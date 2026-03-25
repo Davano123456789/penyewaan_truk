@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Penyewaan;
+use App\Services\NotifikasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PenugasanNotification;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenyewaanAdminController extends Controller
 {
@@ -48,6 +50,16 @@ class PenyewaanAdminController extends Controller
         return view('dashboard.penyewaanAdmin.show', compact('penyewaan'));
     }
 
+    public function cetakInvoice($id)
+    {
+        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'pembayaran'])
+            ->findOrFail($id);
+
+        $pdf = Pdf::loadView('dashboard.penyewaanAdmin.invoice', compact('penyewaan'));
+        
+        return $pdf->download('invoice-penyewaan-' . $penyewaan->id . '.pdf');
+    }
+
     /**
      * Konfirmasi pembayaran (pembayaran pertama atau pelunasan)
      */
@@ -58,8 +70,8 @@ class PenyewaanAdminController extends Controller
 
             $penyewaan = Penyewaan::with('pembayaran')->findOrFail($id);
 
-            // SKENARIO 1: Konfirmasi Pembayaran Pertama (status menunggu_konfirmasi)
-            if ($penyewaan->status == 'menunggu_konfirmasi') {
+            // SKENARIO 1: Konfirmasi Pembayaran Pertama (status menunggu_konfirmasi_pembayaran)
+            if ($penyewaan->status == 'menunggu_konfirmasi_pembayaran') {
                 
                 if (!$penyewaan->pembayaran) {
                     return back()->with('error', 'Belum ada bukti pembayaran yang diupload!');
@@ -169,6 +181,16 @@ class PenyewaanAdminController extends Controller
                 }
 
                 DB::commit();
+
+                // Kirim Notifikasi ke Client
+                NotifikasiService::kirim(
+                    $penyewaan->client_id,
+                    "Pembayaran Dikonfirmasi",
+                    "Pembayaran untuk pesanan #" . $penyewaan->kode_transaksi . " telah dikonfirmasi. Status pesanan sekarang AKTIF.",
+                    route('penyewaan.keranjang', $penyewaan->id),
+                    $penyewaan->id
+                );
+
                 return back()->with('success', 'Pembayaran berhasil dikonfirmasi! Penyewaan sekarang aktif. Sopir telah diberi tahu melalui email jika tersedia.');
             }
 
@@ -178,6 +200,15 @@ class PenyewaanAdminController extends Controller
                 
                 // Update status pembayaran menjadi LUNAS
                 $penyewaan->pembayaran->update(['status' => 'lunas']);
+
+                // Kirim Notifikasi ke Client
+                NotifikasiService::kirim(
+                    $penyewaan->client_id,
+                    "Pelunasan Dikonfirmasi",
+                    "Pelunasan untuk pesanan #" . $penyewaan->kode_transaksi . " telah dikonfirmasi. Terima kasih!",
+                    route('penyewaan.keranjang', $penyewaan->id),
+                    $penyewaan->id
+                );
 
                 DB::commit();
                 return back()->with('success', 'Pelunasan berhasil dikonfirmasi! Pembayaran sekarang LUNAS.');
@@ -199,6 +230,9 @@ class PenyewaanAdminController extends Controller
      */
     public function tolakPembayaran(Request $request, $id)
     {
+        $request->validate([
+            'catatan' => 'required|string'
+        ]);
         try {
             DB::beginTransaction();
 
@@ -211,20 +245,17 @@ class PenyewaanAdminController extends Controller
 
             // Jika ini adalah penolakan untuk pelunasan (pembayaran sisa)
             if ($penyewaan->status == 'aktif' && $penyewaan->pembayaran && $penyewaan->pembayaran->status == 'menunggu_konfirmasi_pelunasan') {
-                // Kembalikan status pembayaran menjadi menunggu_pelunasan dan hapus bukti_transfer agar customer upload ulang
-                $p = $penyewaan->pembayaran;
-                // hapus file bukti jika tersimpan di public
-                if ($p->bukti_transfer) {
-                    $filePath = public_path($p->bukti_transfer);
-                    if ($filePath && file_exists($filePath)) {
-                        @unlink($filePath);
-                    }
+                // Update status pembayaran menjadi ditolak dan simpan catatan
+                $p = \App\Models\Pembayaran::where('penyewaan_id', $penyewaan->id)
+                    ->where('status', 'menunggu_konfirmasi_pelunasan')
+                    ->first();
+
+                if ($p) {
+                    $p->update([
+                        'status' => 'ditolak',
+                        'catatan' => $request->catatan
+                    ]);
                 }
-                $p->update([
-                    'status' => 'menunggu_pelunasan',
-                    'bukti_transfer' => null,
-                    'tanggal_bayar' => null
-                ]);
 
                 // Pastikan penyewaan tetap aktif dan keranjang tetap aktif
                 $penyewaan->update(['status' => 'aktif']);
@@ -232,19 +263,17 @@ class PenyewaanAdminController extends Controller
                     ->update(['status' => 'aktif']);
 
             } else {
-                // Hapus bukti pembayaran dan record pembayaran jika ada (pembayaran pertama)
+                // Update status pembayaran menjadi ditolak
                 if ($penyewaan->pembayaran) {
-                    $filePath = public_path($penyewaan->pembayaran->bukti_transfer);
-                    if ($filePath && file_exists($filePath)) {
-                        @unlink($filePath);
-                    }
-                    $penyewaan->pembayaran->delete();
+                    $penyewaan->pembayaran->update([
+                        'status' => 'ditolak',
+                        'catatan' => $request->catatan
+                    ]);
                 }
 
                 // Update status penyewaan kembali ke menunggu_pembayaran
                 $penyewaan->update([
-                    'status' => 'menunggu_pembayaran',
-                    'catatan_admin' => null
+                    'status' => 'menunggu_pembayaran'
                 ]);
 
                 // Sync keranjang status kembali ke pending
@@ -253,6 +282,15 @@ class PenyewaanAdminController extends Controller
             }
 
             DB::commit();
+
+            // Kirim Notifikasi ke Client
+            NotifikasiService::kirim(
+                $penyewaan->client_id,
+                "Pembayaran Ditolak",
+                "Maaf, pembayaran untuk pesanan #" . $penyewaan->kode_transaksi . " ditolak oleh admin. Alasan: " . $request->catatan . ". Silakan periksa kembali bukti transfer Anda.",
+                route('penyewaan.keranjang', $penyewaan->id),
+                $penyewaan->id
+            );
 
             return back()->with('success', 'Pembayaran ditolak. Penyewaan kembali ke status menunggu pembayaran.');
 
@@ -316,13 +354,14 @@ class PenyewaanAdminController extends Controller
         $request->validate([
             'action' => 'required|in:approve,reject',
             'nominal_refund' => 'nullable|numeric',
-            'bukti_refund' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            'bukti_refund' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'catatan' => 'required_if:action,reject|nullable|string'
         ]);
 
         try {
             DB::beginTransaction();
             
-            $keranjang = \App\Models\Keranjang::with('armada')->findOrFail($id);
+            $keranjang = \App\Models\Keranjang::with('armada', 'penyewaan')->findOrFail($id);
 
             if ($request->action === 'approve') {
                 $updateData = ['status' => 'dibatalkan'];
@@ -356,13 +395,32 @@ class PenyewaanAdminController extends Controller
                     $penyewaan->update(['harga_total' => $newTotal]);
                 }
 
+                // Kirim Notifikasi ke Client
+                NotifikasiService::kirim(
+                    $penyewaan->client_id,
+                    "Pembatalan Disetujui",
+                    "Permintaan pembatalan untuk item di pesanan #" . $penyewaan->kode_transaksi . " telah disetujui.",
+                    route('penyewaan.keranjang', $penyewaan->id),
+                    $penyewaan->id
+                );
+
                 $message = 'Pembatalan disetujui. Status keranjang dibatalkan, armada kembali tersedia, dan total harga diperbarui.';
             } else {
                 // Tolak pembatalan, kembalikan ke aktif
                 $keranjang->update([
                     'status' => 'aktif',
-                    'alasan_batal' => null // Reset alasan batal jika ditolak (opsional, atau biarkan history)
+                    'catatan' => $request->catatan
                 ]);
+
+                // Kirim Notifikasi ke Client
+                NotifikasiService::kirim(
+                    $keranjang->penyewaan->client_id,
+                    "Pembatalan Ditolak",
+                    "Permintaan pembatalan ditolak. Alasan: " . $request->catatan,
+                    route('penyewaan.keranjang', $keranjang->penyewaan->id),
+                    $keranjang->penyewaan->id
+                );
+
                 $message = 'Pembatalan ditolak. Status keranjang kembali aktif.';
             }
 

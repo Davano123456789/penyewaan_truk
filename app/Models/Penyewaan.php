@@ -11,6 +11,7 @@ class Penyewaan extends Model
 
     protected $fillable = [
         'client_id',    // Relasi ke users (meskipun namanya client_id)
+        'kode_transaksi',
         'harga_total',
         'status'
     ];
@@ -36,7 +37,7 @@ class Penyewaan extends Model
     }
 
     public function pembayaran()
-{
-    return $this->hasOne(Pembayaran::class);
-}
+    {
+        return $this->hasOne(Pembayaran::class)->latestOfMany();
+    }
 }

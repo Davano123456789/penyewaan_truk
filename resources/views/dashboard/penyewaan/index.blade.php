@@ -68,8 +68,8 @@
                                     <span class="badge badge-warning">Pending</span>
                                 @elseif($penyewaan->status == 'menunggu_pembayaran')
                                     <span class="badge badge-info">Menunggu Pembayaran</span>
-                                @elseif($penyewaan->status == 'menunggu_konfirmasi')
-                                    <span class="badge badge-primary">Menunggu Konfirmasi</span>
+                                @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
+                                    <span class="badge badge-primary">Menunggu Konfirmasi Pembayaran</span>
                                 @elseif($penyewaan->status == 'aktif')
                                     <span class="badge badge-success">Aktif</span>
                                 @elseif($penyewaan->status == 'selesai')
@@ -82,7 +82,7 @@
                             <!-- Status Pembayaran -->
                             <td>
                                 @if($penyewaan->pembayaran)
-                                    @if($penyewaan->status == 'menunggu_konfirmasi')
+                                    @if($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
                                         <span class="badge badge-secondary">-</span>
                                     @elseif($penyewaan->pembayaran->status == 'lunas')
                                         <span class="badge badge-success"><i class="fas fa-check-circle"></i> Lunas</span>
@@ -90,6 +90,8 @@
                                         <span class="badge badge-warning"><i class="fas fa-clock"></i> Menunggu Pelunasan</span>
                                     @elseif($penyewaan->pembayaran->status == 'menunggu_konfirmasi_pelunasan')
                                         <span class="badge badge-danger"><i class="fas fa-hourglass-half"></i> Menunggu Konfirmasi Pelunasan</span>
+                                    @elseif($penyewaan->pembayaran->status == 'ditolak')
+                                        <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Pembayaran Ditolak</span>
                                     @endif
                                 @else
                                     <span class="badge badge-secondary">-</span>
@@ -116,9 +118,9 @@
             <i class="fas fa-credit-card"></i> Bayar
         </a>
         
-    @elseif($penyewaan->status == 'menunggu_konfirmasi')
+    @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
         <span class="badge badge-info p-2">
-            <i class="fas fa-clock"></i> Menunggu Konfirmasi Admin
+            <i class="fas fa-clock"></i> Menunggu Konfirmasi Pembayaran Admin
         </span>
     @elseif($penyewaan->status == 'aktif' && $penyewaan->pembayaran && $penyewaan->pembayaran->jenis == 'talangan' && $penyewaan->pembayaran->status == 'menunggu_pelunasan')
         <!-- Tombol Bayar Sisa (untuk Talangan) -->
@@ -131,6 +133,12 @@
         <span class="badge badge-success p-2">
             <i class="fas fa-check-circle"></i> Dibayar
         </span>
+    @elseif($penyewaan->pembayaran && $penyewaan->pembayaran->status == 'ditolak')
+        <a href="{{ route('pembayaran.show', $penyewaan->id) }}" 
+           class="btn btn-danger btn-sm" 
+           title="Bayar Ulang">
+            <i class="fas fa-sync-alt"></i> Bayar Ulang
+        </a>
     @else
         <span class="badge badge-secondary p-2">
             <i class="fas fa-info-circle"></i> {{ ucfirst($penyewaan->status) }}
@@ -217,26 +225,4 @@
     });
 </script>
 
-@if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: "{{ session('success') }}",
-        timer: 2000,
-        showConfirmButton: false
-    });
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "{{ session('error') }}",
-        confirmButtonColor: '#ef4444'
-    });
-</script>
-@endif
 @endsection

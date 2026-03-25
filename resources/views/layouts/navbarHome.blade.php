@@ -31,7 +31,7 @@
                         
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
-                            <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
+                            <button type="submit" onclick="confirmLogout(event)" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
                                 <i class="fas fa-sign-out-alt mr-2"></i>Logout
                             </button>
                         </form>
@@ -76,7 +76,7 @@
                     </span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="w-full bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition text-left">
+                        <button type="submit" onclick="confirmLogout(event)" class="w-full bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition text-left">
                             <i class="fas fa-sign-out-alt mr-2"></i>Logout
                         </button>
                     </form>

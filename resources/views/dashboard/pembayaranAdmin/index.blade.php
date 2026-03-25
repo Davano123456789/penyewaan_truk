@@ -33,7 +33,7 @@
                     <thead class="thead-light">
                         <tr>
                             <th class="text-center" width="5%">No</th>
-                            <th>Penyewaan ID</th>
+                            <th width="15%">Kode Transaksi</th>
                             <th>Client</th>
                             <th>Jumlah</th>
                             <th>Metode</th>
@@ -47,8 +47,14 @@
                         @forelse ($pembayarans as $index => $p)
                             <tr>
                                 <td class="text-center">{{ $index + $pembayarans->firstItem() }}</td>
-                                <td>{{ $p->penyewaan_id }}</td>
-                                <td>{{ $p->penyewaan->client->nama ?? $p->penyewaan->client->email ?? '-' }}</td>
+                                <td><span class="badge badge-light border">{{ $p->penyewaan->kode_transaksi ?? $p->penyewaan_id }}</span></td>
+                                <td>
+                                    @if($p->penyewaan->client)
+                                        {{ $p->penyewaan->client->nama ?? $p->penyewaan->client->email }}
+                                    @else
+                                        <span class="text-danger font-italic"><i class="fas fa-exclamation-circle text-xs"></i> User Dihapus</span>
+                                    @endif
+                                </td>
                                 <td>Rp {{ number_format($p->jumlah_bayar ?? 0, 0, ',', '.') }}</td>
                                 <td>{{ $p->metode }}</td>
                                 <td>{{ $p->jenis }}</td>
@@ -58,16 +64,6 @@
                                     <a href="{{ route('pembayaranAdmin.show', $p->id) }}" class="btn btn-info btn-sm" title="Lihat Detail">
                                         <i class="fas fa-eye"></i>
                                     </a>
-
-                                    @if($p->status == 'lunas')
-                                    <form action="{{ route('pembayaranAdmin.destroy', $p->id) }}" method="POST" class="d-inline form-delete">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger btn-sm" title="Hapus">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -146,16 +142,4 @@
         });
     });
 </script>
-@if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: "{{ session('success') }}",
-        timer: 2000,
-        showConfirmButton: false
-    });
-</script>
-@endif
-
 @endsection

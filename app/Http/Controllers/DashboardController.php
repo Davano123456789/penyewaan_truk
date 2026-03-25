@@ -14,7 +14,7 @@ class DashboardController extends Controller
     {
         $totalAktif = Penyewaan::where('status', 'aktif')->count();
         $totalMenungguPembayaran = Penyewaan::where('status', 'menunggu_pembayaran')->count();
-        $totalMenungguKonfirmasi = Penyewaan::where('status', 'menunggu_konfirmasi')->count();
+        $totalMenungguKonfirmasi = Penyewaan::where('status', 'menunggu_konfirmasi_pembayaran')->count();
 
         $totalArmadaTersedia = Armada::where('status', 'aktif')->count();
         $totalArmadaDisewa = Armada::where('status', 'tidak_tersedia')->count();

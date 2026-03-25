@@ -56,14 +56,7 @@
                     </div>
                     @endif
 
-                    @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    @endif
+
 
                     <!-- Form Upload -->
                     <form action="{{ route('pembayaran.store', $penyewaan->id) }}" method="POST" enctype="multipart/form-data" id="uploadForm">
@@ -195,7 +188,7 @@
                                 <li>Pastikan bukti transfer yang diupload <strong>jelas dan terbaca</strong></li>
                                 <li>Jumlah transfer harus <strong>sesuai dengan jumlah yang ditampilkan di atas</strong></li>
                                 <li>Untuk <strong>Talangan</strong>, sisanya bisa dibayar setelah pengiriman selesai</li>
-                                <li>Setelah upload, pesanan Anda akan <strong>menunggu konfirmasi dari admin</strong></li>
+                                <li>Setelah upload, pesanan Anda akan <strong>menunggu konfirmasi pembayaran dari admin</strong></li>
                                 <li>Proses verifikasi maksimal <strong>1x24 jam</strong></li>
                             </ul>
                         </div>
@@ -283,7 +276,7 @@
             keterangan = '✓ Pembayaran cash - Status otomatis: <strong>LUNAS</strong>';
         } else if (jenisPembayaran === 'talangan') {
             jumlahBayar = totalHarga / 2;
-            keterangan = '⏳ Pembayaran talangan - Bayar 50% sekarang, status: <strong>Menunggu Pelunasan</strong> (sisanya setelah pengiriman)';
+            keterangan = '⏳ Pembayaran talangan - Bayar 50% sekarang, status: <strong>Menunggu Konfirmasi Pembayaran</strong> (sisanya setelah pengiriman)';
         }
 
         if (jenisPembayaran) {
@@ -356,14 +349,11 @@
     });
 </script>
 
-@if(session('success'))
+@if($errors->any())
 <script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: "{{ session('success') }}",
-        timer: 2000,
-        showConfirmButton: false
+    $(document).ready(function() {
+        // Jika ada error validasi, mungkin tampilkan modal kembali jika itu tujuannya 
+        // tapi SweetAlert global sudah menampilkan daftar errornya.
     });
 </script>
 @endif

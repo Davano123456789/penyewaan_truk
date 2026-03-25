@@ -152,8 +152,12 @@ public function storePemesanan(Request $request)
         );
 
         // STEP 2: SIMPAN KE KERANJANG
+        $itemCount = $penyewaan->keranjangs()->count() + 1;
+        $kodeKeranjang = "KRJ-" . str_replace('TRK-', '', $penyewaan->kode_transaksi) . "-" . $itemCount;
+
         $keranjang = Keranjang::create([
             'penyewaan_id' => $penyewaan->id,
+            'kode_keranjang' => $kodeKeranjang,
             'sopir_id' => $armada->sopir_id,
             'armada_id' => $validated['armada_id'],
             'tanggal_mulai' => $validated['tanggal_mulai'],
@@ -229,7 +233,6 @@ public function storePemesanan(Request $request)
 {
     // Validasi input
     $validated = $request->validate([
-        'peran_id' => 'required|in:2,3', // Hanya boleh 2 (client) atau 3 (sopir)
         'nama' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users',
         'umur' => 'required|integer|min:17|max:100',
@@ -238,8 +241,6 @@ public function storePemesanan(Request $request)
         'alamat' => 'nullable|string|max:255',
         'terms' => 'required|accepted',
     ], [
-        'peran_id.required' => 'Silakan pilih peran Anda',
-        'peran_id.in' => 'Peran tidak valid',
         'nama.required' => 'Nama lengkap wajib diisi',
         'email.required' => 'Email wajib diisi',
         'email.unique' => 'Email sudah terdaftar, silakan login',
@@ -260,7 +261,7 @@ public function storePemesanan(Request $request)
         'kata_sandi' => Hash::make($request->kata_sandi),
         'telepon' => $request->telepon,
         'alamat' => $request->alamat,
-        'peran_id' => $request->peran_id, // 2 = client, 3 = sopir
+        'peran_id' => 2, // Otomatis menjadi Client
     ]);
 
     // Trigger event untuk kirim email verifikasi

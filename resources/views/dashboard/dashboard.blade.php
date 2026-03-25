@@ -67,7 +67,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Total Penyewaan Menunggu Konfirmasi
+                                Total Penyewaan Menunggu Konfirmasi Pembayaran
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalMenungguKonfirmasi ?? 0 }}</div>
                         </div>

@@ -31,8 +31,8 @@
                             <span class="badge badge-warning">Pending</span>
                         @elseif($penyewaan->status == 'menunggu_pembayaran')
                             <span class="badge badge-info">Menunggu Pembayaran</span>
-                        @elseif($penyewaan->status == 'dibayar')
-                            <span class="badge badge-success">Dibayar</span>
+                        @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
+                            <span class="badge badge-primary">Menunggu Konfirmasi Pembayaran</span>
                         @elseif($penyewaan->status == 'selesai')
                             <span class="badge badge-primary">Selesai</span>
                         @elseif($penyewaan->status == 'dibatalkan')
@@ -51,6 +51,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Status Alert untuk Pembayaran Ditolak -->
+    @if($penyewaan->pembayaran && $penyewaan->pembayaran->status == 'ditolak')
+    <div class="alert alert-danger mb-4 shadow-sm border-left-danger">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <i class="fas fa-exclamation-triangle fa-2x"></i>
+            </div>
+            <div class="col">
+                <h5 class="font-weight-bold mb-1">Pembayaran Terakhir Ditolak</h5>
+                <p class="mb-0"><strong>Alasan:</strong> {{ $penyewaan->pembayaran->catatan ?? 'Tidak ada alasan spesifik.' }}</p>
+                <hr class="my-2">
+                <a href="{{ route('pembayaran.show', $penyewaan->id) }}" class="btn btn-danger btn-sm">
+                    <i class="fas fa-sync-alt"></i> Upload Ulang Bukti Transfer
+                </a>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Daftar Item -->
     <div class="card shadow mb-4">
@@ -206,26 +225,4 @@
     });
 </script>
 
-@if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: "{{ session('success') }}",
-        timer: 2000,
-        showConfirmButton: false
-    });
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "{{ session('error') }}",
-        confirmButtonColor: '#ef4444'
-    });
-</script>
-@endif
 @endsection

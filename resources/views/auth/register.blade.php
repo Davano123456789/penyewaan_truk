@@ -100,42 +100,7 @@
                                     </div>
                                 @endif
 
-                                <!-- Pilihan Peran -->
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-3">
-                                        Daftar Sebagai
-                                    </label>
-                                    <div class="space-y-3">
-                                        <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition">
-                                            <input 
-                                                type="radio" 
-                                                name="peran_id" 
-                                                value="2" 
-                                                class="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                                                required
-                                                checked
-                                            >
-                                            <div class="ml-3">
-                                                <span class="font-semibold text-gray-800">Client</span>
-                                                <p class="text-sm text-gray-600">Saya ingin menyewa truk</p>
-                                            </div>
-                                        </label>
-                                        
-                                        <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition">
-                                            <input 
-                                                type="radio" 
-                                                name="peran_id" 
-                                                value="3" 
-                                                class="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                                                required
-                                            >
-                                            <div class="ml-3">
-                                                <span class="font-semibold text-gray-800">Sopir</span>
-                                                <p class="text-sm text-gray-600">Saya ingin bekerja sebagai sopir</p>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
+
 
                                 <!-- Nama -->
                                 <div>

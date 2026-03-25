@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Keranjang;
 use App\Models\Penyewaan;
 use App\Models\Pembayaran;
+use App\Services\NotifikasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
@@ -24,13 +25,10 @@ class PenyewaanController extends Controller
         
         return view('dashboard.penyewaan.index', compact('penyewaans'));
     }
-    // Detail Penyewaan
+    // Detail Penyewaan (Legacy/Redirect)
     public function show($id)
     {
-        $penyewaan = Penyewaan::with('keranjangs.armada', 'keranjangs.sopir')
-            ->findOrFail($id);
-        
-        return view('dashboard.penyewaan.show', compact('penyewaan'));
+        return redirect()->route('penyewaan.keranjang', $id);
     }
     
     // Halaman Keranjang (Daftar Item dalam Penyewaan)
@@ -133,7 +131,7 @@ class PenyewaanController extends Controller
                 // Tentukan status pembayaran
                 $statusPembayaran = ($validated['jenis'] === 'cash') ? 'lunas' : 'menunggu_pelunasan';
 
-                $newStatus = 'menunggu_konfirmasi';
+                $newStatus = 'menunggu_konfirmasi_pembayaran';
                 $successMessage = 'Bukti transfer berhasil diupload! Menunggu konfirmasi admin.';
             }
             // PEMBAYARAN SISA (status aktif dan talangan menunggu pelunasan)
@@ -197,6 +195,18 @@ class PenyewaanController extends Controller
                     $keranjangsNewStatus = ($newStatus === 'aktif') ? 'aktif' : 'pending';
                     \App\Models\Keranjang::where('penyewaan_id', $penyewaan->id)
                         ->update(['status' => $keranjangsNewStatus]);
+
+                    // Kirim Notifikasi ke Admin
+                    $pesanNotif = ($penyewaan->status == 'menunggu_konfirmasi_pembayaran') 
+                        ? "Ada pembayaran baru dari " . Auth::user()->nama . " untuk pesanan #" . $penyewaan->kode_transaksi
+                        : "Ada upload pelunasan dari " . Auth::user()->nama . " untuk pesanan #" . $penyewaan->kode_transaksi;
+                    
+                    NotifikasiService::kirimKeAdmin(
+                        "Konfirmasi Pembayaran Diperlukan",
+                        $pesanNotif,
+                        route('penyewaanAdmin.show', $penyewaan->id),
+                        $penyewaan->id
+                    );
 
                     return redirect()->route('penyewaan.index')
                         ->with('success', $successMessage);

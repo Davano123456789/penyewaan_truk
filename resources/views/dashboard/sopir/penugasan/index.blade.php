@@ -34,6 +34,7 @@
                     <thead class="thead-light">
                         <tr>
                             <th class="text-center" width="5%">No</th>
+                            <th width="12%">Kode Keranjang</th>
                             <th width="15%">Armada</th>
                             <th width="15%">Tanggal Mulai</th>
                             <th width="12%">Estimasi Hari</th>
@@ -45,8 +46,13 @@
                     <tbody>
                         @forelse($penugasans as $key => $penugasan)
                         <tr>
-                            <td class="text-center">{{ $key + 1 }}</td>
-                            <td>{{ $penugasan->armada->no_polisi ?? '-' }}</td>
+                             <td class="text-center">{{ $key + 1 }}</td>
+                             <td>
+                                 <span class="badge badge-info">{{ $penugasan->kode_keranjang ?? '-' }}</span>
+                                 <br>
+                                 <small class="text-muted">#{{ $penugasan->penyewaan->kode_transaksi }}</small>
+                             </td>
+                             <td>{{ $penugasan->armada->no_polisi ?? '-' }}</td>
                             <td>{{ $penugasan->tanggal_mulai ? \Carbon\Carbon::parse($penugasan->tanggal_mulai)->format('d-m-Y') : '-' }}</td>
                             <td>{{ $penugasan->estimasi_hari ?? '-' }}</td>
                             <td>
@@ -281,29 +287,6 @@
         }
     }
 </script>
-
-@if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: "{{ session('success') }}",
-        timer: 2000,
-        showConfirmButton: false
-    });
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "{{ session('error') }}",
-        confirmButtonColor: '#ef4444'
-    });
-</script>
-@endif
 
 @if($errors->any())
 <script>

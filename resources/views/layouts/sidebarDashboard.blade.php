@@ -80,6 +80,30 @@
             <span>Penyewaan Admin</span>
         </a>
     </li>
+
+    <!-- Nav Item - Pembayaran Admin -->
+    <li class="nav-item {{ Request::is('dashboard/pembayaran-admin*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('pembayaranAdmin.index') }}">
+            <i class="fas fa-fw fa-money-check-alt"></i>
+            <span>Pembayaran Admin</span>
+        </a>
+    </li>
+
+    <!-- Nav Item - Daftar Pembatalan -->
+    <li class="nav-item {{ Request::is('dashboard/pembatalan-admin*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('penyewaanAdmin.pembatalan') }}">
+            <i class="fas fa-fw fa-window-close"></i>
+            <span>Daftar Pembatalan</span>
+        </a>
+    </li>
+
+    <!-- Nav Item - Validasi Penugasan -->
+    <li class="nav-item {{ Request::is('dashboard/penugasan-admin*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('penugasanAdmin.index') }}">
+            <i class="fas fa-fw fa-check-double"></i>
+            <span>Validasi Penugasan</span>
+        </a>
+    </li>
     
     @endif
 

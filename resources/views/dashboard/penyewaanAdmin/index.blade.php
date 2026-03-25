@@ -15,9 +15,9 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Menunggu Konfirmasi</div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Menunggu Konfirmasi Pembayaran</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ \App\Models\Penyewaan::where('status', 'menunggu_konfirmasi')->count() }}
+                                {{ \App\Models\Penyewaan::where('status', 'menunggu_konfirmasi_pembayaran')->count() }}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -94,7 +94,7 @@
                             <option value="">Semua Status</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="menunggu_pembayaran" {{ request('status') == 'menunggu_pembayaran' ? 'selected' : '' }}>Menunggu Pembayaran</option>
-                            <option value="menunggu_konfirmasi" {{ request('status') == 'menunggu_konfirmasi' ? 'selected' : '' }}>Menunggu Konfirmasi</option>
+                            <option value="menunggu_konfirmasi_pembayaran" {{ request('status') == 'menunggu_konfirmasi_pembayaran' ? 'selected' : '' }}>Menunggu Konfirmasi Pembayaran</option>
                             <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
                             <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
                             <option value="dibatalkan" {{ request('status') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
@@ -138,8 +138,8 @@
                                     <span class="badge badge-secondary">Pending</span>
                                 @elseif($penyewaan->status == 'menunggu_pembayaran')
                                     <span class="badge badge-info">Menunggu Pembayaran</span>
-                                @elseif($penyewaan->status == 'menunggu_konfirmasi')
-                                    <span class="badge badge-warning">Menunggu Konfirmasi</span>
+                                @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
+                                    <span class="badge badge-warning">Menunggu Konfirmasi Pembayaran</span>
                                 @elseif($penyewaan->status == 'aktif')
                                     <span class="badge badge-success">Aktif</span>
                                 @elseif($penyewaan->status == 'selesai')
@@ -263,26 +263,4 @@
     });
 </script>
 
-@if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: "{{ session('success') }}",
-        timer: 2000,
-        showConfirmButton: false
-    });
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "{{ session('error') }}",
-        confirmButtonColor: '#ef4444'
-    });
-</script>
-@endif
 @endsection

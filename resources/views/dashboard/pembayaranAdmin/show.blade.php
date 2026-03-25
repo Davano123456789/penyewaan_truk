@@ -17,13 +17,14 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="font-weight-bold">Penyewaan ID</label>
-                        <input type="text" class="form-control" value="{{ $pembayaran->penyewaan_id }}" readonly>
+                        <label class="font-weight-bold">Kode Transaksi</label>
+                        <input type="text" class="form-control" value="{{ $pembayaran->penyewaan->kode_transaksi ?? $pembayaran->penyewaan_id }}" readonly>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold">Client</label>
-                        <input type="text" class="form-control" value="{{ $pembayaran->penyewaan->client->nama ?? $pembayaran->penyewaan->client->email ?? '-' }}" readonly>
+                        <input type="text" class="form-control {{ !$pembayaran->penyewaan->client ? 'is-invalid text-danger font-italic' : '' }}" 
+                               value="{{ $pembayaran->penyewaan->client ? ($pembayaran->penyewaan->client->nama ?? $pembayaran->penyewaan->client->email) : 'User Dihapus' }}" readonly>
                     </div>
 
                     <div class="form-group">
@@ -83,12 +84,6 @@
                     <a href="{{ route('pembayaranAdmin.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Kembali ke Daftar Pembayaran
                     </a>
-
-                    <form action="{{ route('pembayaranAdmin.destroy', $pembayaran->id) }}" method="POST" class="d-inline ml-2 form-delete">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-danger">Hapus Pembayaran</button>
-                    </form>
                 </div>
             </div>
 

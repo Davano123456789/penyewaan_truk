@@ -46,4 +46,9 @@ public function peran()
     return $this->belongsTo(Peran::class);
 }
 
+public function notifikasis()
+{
+    return $this->hasMany(Notifikasi::class);
+}
+
 }

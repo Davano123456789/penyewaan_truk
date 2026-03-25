@@ -6,46 +6,8 @@
                         <i class="fa fa-bars"></i>
                     </button>
 
-                    <!-- Topbar Search -->
-                    <form
-                        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                        <div class="input-group">
-                            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
-                                aria-label="Search" aria-describedby="basic-addon2">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" type="button">
-                                    <i class="fas fa-search fa-sm"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-
-                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-                        <li class="nav-item dropdown no-arrow d-sm-none">
-                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-search fa-fw"></i>
-                            </a>
-                            <!-- Dropdown - Messages -->
-                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
-                                aria-labelledby="searchDropdown">
-                                <form class="form-inline mr-auto w-100 navbar-search">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control bg-light border-0 small"
-                                            placeholder="Search for..." aria-label="Search"
-                                            aria-describedby="basic-addon2">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-primary" type="button">
-                                                <i class="fas fa-search fa-sm"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </li>
 
                         <!-- Nav Item - Alerts -->
                         <li class="nav-item dropdown no-arrow mx-1">
@@ -53,116 +15,120 @@
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-bell fa-fw"></i>
                                 <!-- Counter - Alerts -->
-                                <span class="badge badge-danger badge-counter">3+</span>
+                                <span class="badge badge-danger badge-counter" id="notification-count" style="display: none;">0</span>
                             </a>
                             <!-- Dropdown - Alerts -->
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="alertsDropdown">
-                                <h6 class="dropdown-header">
-                                    Alerts Center
+                                <h6 class="dropdown-header d-flex justify-content-between align-items-center">
+                                    Pusat Notifikasi
+                                    <a href="#" class="text-white-50 small font-weight-normal" id="mark-all-read-topbar">Mark all as read</a>
                                 </h6>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-primary">
-                                            <i class="fas fa-file-alt text-white"></i>
-                                        </div>
+                                <div id="notification-items">
+                                    <!-- Notifications will be loaded here via JS -->
+                                    <div class="dropdown-item d-flex align-items-center text-center py-3 text-muted">
+                                        Memuat notifikasi...
                                     </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 12, 2019</div>
-                                        <span class="font-weight-bold">A new monthly report is ready to download!</span>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-success">
-                                            <i class="fas fa-donate text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 7, 2019</div>
-                                        $290.29 has been deposited into your account!
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-warning">
-                                            <i class="fas fa-exclamation-triangle text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 2, 2019</div>
-                                        Spending Alert: We've noticed unusually high spending for your account.
-                                    </div>
-                                </a>
-                                <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
+                                </div>
+                                <a class="dropdown-item text-center small text-gray-500" href="{{ route('notifikasi.all') }}">Tampilkan Semua Notifikasi</a>
                             </div>
                         </li>
 
-                        <!-- Nav Item - Messages -->
-                        <li class="nav-item dropdown no-arrow mx-1">
-                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-envelope fa-fw"></i>
-                                <!-- Counter - Messages -->
-                                <span class="badge badge-danger badge-counter">7</span>
-                            </a>
-                            <!-- Dropdown - Messages -->
-                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="messagesDropdown">
-                                <h6 class="dropdown-header">
-                                    Message Center
-                                </h6>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_1.svg"
-                                            alt="...">
-                                        <div class="status-indicator bg-success"></div>
-                                    </div>
-                                    <div class="font-weight-bold">
-                                        <div class="text-truncate">Hi there! I am wondering if you can help me with a
-                                            problem I've been having.</div>
-                                        <div class="small text-gray-500">Emily Fowler · 58m</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_2.svg"
-                                            alt="...">
-                                        <div class="status-indicator"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-truncate">I have the photos that you ordered last month, how
-                                            would you like them sent to you?</div>
-                                        <div class="small text-gray-500">Jae Chun · 1d</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_3.svg"
-                                            alt="...">
-                                        <div class="status-indicator bg-warning"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-truncate">Last month's report looks great, I am very happy with
-                                            the progress so far, keep up the good work!</div>
-                                        <div class="small text-gray-500">Morgan Alvarez · 2d</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="https://source.unsplash.com/Mv9hjnEUHR4/60x60"
-                                            alt="...">
-                                        <div class="status-indicator bg-success"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-truncate">Am I a good boy? The reason I ask is because someone
-                                            told me that people say this to all dogs, even if they aren't good...</div>
-                                        <div class="small text-gray-500">Chicken the Dog · 2w</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
-                            </div>
-                        </li>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const notificationItems = document.getElementById('notification-items');
+                                const notificationCount = document.getElementById('notification-count');
+                                const markAllReadBtn = document.getElementById('mark-all-read');
+
+                                function loadNotifications() {
+                                    fetch('{{ route("notifikasi.index") }}')
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                // Update unread count
+                                                if (data.unread_count > 0) {
+                                                    notificationCount.innerText = data.unread_count > 9 ? '9+' : data.unread_count;
+                                                    notificationCount.style.display = 'inline';
+                                                } else {
+                                                    notificationCount.style.display = 'none';
+                                                }
+
+                                                // Update notification items
+                                                if (data.data.length > 0) {
+                                                    let html = '';
+                                                    data.data.forEach(notif => {
+                                                        const date = new Date(notif.created_at);
+                                                        const formattedDate = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                                                        const isUnreadClass = notif.is_read ? '' : 'font-weight-bold text-dark';
+                                                        const unreadStyle = notif.is_read ? '' : 'background-color: #f8f9fc;';
+                                                        const unreadDot = notif.is_read ? '' : '<span class="badge badge-primary badge-pill float-right" style="font-size: 0.5rem;">&nbsp;</span>';
+                                                        
+                                                        html += `
+                                                            <a class="dropdown-item d-flex align-items-center notification-link" href="#" data-id="${notif.id}" data-url="${notif.url}" style="${unreadStyle}">
+                                                                <div class="mr-3">
+                                                                    <div class="icon-circle ${notif.is_read ? 'bg-secondary' : 'bg-primary'} shadow-sm">
+                                                                        <i class="fas ${notif.penyewaan_id ? 'fa-file-alt' : 'fa-bell'} text-white"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="w-100">
+                                                                    <div class="small text-gray-500 d-flex justify-content-between">
+                                                                        <span>${formattedDate}</span>
+                                                                        ${unreadDot}
+                                                                    </div>
+                                                                    <span class="${isUnreadClass}">${notif.judul}</span>
+                                                                    <div class="small text-gray-600">${notif.pesan}</div>
+                                                                </div>
+                                                            </a>
+                                                        `;
+                                                    });
+                                                    notificationItems.innerHTML = html;
+
+                                                    // Add click event for notifications
+                                                    document.querySelectorAll('.notification-link').forEach(link => {
+                                                        link.addEventListener('click', function(e) {
+                                                            e.preventDefault();
+                                                            const id = this.dataset.id;
+                                                            const url = this.dataset.url;
+
+                                                            fetch(`/api/notifikasi/${id}/read`, {
+                                                                method: 'POST',
+                                                                headers: {
+                                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                                    'Content-Type': 'application/json'
+                                                                }
+                                                            }).then(() => {
+                                                                window.location.href = url;
+                                                            });
+                                                        });
+                                                    });
+                                                } else {
+                                                    notificationItems.innerHTML = '<div class="dropdown-item text-center py-3 text-muted">Tidak ada notifikasi</div>';
+                                                }
+                                            }
+                                        });
+                                }
+
+                                // Initial load
+                                loadNotifications();
+
+                                // Mark all as read
+                                document.getElementById('mark-all-read-topbar').addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    fetch('{{ route("notifikasi.readAll") }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Content-Type': 'application/json'
+                                        }
+                                    }).then(() => {
+                                        loadNotifications();
+                                    });
+                                });
+
+                                // Poll for new notifications every 60 seconds
+                                setInterval(loadNotifications, 60000);
+                            });
+                        </script>
 
                         <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -170,14 +136,14 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Douglas McGee</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->nama }}</span>
                                 <img class="img-profile rounded-circle"
-                                    src="img/undraw_profile.svg">
+                                    src="{{ Auth::user()->gambar ?? asset('dashboard_tamplate/img/undraw_profile.svg') }}">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('profil.index') }}">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
                                 </a>

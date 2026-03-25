@@ -31,7 +31,8 @@ class Keranjang extends Model
         'longitude_antar',
         'parkir_latitude',
         'parkir_longitude',
-        'status'
+        'status',
+        'kode_keranjang'
     ];
 
     // Relasi ke Penyewaan

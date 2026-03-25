@@ -52,8 +52,8 @@
                                 <td>
                                     @if($p->status == 'lunas')
                                         <span class="badge badge-success">Lunas</span>
-                                    @elseif($p->status == 'menunggu_konfirmasi')
-                                        <span class="badge badge-info">Menunggu Konfirmasi</span>
+                                    @elseif($p->status == 'menunggu_konfirmasi_pembayaran')
+                                        <span class="badge badge-info">Menunggu Konfirmasi Pembayaran</span>
                                     @elseif($p->status == 'menunggu_pelunasan')
                                         <span class="badge badge-warning">Menunggu Pelunasan</span>
                                     @elseif($p->status == 'ditolak')
