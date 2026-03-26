@@ -84,14 +84,17 @@ class PenugasanAdminController extends Controller
 
         $keranjang = Keranjang::with('penyewaan')->findOrFail($id);
 
-        // Kembalikan status menjadi AKTIF agar sopir bisa upload ulang
-        $keranjang->update(['status' => 'aktif']);
+        // Ubah status menjadi REVISI_BUKTI agar sopir tahu ada masalah pada fotonya
+        $keranjang->update([
+            'status' => 'revisi_bukti',
+            'catatan_penugasan' => $request->alasan
+        ]);
 
         // Kirim notifikasi ke Sopir bahwa buktinya ditolak
         NotifikasiService::kirim(
             $keranjang->sopir_id,
             "Bukti Penugasan Ditolak",
-            "Bukti selesaian untuk pesanan #" . $keranjang->penyewaan->kode_transaksi . " ditolak oleh admin. Alasan: " . $request->alasan . ". Silakan upload ulang.",
+            "Bukti penyelesaian untuk pesanan #" . $keranjang->penyewaan->kode_transaksi . " ditolak oleh admin. Alasan: " . $request->alasan . ". Silakan periksa detail penugasan dan upload ulang.",
             route('penugasan.index'),
             $keranjang->penyewaan_id
         );

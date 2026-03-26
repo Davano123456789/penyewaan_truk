@@ -35,22 +35,31 @@ class FrontController extends Controller
         return view('home', compact('mitras', 'riwayatPenyewaan', 'keunggulans'));
     }
     
-    public function pemesanan()
-{
-    // Ambil semua parkir dengan koordinat
-    $parkirs = Parkir::whereNotNull('latitude')
-                    ->whereNotNull('longitude')
-                    ->get();
-    
-    // Ambil jenis truk yang tersedia (distinct dari armadas)
-    $jenisTruk = Armada::where('status', 'tersedia')
-                       ->whereNotNull('jenis')
-                       ->distinct()
-                       ->pluck('jenis')
-                       ->toArray();
-    
-    return view('pemesanan', compact('parkirs', 'jenisTruk'));
-}
+    public function pemesanan($id = null)
+    {
+        // Ambil semua parkir dengan koordinat
+        $parkirs = Parkir::whereNotNull('latitude')
+                        ->whereNotNull('longitude')
+                        ->get();
+        
+        // Ambil jenis truk yang tersedia (distinct dari armadas)
+        $jenisTruk = Armada::where('status', 'tersedia')
+                           ->whereNotNull('jenis')
+                           ->distinct()
+                           ->pluck('jenis')
+                           ->toArray();
+
+        $editItem = null;
+        if ($id) {
+            $editItem = Keranjang::with('armada')->findOrFail($id);
+            // Tambahkan jenis truk yang sedang diedit jika tidak ada di list tersedia
+            if ($editItem->armada && !in_array($editItem->armada->jenis, $jenisTruk)) {
+                $jenisTruk[] = $editItem->armada->jenis;
+            }
+        }
+        
+        return view('pemesanan', compact('parkirs', 'jenisTruk', 'editItem'));
+    }
 public function detailArmada($id)
 {
     $armada = Armada::with('sopir', 'parkir')->findOrFail($id);
@@ -78,11 +87,22 @@ public function getArmadaTersedia(Request $request)
     }
 
     // Ambil armada yang AKTIF saja, sesuai jenis, dan di parkir terdekat
-    $armadas = Armada::where('parkir_id', $nearestParkir->id)
+    $query = Armada::where('parkir_id', $nearestParkir->id)
         ->where('jenis', $jenis)
-        ->where('status', 'tersedia') // HANYA ARMADA AKTIF
-        ->with('sopir')
-        ->get()
+        ->with('sopir');
+
+    // Jika sedang edit, masukkan juga armada yang sedang digunakan di item tersebut
+    $currentArmadaId = $request->query('current_armada_id');
+    if ($currentArmadaId) {
+        $query->where(function($q) use ($currentArmadaId) {
+            $q->where('status', 'tersedia')
+              ->orWhere('id', $currentArmadaId);
+        });
+    } else {
+        $query->where('status', 'tersedia');
+    }
+
+    $armadas = $query->get()
         ->map(function($armada) {
             return [
                 'id' => $armada->id,

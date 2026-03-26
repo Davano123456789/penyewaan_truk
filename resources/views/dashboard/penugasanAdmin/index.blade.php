@@ -50,19 +50,74 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <form action="{{ route('penugasanAdmin.validasi', $p->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-success btn-sm mb-1" onclick="return confirm('Validasi penugasan ini sebagai SELESAI?')">
-                                            <i class="fas fa-check-circle"></i> Validasi
-                                        </button>
-                                    </form>
-                                    <button class="btn btn-danger btn-sm mb-1" data-toggle="modal" data-target="#modalTolak{{ $p->id }}">
-                                        <i class="fas fa-times-circle"></i> Tolak
+                                    <button class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#modalVerifikasi{{ $p->id }}">
+                                        <i class="fas fa-shield-alt"></i> Verifikasi
                                     </button>
                                 </td>
                             </tr>
 
-                            <!-- Modal Perbesar Bukti -->
+                            <!-- Modal Verifikasi -->
+                            <div class="modal fade" id="modalVerifikasi{{ $p->id }}" tabindex="-1" role="dialog" aria-labelledby="modalVerifikasiLabel{{ $p->id }}" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-primary text-white">
+                                            <h5 class="modal-title" id="modalVerifikasiLabel{{ $p->id }}">Verifikasi Penugasan Selesai</h5>
+                                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Info Ringkas -->
+                                            <div class="alert alert-info small mb-3">
+                                                <strong>Sopir:</strong> {{ $p->sopir->nama }}<br>
+                                                <strong>Armada:</strong> {{ $p->armada->no_polisi }} ({{ $p->armada->jenis }})
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="font-weight-bold text-dark">Keputusan Admin <span class="text-danger">*</span></label>
+                                                <div class="d-flex border rounded p-3 bg-light">
+                                                    <div class="custom-control custom-radio mr-4">
+                                                        <input type="radio" id="verifApprove{{ $p->id }}" name="decision_{{ $p->id }}" value="approve" class="custom-control-input decision-radio" data-id="{{ $p->id }}" required>
+                                                        <label class="custom-control-label font-weight-bold text-success" for="verifApprove{{ $p->id }}">Setujui</label>
+                                                    </div>
+                                                    <div class="custom-control custom-radio">
+                                                        <input type="radio" id="verifReject{{ $p->id }}" name="decision_{{ $p->id }}" value="reject" class="custom-control-input decision-radio" data-id="{{ $p->id }}" required>
+                                                        <label class="custom-control-label font-weight-bold text-danger" for="verifReject{{ $p->id }}">Tolak</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Section Setuju -->
+                                            <div id="sectionApprove{{ $p->id }}" class="verification-section" style="display: none;">
+                                                <div class="alert alert-success d-flex align-items-center mb-0">
+                                                    <i class="fas fa-check-circle fa-2x mr-3"></i>
+                                                    <div>Penugasan akan dinyatakan <strong>SELESAI</strong>.</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Section Tolak -->
+                                            <div id="sectionReject{{ $p->id }}" class="verification-section" style="display: none;">
+                                                <div class="form-group mb-0">
+                                                    <label class="font-weight-bold">Alasan Penolakan <span class="text-danger">*</span></label>
+                                                    <textarea id="catatan_verifikasi{{ $p->id }}" class="form-control" rows="3" placeholder="Contoh: Foto tidak jelas, silakan upload ulang..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                            <button type="button" id="btnSubmitVerifikasi{{ $p->id }}" class="btn btn-primary btn-submit-verif" data-id="{{ $p->id }}" disabled>
+                                                <i class="fas fa-paper-plane"></i> Proses
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hidden Forms -->
+                            <form id="formApprove{{ $p->id }}" action="{{ route('penugasanAdmin.validasi', $p->id) }}" method="POST" style="display: none;">@csrf</form>
+                            <form id="formReject{{ $p->id }}" action="{{ route('penugasanAdmin.tolak', $p->id) }}" method="POST" style="display: none;">@csrf <input type="hidden" name="alasan" id="hiddenAlasan{{ $p->id }}"></form>
+
+                            <!-- Modal Perbesar Bukti Tetap Ada -->
                             <div class="modal fade" id="modalBukti{{ $p->id }}" tabindex="-1" role="dialog" aria-hidden="true">
                                 <div class="modal-dialog modal-lg" role="document">
                                     <div class="modal-content">
@@ -75,33 +130,6 @@
                                         <div class="modal-body text-center">
                                             <img src="{{ $p->bukti_selesai }}" class="img-fluid rounded shadow">
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Modal Tolak -->
-                            <div class="modal fade" id="modalTolak{{ $p->id }}" tabindex="-1" role="dialog" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <form action="{{ route('penugasanAdmin.tolak', $p->id) }}" method="POST">
-                                            @csrf
-                                            <div class="modal-header">
-                                                <h5 class="modal-title text-danger">Tolak Bukti Penugasan</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="form-group">
-                                                    <label>Alasan Penolakan:</label>
-                                                    <textarea name="alasan" class="form-control" rows="3" placeholder="Contoh: Foto tidak jelas, Silakan upload ulang foto bukti di lokasi..." required></textarea>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                                <button type="submit" class="btn btn-danger">Kirim Penolakan</button>
-                                            </div>
-                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -119,4 +147,55 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Handle Verification Modal Decision
+    document.querySelectorAll('.decision-radio').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const id = this.getAttribute('data-id');
+            const decision = this.value;
+            const submitBtn = document.getElementById('btnSubmitVerifikasi' + id);
+            
+            document.getElementById('sectionApprove' + id).style.display = 'none';
+            document.getElementById('sectionReject' + id).style.display = 'none';
+            
+            if (decision === 'approve') {
+                document.getElementById('sectionApprove' + id).style.display = 'block';
+            } else {
+                document.getElementById('sectionReject' + id).style.display = 'block';
+            }
+            
+            submitBtn.disabled = false;
+        });
+    });
+
+    // Handle Modal Submit
+    document.querySelectorAll('.btn-submit-verif').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const decision = document.querySelector(`input[name="decision_${id}"]:checked`).value;
+            const catatan = document.getElementById('catatan_verifikasi' + id).value;
+            
+            if (decision === 'approve') {
+                document.getElementById('formApprove' + id).submit();
+            } else {
+                if (!catatan.trim()) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Alasan penolakan wajib diisi!',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
+                
+                document.getElementById('hiddenAlasan' + id).value = catatan;
+                document.getElementById('formReject' + id).submit();
+            }
+        });
+    });
+</script>
 @endsection

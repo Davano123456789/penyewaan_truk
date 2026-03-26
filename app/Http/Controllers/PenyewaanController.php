@@ -46,9 +46,16 @@ class PenyewaanController extends Controller
         try {
             $penyewaan = Penyewaan::findOrFail($id);
             
-            // Cek apakah masih pending
-            if ($penyewaan->status !== 'pending') {
-                return redirect()->back()->with('error', 'Hanya pesanan dengan status pending yang dapat dihapus!');
+            // Cek apakah masih pending atau menunggu pembayaran
+            if (!in_array($penyewaan->status, ['pending', 'menunggu_pembayaran'])) {
+                return redirect()->back()->with('error', 'Hanya pesanan dengan status pending atau menunggu pembayaran yang dapat dihapus!');
+            }
+
+            // Kembalikan status semua armada terkait menjadi tersedia
+            foreach ($penyewaan->keranjangs as $item) {
+                if ($item->armada) {
+                    $item->armada->update(['status' => 'tersedia']);
+                }
             }
             
             // Hapus semua keranjang terkait
@@ -128,8 +135,8 @@ class PenyewaanController extends Controller
                     ? $penyewaan->harga_total_aktif / 2 
                     : $penyewaan->harga_total_aktif;
 
-                // Tentukan status pembayaran
-                $statusPembayaran = ($validated['jenis'] === 'cash') ? 'lunas' : 'menunggu_pelunasan';
+                // Tentukan status pembayaran (Sekarang selalu menunggu konfirmasi admin)
+                $statusPembayaran = 'menunggu_konfirmasi';
 
                 $newStatus = 'menunggu_konfirmasi_pembayaran';
                 $successMessage = 'Bukti transfer berhasil diupload! Menunggu konfirmasi admin.';
@@ -141,7 +148,7 @@ class PenyewaanController extends Controller
                 
                 // Pembayaran sisa = 50% dari total
                 $jumlahBayar = $penyewaan->harga_total_aktif / 2;
-                $statusPembayaran = 'menunggu_konfirmasi_pelunasan'; // Menunggu konfirmasi pelunasan dari admin
+                $statusPembayaran = 'menunggu_konfirmasi_pelunasan'; // Tetap menunggu konfirmasi pelunasan dari admin
                 $newStatus = 'aktif'; // Status penyewaan tetap aktif
                 $successMessage = 'Pembayaran sisa berhasil diupload! Menunggu konfirmasi pelunasan dari admin.';
             }
@@ -234,5 +241,18 @@ class PenyewaanController extends Controller
         })->with('penyewaan')->orderBy('created_at', 'desc')->paginate(10);
 
         return view('dashboard.pembayaran.riwayat', compact('pembayarans'));
+    }
+
+    public function detailPembayaran($id)
+    {
+        $pembayaran = Pembayaran::with(['penyewaan.keranjangs.armada', 'penyewaan.client'])
+            ->findOrFail($id);
+
+        // Security check
+        if ($pembayaran->penyewaan->client_id != Auth::id()) {
+            abort(403, 'Akses ditolak!');
+        }
+
+        return view('dashboard.pembayaran.detail', compact('pembayaran'));
     }
 }

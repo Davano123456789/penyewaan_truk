@@ -81,14 +81,29 @@
                         <label class="font-weight-bold">Status</label>
                         <div>
                             @if($penugasan->status == 'pending')
-                                <span class="badge badge-warning p-2">Pending</span>
+                                <span class="badge badge-secondary p-2">Pending (Menunggu Pembayaran)</span>
+                            @elseif($penugasan->status == 'aktif')
+                                <span class="badge badge-success p-2">Aktif / Berjalan</span>
+                            @elseif($penugasan->status == 'revisi_bukti')
+                                <span class="badge badge-danger p-2">Revisi Bukti Selesai</span>
                             @elseif($penugasan->status == 'selesai')
-                                <span class="badge badge-success p-2">Selesai</span>
+                                <span class="badge badge-primary p-2">Selesai</span>
+                            @elseif($penugasan->status == 'menunggu_konfirmasi_selesai')
+                                <span class="badge badge-warning p-2">Menunggu Validasi Admin</span>
                             @else
                                 <span class="badge badge-info p-2">{{ ucfirst($penugasan->status) }}</span>
                             @endif
                         </div>
                     </div>
+
+                    @if($penugasan->catatan_penugasan)
+                    <div class="alert alert-warning border-left-warning shadow-sm">
+                        <h6 class="font-weight-bold"><i class="fas fa-exclamation-triangle"></i> Catatan dari Admin:</h6>
+                        <p class="mb-0 italic">"{{ $penugasan->catatan_penugasan }}"</p>
+                        <hr class="my-2">
+                        <small class="text-dark">Silakan periksa kembali bukti yang Anda unggah dan lakukan upload ulang jika diperlukan.</small>
+                    </div>
+                    @endif
 
                     <!-- Tambahan Bukti Selesai -->
                     <div class="form-group">
@@ -100,13 +115,10 @@
                                      class="img-thumbnail" 
                                      style="max-width: 300px;">
                             @else
-                                <img src="https://res.cloudinary.com/dch7lqtxa/image/upload/v1761441410/bukti_selesai/njbd8c3odtkewy2kenkc.jpg"
-                                     alt="Belum ada bukti"
-                                     class="img-thumbnail mb-2"
-                                     style="max-width: 300px;">
-                                <p class="text-muted mt-2">
-                                    Belum ada bukti selesai yang diunggah.
-                                </p>
+                                <div class="bg-light border rounded p-4 text-center">
+                                    <i class="fas fa-image fa-3x text-gray-300 mb-2"></i>
+                                    <p class="text-muted small mb-0">Belum ada bukti selesai yang diunggah.</p>
+                                </div>
                             @endif
                         </div>
                     </div>

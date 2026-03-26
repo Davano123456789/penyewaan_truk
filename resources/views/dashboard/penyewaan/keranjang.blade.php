@@ -84,6 +84,19 @@
                         <div class="col-md-9">
                             <div class="mb-2">
                                 <span class="badge badge-primary mr-2">Item #{{ $index + 1 }}</span>
+                                @if($item->status == 'pending')
+                                    <span class="badge badge-secondary mr-2"><i class="fas fa-clock"></i> Pending</span>
+                                @elseif(in_array($item->status, ['menunggu_pembayaran', 'menunggu_konfirmasi_pembayaran']))
+                                    <span class="badge badge-secondary mr-2"><i class="fas fa-hourglass-half"></i> Persiapan</span>
+                                @elseif(in_array($item->status, ['aktif', 'revisi_bukti', 'menunggu_konfirmasi_selesai']))
+                                    <span class="badge badge-info mr-2"><i class="fas fa-truck-moving"></i> Sedang Berjalan</span>
+                                @elseif($item->status == 'selesai')
+                                    <span class="badge badge-success mr-2"><i class="fas fa-check-circle"></i> Selesai</span>
+                                @elseif($item->status == 'menunggu_konfirmasi_batal')
+                                    <span class="badge badge-warning mr-2"><i class="fas fa-times-circle"></i> Pengajuan Batal</span>
+                                @elseif($item->status == 'dibatalkan')
+                                    <span class="badge badge-danger mr-2"><i class="fas fa-ban"></i> Dibatalkan</span>
+                                @endif
                                 <span class="font-weight-bold text-dark">{{ $item->armada->no_polisi ?? '-' }}</span>
                             </div>
                             <div class="mb-1">
@@ -111,15 +124,19 @@
                             <h4 class="text-success mb-2">
                                 <strong>Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}</strong>
                             </h4>
-                            @if(in_array($penyewaan->status, ['pending', 'menunggu_pembayaran']))
-                            <form action="{{ route('keranjang.destroy', $item->id) }}" method="POST" class="delete-form d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button" class="btn btn-danger btn-sm btn-delete">
-                                    <i class="fas fa-trash"></i> Hapus
-                                </button>
-                            </form>
-                            @elseif($item->status == 'aktif')
+                            <div class="mb-2">
+                                @if(in_array($penyewaan->status, ['pending', 'menunggu_pembayaran']))
+                                <a href="{{ route('keranjang.edit', $item->id) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-edit"></i> Ubah
+                                </a>
+                                <form action="{{ route('keranjang.destroy', $item->id) }}" method="POST" class="delete-form d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn btn-danger btn-sm btn-delete">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </form>
+                                @elseif($item->status == 'aktif')
                                 <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#modalBatal{{ $item->id }}">
                                     <i class="fas fa-times-circle"></i> Batalkan
                                 </button>

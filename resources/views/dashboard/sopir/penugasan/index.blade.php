@@ -66,8 +66,12 @@
                                     <span class="badge badge-warning"><i class="fas fa-clock"></i> Pending</span>
                                 @elseif($penugasan->status == 'aktif')
                                     <span class="badge badge-success"><i class="fas fa-play-circle"></i> Aktif</span>
+                                @elseif($penugasan->status == 'revisi_bukti')
+                                    <span class="badge badge-danger"><i class="fas fa-exclamation-circle"></i> Revisi Bukti</span>
                                 @elseif($penugasan->status == 'selesai')
                                     <span class="badge badge-success"><i class="fas fa-check-circle"></i> Selesai</span>
+                                @elseif($penugasan->status == 'menunggu_konfirmasi_selesai')
+                                    <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Menunggu Validasi</span>
                                 @else
                                     <span class="badge badge-info">{{ ucfirst($penugasan->status) }}</span>
                                 @endif
@@ -81,16 +85,20 @@
                                 </a>
 
                                 <!-- Tombol Upload (jika belum selesai) -->
-                                @if($penugasan->status != 'selesai')
+                                @if(in_array($penugasan->status, ['aktif', 'revisi_bukti']))
                                     <button type="button" 
-                                            class="btn btn-success btn-sm btn-upload" 
+                                            class="btn btn-{{ $penugasan->status == 'revisi_bukti' ? 'danger' : 'success' }} btn-sm btn-upload" 
                                             data-id="{{ $penugasan->id }}"
                                             title="Upload Bukti Selesai">
-                                        <i class="fas fa-upload"></i> Upload
+                                        <i class="fas fa-upload"></i> {{ $penugasan->status == 'revisi_bukti' ? 'Upload Ulang' : 'Upload' }}
                                     </button>
-                                @else
-                                    <span class="badge badge-success p-2">
-                                        <i class="fas fa-check-circle"></i> Sudah Upload
+                                @elseif($penugasan->status == 'menunggu_konfirmasi_selesai')
+                                    <span class="badge badge-warning p-2 d-inline-block mt-1">
+                                        <i class="fas fa-hourglass-half"></i> Validasi
+                                    </span>
+                                @elseif($penugasan->status == 'selesai')
+                                    <span class="badge badge-success p-2 d-inline-block mt-1">
+                                        <i class="fas fa-check-circle"></i> Selesai
                                     </span>
                                 @endif
                             </td>
@@ -183,15 +191,6 @@
 @endsection
 
 @section('scripts')
-<!-- jQuery -->
-<script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
-
-<!-- Bootstrap Bundle (includes Popper) -->
-<script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-
-<!-- Atau jika pakai CDN -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     // Fungsi pencarian

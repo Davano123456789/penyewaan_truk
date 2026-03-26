@@ -98,11 +98,12 @@
                     <thead class="thead-light">
                         <tr>
                             <th width="5%">No</th>
-                            <th width="18%">Armada</th>
-                            <th width="15%">Tanggal Mulai</th>
-                            <th width="12%">Estimasi Hari</th>
-                            <th width="20%">Tempat Jemput</th>
-                            <th width="20%">Tempat Antar</th>
+                            <th width="15%">Armada</th>
+                            <th width="15%">Sopir</th>
+                            <th width="12%">Tanggal Mulai</th>
+                            <th width="10%">Estimasi</th>
+                            <th width="18%">Rute (Jemput & Antar)</th>
+                            <th width="15%">Status Item</th>
                             <th width="10%">Subtotal</th>
                         </tr>
                     </thead>
@@ -112,19 +113,52 @@
                             <td class="text-center">{{ $index + 1 }}</td>
                             <td>
                                 <strong>{{ $item->armada->jenis ?? 'N/A' }}</strong><br>
-                                <small class="text-muted">{{ $item->armada->no_polisi ?? 'N/A' }}</small>
+                                <small class="badge badge-secondary">{{ $item->armada->no_polisi ?? 'N/A' }}</small>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="mr-2">
+                                        <i class="fas fa-user-circle fa-lg text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small font-weight-bold">{{ $item->sopir->nama ?? 'Belum Ditugaskan' }}</div>
+                                        <div class="small text-muted">{{ $item->sopir->telepon ?? '-' }}</div>
+                                    </div>
+                                </div>
                             </td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M Y') }}</td>
-                            <td class="text-center"><strong>{{ $item->estimasi_hari }} hari</strong></td>
-                            <td>{{ $item->tempat_jemput }}</td>
-                            <td>{{ $item->tempat_antar }}</td>
-                            <td class="text-right"><strong class="text-success">Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}</strong></td>
+                            <td class="text-center">
+                                <div class="small font-weight-bold">{{ $item->estimasi_hari }} Hari</div>
+                                <div class="small text-muted">{{ $item->total_jarak }} Km</div>
+                            </td>
+                            <td>
+                                <div class="small mb-1"><i class="fas fa-map-marker-alt text-danger"></i> {{ $item->tempat_jemput }}</div>
+                                <div class="small"><i class="fas fa-flag-checkered text-success"></i> {{ $item->tempat_antar }}</div>
+                            </td>
+                            <td class="text-center">
+                                @if($item->status == 'pending')
+                                    <span class="badge badge-secondary">Pending</span>
+                                @elseif($item->status == 'aktif')
+                                    <span class="badge badge-success">Aktif</span>
+                                @elseif($item->status == 'revisi_bukti')
+                                    <span class="badge badge-danger">Revisi Bukti</span>
+                                @elseif($item->status == 'selesai')
+                                    <span class="badge badge-primary">Selesai</span>
+                                @elseif($item->status == 'menunggu_konfirmasi_batal')
+                                    <span class="badge badge-warning">Menunggu Konfirmasi Batal</span>
+                                @elseif($item->status == 'dibatalkan')
+                                    <span class="badge badge-danger">Dibatalkan</span>
+                                @else
+                                    <span class="badge badge-info">{{ ucfirst($item->status) }}</span>
+                                @endif
+                            </td>
+                            <td class="text-right"><strong class="text-primary">Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}</strong></td>
                         </tr>
                         @endforeach
                     </tbody>
                     <tfoot class="font-weight-bold">
                         <tr class="bg-light">
-                            <td colspan="6" class="text-right">TOTAL:</td>
+                            <td colspan="7" class="text-right">TOTAL:</td>
                             <td class="text-right"><h5 class="mb-0 text-primary">Rp {{ number_format($penyewaan->harga_total, 0, ',', '.') }}</h5></td>
                         </tr>
                     </tfoot>

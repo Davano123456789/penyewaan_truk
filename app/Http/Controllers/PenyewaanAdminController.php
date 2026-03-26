@@ -80,6 +80,12 @@ class PenyewaanAdminController extends Controller
                 // Update status penyewaan menjadi AKTIF
                 $penyewaan->update(['status' => 'aktif']);
 
+                // Update status pembayaran sesuai jenisnya
+                if ($penyewaan->pembayaran) {
+                    $pembayaranStatus = ($penyewaan->pembayaran->jenis == 'cash') ? 'lunas' : 'menunggu_pelunasan';
+                    $penyewaan->pembayaran->update(['status' => $pembayaranStatus]);
+                }
+
                 // Update semua keranjang terkait menjadi AKTIF
                 \App\Models\Keranjang::where('penyewaan_id', $penyewaan->id)
                     ->update(['status' => 'aktif']);
@@ -321,8 +327,14 @@ class PenyewaanAdminController extends Controller
                 $penyewaan->pembayaran->delete();
             }
 
+            // Kembalikan status semua armada terkait menjadi tersedia
+            foreach ($penyewaan->keranjangs as $item) {
+                if ($item->armada) {
+                    $item->armada->update(['status' => 'tersedia']);
+                }
+            }
+
             // Hapus semua keranjang terkait
-            $penyewaan->keranjangs()->delete();
 
             // Hapus penyewaan
             $penyewaan->delete();

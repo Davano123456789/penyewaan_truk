@@ -51,7 +51,7 @@
                             <th width="15%">Total Harga</th>
                             <th width="15%">Status Pesanan</th>
                             <th width="15%">Status Pembayaran</th>
-                            <th width="12%">Jumlah Item</th>
+                             <th class="text-center" width="10%">Unit</th>
                             <th class="text-center" width="23%">Aksi</th>
                         </tr>
                     </thead>
@@ -82,69 +82,57 @@
                             <!-- Status Pembayaran -->
                             <td>
                                 @if($penyewaan->pembayaran)
-                                    @if($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
-                                        <span class="badge badge-secondary">-</span>
+                                    @if($penyewaan->pembayaran->status == 'menunggu_konfirmasi')
+                                        <span class="badge badge-info"><i class="fas fa-hourglass-start"></i> Menunggu Konfirmasi</span>
                                     @elseif($penyewaan->pembayaran->status == 'lunas')
                                         <span class="badge badge-success"><i class="fas fa-check-circle"></i> Lunas</span>
                                     @elseif($penyewaan->pembayaran->status == 'menunggu_pelunasan')
                                         <span class="badge badge-warning"><i class="fas fa-clock"></i> Menunggu Pelunasan</span>
                                     @elseif($penyewaan->pembayaran->status == 'menunggu_konfirmasi_pelunasan')
-                                        <span class="badge badge-danger"><i class="fas fa-hourglass-half"></i> Menunggu Konfirmasi Pelunasan</span>
+                                        <span class="badge badge-info"><i class="fas fa-hourglass-half"></i> Menunggu Konfirmasi Pelunasan</span>
                                     @elseif($penyewaan->pembayaran->status == 'ditolak')
                                         <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Pembayaran Ditolak</span>
+                                    @else
+                                        <span class="badge badge-secondary">{{ $penyewaan->pembayaran->status }}</span>
                                     @endif
                                 @else
                                     <span class="badge badge-secondary">-</span>
                                 @endif
                             </td>
+                                                        <td class="text-center">
+                                 <strong>{{ $penyewaan->keranjangs_count }}</strong> Item
+                             </td>
                             
-                            <td class="text-center">
-                                <span class="badge badge-info">
-                                    {{ $penyewaan->keranjangs_count }} Item
-                                </span>
-                                <a href="{{ route('penyewaan.keranjang', $penyewaan->id) }}" 
-                                   class="btn btn-sm btn-primary ml-2" 
-                                   title="Lihat Daftar Item">
-                                    <i class="fas fa-list"></i> Lihat
-                                </a>
-                            </td>
-                            
-                            <td class="text-center">
-    @if($penyewaan->status == 'menunggu_pembayaran')
-        <!-- Tombol Bayar (Upload Bukti) -->
-        <a href="{{ route('pembayaran.show', $penyewaan->id) }}" 
-           class="btn btn-success btn-sm" 
-           title="Bayar">
-            <i class="fas fa-credit-card"></i> Bayar
-        </a>
-        
-    @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
-        <span class="badge badge-info p-2">
-            <i class="fas fa-clock"></i> Menunggu Konfirmasi Pembayaran Admin
-        </span>
-    @elseif($penyewaan->status == 'aktif' && $penyewaan->pembayaran && $penyewaan->pembayaran->jenis == 'talangan' && $penyewaan->pembayaran->status == 'menunggu_pelunasan')
-        <!-- Tombol Bayar Sisa (untuk Talangan) -->
-        <a href="{{ route('pembayaran.show', $penyewaan->id) }}" 
-           class="btn btn-warning btn-sm" 
-           title="Bayar Sisa">
-            <i class="fas fa-money-bill-wave"></i> Bayar Sisa
-        </a>
-    @elseif($penyewaan->status == 'dibayar')
-        <span class="badge badge-success p-2">
-            <i class="fas fa-check-circle"></i> Dibayar
-        </span>
-    @elseif($penyewaan->pembayaran && $penyewaan->pembayaran->status == 'ditolak')
-        <a href="{{ route('pembayaran.show', $penyewaan->id) }}" 
-           class="btn btn-danger btn-sm" 
-           title="Bayar Ulang">
-            <i class="fas fa-sync-alt"></i> Bayar Ulang
-        </a>
-    @else
-        <span class="badge badge-secondary p-2">
-            <i class="fas fa-info-circle"></i> {{ ucfirst($penyewaan->status) }}
-        </span>
-    @endif
-</td>
+                             <td class="text-center">
+                                 <a href="{{ route('penyewaan.keranjang', $penyewaan->id) }}" 
+                                    class="btn btn-info btn-sm" 
+                                    title="Lihat Detail Pesanan">
+                                     <i class="fas fa-eye"></i> Detail
+                                 </a>
+
+                                 @if($penyewaan->status == 'menunggu_pembayaran')
+                                     <a href="{{ route('pembayaran.show', $penyewaan->id) }}" 
+                                        class="btn btn-success btn-sm" 
+                                        title="Bayar">
+                                         <i class="fas fa-credit-card"></i> Bayar
+                                     </a>
+                                     
+                                 @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
+                                     <!-- Lanjutkan Menunggu -->
+                                 @elseif($penyewaan->status == 'aktif' && $penyewaan->pembayaran && $penyewaan->pembayaran->jenis == 'talangan' && $penyewaan->pembayaran->status == 'menunggu_pelunasan')
+                                     <a href="{{ route('pembayaran.show', $penyewaan->id) }}" 
+                                        class="btn btn-warning btn-sm" 
+                                        title="Bayar Sisa">
+                                         <i class="fas fa-money-bill-wave"></i> Bayar Sisa
+                                     </a>
+                                 @elseif($penyewaan->pembayaran && $penyewaan->pembayaran->status == 'ditolak')
+                                     <a href="{{ route('pembayaran.show', $penyewaan->id) }}" 
+                                        class="btn btn-danger btn-sm" 
+                                        title="Bayar Ulang">
+                                         <i class="fas fa-sync-alt"></i> Bayar Ulang
+                                     </a>
+                                 @endif
+                             </td>
                         </tr>
                         @empty
                         <tr>

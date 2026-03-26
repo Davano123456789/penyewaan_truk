@@ -80,8 +80,14 @@
             <p class="text-gray-600">Pilih jenis truk dan lokasi untuk mendapatkan rekomendasi armada terdekat</p>
         </div>
 
-        <form action="{{ route('pemesanan.store') }}" method="POST" id="formPemesanan" class="max-w-7xl mx-auto">
+        <form action="{{ isset($editItem) ? route('keranjang.update', $editItem->id) : route('pemesanan.store') }}" 
+              method="POST" 
+              id="formPemesanan" 
+              class="max-w-7xl mx-auto">
             @csrf
+            @if(isset($editItem))
+                @method('PUT')
+            @endif
             
             <div class="grid lg:grid-cols-3 gap-8">
                 <!-- Left Side - Map & Location -->
@@ -316,6 +322,11 @@ let parkirs = @json($parkirs);
 let searchTimeout;
 let hargaAsli = 0;
 
+// Initialize variables for edit mode
+let editMode = @json(isset($editItem));
+let editData = @json($editItem ?? null);
+let currentArmadaId = editData ? editData.armada_id : null;
+
 // Initialize map
 document.addEventListener('DOMContentLoaded', function() {
     map = L.map('map').setView([-7.250445, 112.768845], 13);
@@ -365,6 +376,29 @@ document.addEventListener('DOMContentLoaded', function() {
             hideSearchResults();
         }
     });
+
+    // Handle Edit Mode Initialization
+    if (editMode && editData) {
+        // 1. Set Jenis Truk
+        if (editData.armada) {
+            selectJenisTruk(editData.armada.jenis);
+        }
+
+        // 2. Set Pin & Address
+        if (editData.latitude_penjemputan && editData.longitude_penjemputan) {
+            setLocation(editData.latitude_penjemputan, editData.longitude_penjemputan, 'jemput', editData.tempat_jemput);
+        }
+        if (editData.latitude_antar && editData.longitude_antar) {
+            setLocation(editData.latitude_antar, editData.longitude_antar, 'antar', editData.tempat_antar);
+        }
+
+        // 3. Set Inputs
+        document.getElementById('tanggal_mulai').value = editData.tanggal_mulai;
+        document.getElementById('barang_muatan').value = editData.barang_muatan;
+        
+        // 4. Set Price Tawar if different from base (assuming we store final price in harga_sewa)
+        // This part depends on how you want to handle existing pricing
+    }
 });
 
 function selectJenisTruk(jenis) {
@@ -373,8 +407,11 @@ function selectJenisTruk(jenis) {
     
     document.querySelectorAll('.jenis-truk-btn').forEach(btn => {
         btn.classList.remove('active');
+        // Cari button yang teksnya sesuai dengan jenis
+        if (btn.querySelector('span').textContent.trim() === jenis) {
+            btn.classList.add('active');
+        }
     });
-    event.currentTarget.classList.add('active');
     
     if (jemputCoords) {
         loadArmada(jemputCoords.lat, jemputCoords.lng);
@@ -391,15 +428,31 @@ function setMapMode(mode) {
     document.getElementById('btnAntar').className = mode === 'antar'
         ? 'flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold'
         : 'flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg font-semibold';
+
+    // Sinkronkan input pencarian dengan alamat yang sudah dipilih di mode tersebut
+    const searchInput = document.getElementById('searchLocation');
+    if (mode === 'jemput') {
+        const addr = document.getElementById('jemputAddress').textContent;
+        searchInput.value = (addr !== 'Belum dipilih') ? addr : '';
+    } else {
+        const addr = document.getElementById('antarAddress').textContent;
+        searchInput.value = (addr !== 'Belum dipilih') ? addr : '';
+    }
+    hideSearchResults();
 }
 
-async function setLocation(lat, lng) {
+async function setLocation(lat, lng, modeOverride = null, addressOverride = null) {
     try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
-        const data = await response.json();
-        const address = data.display_name;
+        let mode = modeOverride || currentMode;
+        let address = addressOverride;
+        
+        if (!address) {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
+            const data = await response.json();
+            address = data.display_name;
+        }
 
-        if (currentMode === 'jemput') {
+        if (mode === 'jemput') {
             jemputCoords = { lat, lng };
             
             if (markerJemput) map.removeLayer(markerJemput);
@@ -596,7 +649,7 @@ async function loadArmada(lat, lng) {
     }
 
     try {
-        const response = await fetch(`/api/armada-tersedia?lat=${lat}&lng=${lng}&jenis=${selectedJenisTruk}`);
+        const response = await fetch(`/api/armada-tersedia?lat=${lat}&lng=${lng}&jenis=${selectedJenisTruk}${currentArmadaId ? '&current_armada_id='+currentArmadaId : ''}`);
         const result = await response.json();
 
         const armadaList = document.getElementById('armadaList');
@@ -626,6 +679,14 @@ async function loadArmada(lat, lng) {
                 </div>
             </div>
         `).join('');
+
+        // Auto-select current armada if editing
+        if (editMode && currentArmadaId) {
+            const currentCard = document.querySelector(`.armada-card[onclick="selectArmada(${currentArmadaId})"]`);
+            if (currentCard) {
+                currentCard.click();
+            }
+        }
     } catch (error) {
         console.error('Error loading armada:', error);
     }

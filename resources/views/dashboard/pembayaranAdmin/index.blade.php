@@ -58,7 +58,21 @@
                                 <td>Rp {{ number_format($p->jumlah_bayar ?? 0, 0, ',', '.') }}</td>
                                 <td>{{ $p->metode }}</td>
                                 <td>{{ $p->jenis }}</td>
-                                <td>{{ $p->status }}</td>
+                                <td>
+                                    @if($p->status == 'lunas')
+                                        <span class="badge badge-success">Lunas</span>
+                                    @elseif($p->status == 'menunggu_konfirmasi')
+                                        <span class="badge badge-info text-white">Menunggu Konfirmasi</span>
+                                    @elseif($p->status == 'menunggu_pelunasan')
+                                        <span class="badge badge-warning text-dark">Menunggu Pelunasan</span>
+                                    @elseif($p->status == 'menunggu_konfirmasi_pelunasan')
+                                        <span class="badge badge-info text-white">Menunggu Konfirmasi Pelunasan</span>
+                                    @elseif($p->status == 'ditolak')
+                                        <span class="badge badge-danger">Ditolak</span>
+                                    @else
+                                        <span class="badge badge-secondary">{{ $p->status }}</span>
+                                    @endif
+                                </td>
                                 <td>{{ optional($p->tanggal_bayar)->format('Y-m-d') ?? '-' }}</td>
                                 <td class="text-center">
                                     <a href="{{ route('pembayaranAdmin.show', $p->id) }}" class="btn btn-info btn-sm" title="Lihat Detail">

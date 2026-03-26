@@ -9,16 +9,16 @@
 
             <!-- Desktop Menu -->
             <div class="hidden md:flex items-center space-x-8">
-                <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-600 transition">Beranda</a>
-                <a href="{{ route('daftarArmada') }}" class="text-gray-700 hover:text-blue-600 transition">Armada</a>
-                <a href="{{ route('pemesanan') }}" class="text-blue-600 font-semibold">Penyewaan</a>
+                <a href="{{ route('home') }}" class="{{ Request::is('/') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Beranda</a>
+                <a href="{{ route('daftarArmada') }}" class="{{ Request::is('daftar-armada*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Armada</a>
+                <a href="{{ route('pemesanan') }}" class="{{ Request::is('pemesanan*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Penyewaan</a>
                 @auth
                     @if(Auth::user()->peran_id == 1)
-                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-600 transition">Dashboard</a>
+                        <a href="{{ route('dashboard') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Dashboard</a>
                     @elseif(Auth::user()->peran_id == 2)
-                        <a href="{{ route('penyewaan.index') }}" class="text-gray-700 hover:text-blue-600 transition">Dashboard</a>
+                        <a href="{{ route('penyewaan.index') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Dashboard</a>
                     @elseif(Auth::user()->peran_id == 3)
-                        <a href="{{ route('penugasan.index') }}" class="text-gray-700 hover:text-blue-600 transition">Dashboard</a>
+                        <a href="{{ route('penugasan.index') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Dashboard</a>
                     @endif
                 @endauth
                 
@@ -57,16 +57,16 @@
         <div class="hidden md:hidden mt-4" id="mobile-menu">
             <div class="flex flex-col space-y-4">
             
-                <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-600 transition">Beranda</a>
-                <a href="{{ route('daftarArmada') }}" class="text-gray-700 hover:text-blue-600 transition">Armada</a>
-                <a href="{{ route('pemesanan') }}" class="text-blue-600 font-semibold">Penyewaan</a>
+                <a href="{{ route('home') }}" class="{{ Request::is('/') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Beranda</a>
+                <a href="{{ route('daftarArmada') }}" class="{{ Request::is('daftar-armada*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Armada</a>
+                <a href="{{ route('pemesanan') }}" class="{{ Request::is('pemesanan*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Penyewaan</a>
                 @auth
                     @if(Auth::user()->peran_id == 1)
-                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-600 transition">Dashboard</a>
+                        <a href="{{ route('dashboard') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Dashboard</a>
                     @elseif(Auth::user()->peran_id == 2)
-                        <a href="{{ route('penyewaan.index') }}" class="text-gray-700 hover:text-blue-600 transition">Dashboard</a>
+                        <a href="{{ route('penyewaan.index') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Dashboard</a>
                     @elseif(Auth::user()->peran_id == 3)
-                        <a href="{{ route('penugasan.index') }}" class="text-gray-700 hover:text-blue-600 transition">Dashboard</a>
+                        <a href="{{ route('penugasan.index') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Dashboard</a>
                     @endif
                 @endauth
                 

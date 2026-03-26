@@ -112,19 +112,19 @@
     <!-- ============================================================== -->
     @if(Auth::user()->peran_id == 2)
 
-    <!-- Nav Item - Riwayat Pembayaran -->
-    <li class="nav-item {{ Request::is('dashboard/pembayaran/riwayat*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('pembayaran.riwayat') }}">
-            <i class="fas fa-fw fa-history"></i>
-            <span>Riwayat Pembayaran</span>
-        </a>
-    </li>
-
     <!-- Nav Item - Penyewaan -->
     <li class="nav-item {{ Request::is('dashboard/penyewaan*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('penyewaan.index') }}">
             <i class="fas fa-fw fa-file-invoice-dollar"></i>
             <span>Penyewaan</span>
+        </a>
+    </li>
+
+    <!-- Nav Item - Riwayat Pembayaran -->
+    <li class="nav-item {{ Request::is('dashboard/pembayaran/riwayat*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('pembayaran.riwayat') }}">
+            <i class="fas fa-fw fa-history"></i>
+            <span>Riwayat Pembayaran</span>
         </a>
     </li>
 
@@ -147,6 +147,14 @@
 
     <!-- Divider -->
     <hr class="sidebar-divider">
+
+    <!-- Nav Item - Beranda -->
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('home') }}">
+            <i class="fas fa-fw fa-home"></i>
+            <span>Kembali ke Beranda</span>
+        </a>
+    </li>
 
     <!-- Nav Item - Profil -->
     <li class="nav-item {{ Request::is('dashboard/profil*') ? 'active' : '' }}">

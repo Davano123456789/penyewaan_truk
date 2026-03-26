@@ -9,6 +9,47 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
+            <!-- Rekening Info Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-info">
+                    <h6 class="m-0 font-weight-bold text-white">
+                        <i class="fas fa-university"></i> Nomor Rekening Tujuan
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h6 class="font-weight-bold text-primary">Bank BCA</h6>
+                                <p class="h5 mb-1">1234567890</p>
+                                <small class="text-muted">PT Truck Rental Indonesia</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h6 class="font-weight-bold text-warning">Bank Mandiri</h6>
+                                <p class="h5 mb-1">9876543210</p>
+                                <small class="text-muted">PT Truck Rental Indonesia</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h6 class="font-weight-bold text-info">Bank BRI</h6>
+                                <p class="h5 mb-1">5555666677</p>
+                                <small class="text-muted">PT Truck Rental Indonesia</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h6 class="font-weight-bold text-success">Bank BNI</h6>
+                                <p class="h5 mb-1">8888999900</p>
+                                <small class="text-muted">PT Truck Rental Indonesia</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card shadow mb-4">
                 <div class="card-header py-3 bg-primary">
                     <h6 class="m-0 font-weight-bold text-white">
@@ -206,46 +247,6 @@
                 </div>
             </div>
 
-            <!-- Rekening Info Card -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 bg-info">
-                    <h6 class="m-0 font-weight-bold text-white">
-                        <i class="fas fa-university"></i> Nomor Rekening Tujuan
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="border rounded p-3">
-                                <h6 class="font-weight-bold text-primary">Bank BCA</h6>
-                                <p class="h5 mb-1">1234567890</p>
-                                <small class="text-muted">PT Truck Rental Indonesia</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="border rounded p-3">
-                                <h6 class="font-weight-bold text-warning">Bank Mandiri</h6>
-                                <p class="h5 mb-1">9876543210</p>
-                                <small class="text-muted">PT Truck Rental Indonesia</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="border rounded p-3">
-                                <h6 class="font-weight-bold text-info">Bank BRI</h6>
-                                <p class="h5 mb-1">5555666677</p>
-                                <small class="text-muted">PT Truck Rental Indonesia</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="border rounded p-3">
-                                <h6 class="font-weight-bold text-success">Bank BNI</h6>
-                                <p class="h5 mb-1">8888999900</p>
-                                <small class="text-muted">PT Truck Rental Indonesia</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>

@@ -146,6 +146,7 @@ Route::post('/dashboard/penugasan-admin/{id}/tolak', [PenugasanAdminController::
 Route::get('/dashboard/penyewaan', [PenyewaanController::class , 'index'])->name('penyewaan.index');
 // Route Pembayaran
 Route::get('/dashboard/pembayaran/riwayat', [PenyewaanController::class , 'riwayatPembayaran'])->name('pembayaran.riwayat');
+Route::get('/dashboard/pembayaran/detail/{id}', [PenyewaanController::class , 'detailPembayaran'])->name('pembayaran.detail');
 Route::get('/dashboard/pembayaran/{penyewaan}', [PenyewaanController::class , 'showPembayaran'])->name('pembayaran.show');
 Route::post('/dashboard/pembayaran/{penyewaan}', [PenyewaanController::class , 'storePembayaran'])->name('pembayaran.store');
 Route::delete('/dashboard/penyewaan/{penyewaan}', [PenyewaanController::class , 'destroy'])->name('penyewaan.destroy');
@@ -166,6 +167,8 @@ Route::delete('/dashboard/penyewaan/{id}', [PenyewaanController::class , 'destro
 
 // Keranjang Item
 Route::delete('/dashboard/keranjang/{id}', [KeranjangController::class , 'destroy'])->name('keranjang.destroy');
+Route::get('/pemesanan/{id}/edit', [FrontController::class , 'pemesanan'])->name('keranjang.edit');
+Route::put('/dashboard/keranjang/{id}', [KeranjangController::class , 'update'])->name('keranjang.update');
 Route::post('/dashboard/keranjang/{id}/ajukan-batal', [KeranjangController::class , 'ajukanBatal'])->name('keranjang.ajukan-batal');
 
 // Pembatalan Admin

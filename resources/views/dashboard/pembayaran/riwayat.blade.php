@@ -25,7 +25,7 @@
                             <th>Jenis</th>
                             <th>Status</th>
                             <th>Tanggal Bayar</th>
-                            <th class="text-center">Bukti</th>
+                            <th class="text-center" width="15%">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,10 +52,12 @@
                                 <td>
                                     @if($p->status == 'lunas')
                                         <span class="badge badge-success">Lunas</span>
-                                    @elseif($p->status == 'menunggu_konfirmasi_pembayaran')
-                                        <span class="badge badge-info">Menunggu Konfirmasi Pembayaran</span>
+                                    @elseif($p->status == 'menunggu_konfirmasi')
+                                        <span class="badge badge-info">Menunggu Konfirmasi</span>
                                     @elseif($p->status == 'menunggu_pelunasan')
                                         <span class="badge badge-warning">Menunggu Pelunasan</span>
+                                    @elseif($p->status == 'menunggu_konfirmasi_pelunasan')
+                                        <span class="badge badge-info">Menunggu Konfirmasi Pelunasan</span>
                                     @elseif($p->status == 'ditolak')
                                         <span class="badge badge-danger">Ditolak</span>
                                     @else
@@ -64,8 +66,8 @@
                                 </td>
                                 <td>{{ \Carbon\Carbon::parse($p->tanggal_bayar)->format('d M Y') }}</td>
                                 <td class="text-center">
-                                    <a href="{{ $p->bukti_transfer }}" target="_blank" class="btn btn-sm btn-info">
-                                        <i class="fas fa-image"></i> Lihat
+                                    <a href="{{ route('pembayaran.detail', $p->id) }}" class="btn btn-sm btn-primary" title="Lihat Detail">
+                                        <i class="fas fa-eye"></i> Detail
                                     </a>
                                 </td>
                             </tr>

@@ -131,20 +131,42 @@
                                         required
                                     >
                                 </div>
-  <!-- Kata Sandi -->
+                                <!-- Kata Sandi -->
                                 <div>
                                     <label for="kata_sandi" class="block text-sm font-semibold text-gray-700 mb-2">
                                         Kata Sandi
                                     </label>
-                                    <input 
-                                        type="password" 
-                                        id="kata_sandi" 
-                                        name="kata_sandi" 
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                        placeholder="Minimal 8 karakter"
-                                        required
-                                    >
+                                    <div class="relative">
+                                        <input 
+                                            type="password" 
+                                            id="kata_sandi" 
+                                            name="kata_sandi" 
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
+                                            placeholder="Minimal 8 karakter"
+                                            required
+                                        >
+                                        <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-blue-600 transition">
+                                            <i id="eyeIcon" class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
+
+                                <script>
+                                function togglePassword() {
+                                    const passwordInput = document.getElementById('kata_sandi');
+                                    const eyeIcon = document.getElementById('eyeIcon');
+                                    
+                                    if (passwordInput.type === 'password') {
+                                        passwordInput.type = 'text';
+                                        eyeIcon.classList.remove('fa-eye');
+                                        eyeIcon.classList.add('fa-eye-slash');
+                                    } else {
+                                        passwordInput.type = 'password';
+                                        eyeIcon.classList.remove('fa-eye-slash');
+                                        eyeIcon.classList.add('fa-eye');
+                                    }
+                                }
+                                </script>
                                 <!-- Umur -->
                                 <div>
                                     <label for="umur" class="block text-sm font-semibold text-gray-700 mb-2">

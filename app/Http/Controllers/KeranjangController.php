@@ -6,6 +6,7 @@ use App\Models\Armada;
 use App\Models\Parkir;
 use App\Models\Keranjang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class KeranjangController extends Controller
 {
@@ -98,6 +99,81 @@ class KeranjangController extends Controller
         return redirect()->route('keranjang.index')
                         ->with('success', 'Pesanan berhasil ditambahkan ke keranjang!');
     }
+    public function update(Request $request, $id)
+    {
+        try {
+            $keranjang = Keranjang::findOrFail($id);
+            $penyewaan = $keranjang->penyewaan;
+
+            // Cek apakah penyewaan masih pending atau menunggu_pembayaran
+            if (!in_array($penyewaan->status, ['pending', 'menunggu_pembayaran'])) {
+                return redirect()->back()->with('error', 'Tidak dapat mengubah item dari pesanan yang sudah diproses!');
+            }
+
+            $validated = $request->validate([
+                'armada_id' => 'required|exists:armadas,id',
+                'tanggal_mulai' => 'required|date',
+                'estimasi_hari' => 'required|integer|min:1',
+                'tempat_jemput' => 'required|string',
+                'tempat_antar' => 'required|string',
+                'barang_muatan' => 'required|string',
+                'latitude_penjemputan' => 'required|numeric',
+                'longitude_penjemputan' => 'required|numeric',
+                'latitude_antar' => 'required|numeric',
+                'longitude_antar' => 'required|numeric',
+                'parkir_latitude' => 'required|numeric',
+                'parkir_longitude' => 'required|numeric',
+                'harga_sewa' => 'required|numeric',
+                'total_jarak' => 'required|numeric',
+                'harga_tawar' => 'nullable|numeric|min:0'
+            ]);
+
+            // Validasi harga tawar jika ada
+            if (isset($validated['harga_tawar']) && $validated['harga_tawar'] > 0) {
+                $hargaAsli = $validated['harga_sewa'];
+                $minHarga = $hargaAsli * 0.9;
+                
+                if ($validated['harga_tawar'] < $minHarga) {
+                    return redirect()->back()
+                        ->with('error', 'Harga tawar tidak boleh kurang dari 90% harga asli.')
+                        ->withInput();
+                }
+                
+                $validated['harga_sewa'] = $validated['harga_tawar'];
+            }
+
+            // Jika armada berubah
+            if ($keranjang->armada_id != $validated['armada_id']) {
+                // Kembalikan armada lama menjadi tersedia
+                $oldArmada = Armada::find($keranjang->armada_id);
+                if ($oldArmada) {
+                    $oldArmada->update(['status' => 'tersedia']);
+                }
+
+                // Set armada baru menjadi tidak tersedia
+                $newArmada = Armada::findOrFail($validated['armada_id']);
+                $newArmada->update(['status' => 'tidak_tersedia']);
+                
+                // Update sopir_id juga
+                $validated['sopir_id'] = $newArmada->sopir_id;
+            }
+
+            // Update keranjang
+            $keranjang->update($validated);
+
+            // Update total harga penyewaan
+            $totalHarga = $penyewaan->keranjangs()->sum('harga_sewa');
+            $penyewaan->update(['harga_total' => $totalHarga]);
+
+            return redirect()->route('penyewaan.keranjang', $penyewaan->id)
+                             ->with('success', 'Item berhasil diperbarui!');
+            
+        } catch (\Exception $e) {
+            Log::error('Error update keranjang: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+    
     public function destroy($id)
     {
         try {
@@ -107,10 +183,10 @@ class KeranjangController extends Controller
             // Cek apakah penyewaan masih pending atau menunggu_pembayaran
             if (!in_array($penyewaan->status, ['pending', 'menunggu_pembayaran'])) {
                 return redirect()->back()->with('error', 'Tidak dapat menghapus item dari pesanan yang sudah diproses!');
-            }            // ✅ TAMBAHKAN INI - Kembalikan status armada ke aktif
+            }            // Kembalikan status armada ke tersedia
             $armada = Armada::find($keranjang->armada_id);
             if ($armada) {
-                $armada->update(['status' => 'aktif']); // Atau 'tersedia', sesuai dengan status di database Anda
+                $armada->update(['status' => 'tersedia']);
             }
             
             // Hapus item
