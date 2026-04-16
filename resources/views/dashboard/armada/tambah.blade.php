@@ -116,7 +116,8 @@
                             <select class="form-control @error('status') is-invalid @enderror" 
                                     id="status" name="status">
                                 <option value="tersedia" {{ old('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                            <option value="perawatan" {{ old('status') == 'perawatan' ? 'selected' : '' }}>Sedang Perawatan (Maintenance)</option>
+                                <option value="tidak_tersedia" {{ old('status') == 'tidak_tersedia' ? 'selected' : '' }}>Tidak Tersedia (Sedang Dipesan)</option>
+                                <option value="perawatan" {{ old('status') == 'perawatan' ? 'selected' : '' }}>Sedang Perawatan (Maintenance)</option>
                             </select>
                             @error('status')
                                 <div class="invalid-feedback">{{ $message }}</div>

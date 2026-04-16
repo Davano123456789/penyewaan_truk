@@ -23,8 +23,11 @@
 
                     <div class="form-group">
                         <label class="font-weight-bold">Client</label>
-                        <input type="text" class="form-control {{ !$pembayaran->penyewaan->client ? 'is-invalid text-danger font-italic' : '' }}" 
-                               value="{{ $pembayaran->penyewaan->client ? ($pembayaran->penyewaan->client->nama ?? $pembayaran->penyewaan->client->email) : 'User Dihapus' }}" readonly>
+                        @php
+                            $client = $pembayaran->penyewaan ? $pembayaran->penyewaan->client : null;
+                        @endphp
+                        <input type="text" class="form-control {{ !$client ? 'is-invalid text-danger font-italic' : '' }}" 
+                               value="{{ $client ? ($client->nama ?? $client->email) : (!$pembayaran->penyewaan ? 'Data Transaksi Hilang' : 'User Dihapus') }}" readonly>
                     </div>
 
                     <div class="form-group">
@@ -68,14 +71,18 @@
             <div class="row mt-3">
                 <div class="col-12">
                     <h6 class="font-weight-bold">Items (Keranjang)</h6>
-                    <ul class="list-group">
-                        @foreach($pembayaran->penyewaan->keranjangs as $k)
-                            <li class="list-group-item">
-                                <strong>{{ $k->armada->merek ?? '-' }}</strong> — Rp {{ number_format($k->harga_sewa ?? 0,0,',','.') }}
-                                <div class="small text-muted">Tanggal Mulai: {{ optional($k->tanggal_mulai)->format('Y-m-d') ?? '-' }}</div>
-                            </li>
-                        @endforeach
-                    </ul>
+                    @if($pembayaran->penyewaan)
+                        <ul class="list-group">
+                            @foreach($pembayaran->penyewaan->keranjangs as $k)
+                                <li class="list-group-item">
+                                    <strong>{{ $k->armada->merek ?? '-' }}</strong> — Rp {{ number_format($k->harga_sewa ?? 0,0,',','.') }}
+                                    <div class="small text-muted">Tanggal Mulai: {{ optional($k->tanggal_mulai)->format('Y-m-d') ?? '-' }}</div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <div class="alert alert-warning">Data rincian keranjang tidak tersedia karena data transaksi telah dihapus.</div>
+                    @endif
                 </div>
             </div>
 

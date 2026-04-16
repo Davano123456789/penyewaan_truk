@@ -43,6 +43,7 @@
                 <th width="15%">Sopir</th>
                 <th width="12%">Jenis</th>
                 <th width="12%">No Polisi</th>
+                <th width="11%" class="text-center">Status</th>
                 <th width="15%" class="text-center">Gambar</th>
                 <th class="text-center" width="15%">Aksi</th>
             </tr>
@@ -55,6 +56,9 @@
                     <td>{{ $armada->sopir->nama ?? 'Belum Ada' }}</td>
                     <td>{{ $armada->jenis ?? '-' }}</td>
                     <td>{{ $armada->no_polisi ?? '-' }}</td>
+                    <td class="text-center">
+                        <span class="badge badge-{{ $armada->status_badge }}">{{ $armada->status_label }}</span>
+                    </td>
                     <td class="text-center">
                         @if($armada->gambar)
                             <img src="{{ $armada->gambar }}" alt="Gambar Armada" width="80" class="rounded">
@@ -84,7 +88,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center text-muted">Belum ada data armada</td>
+                    <td colspan="8" class="text-center text-muted">Belum ada data armada</td>
                 </tr>
             @endforelse
         </tbody>

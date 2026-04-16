@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Keranjang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Penyewaan;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenugasanController extends Controller
 {
@@ -112,4 +114,14 @@ class PenugasanController extends Controller
         }
     }
 
+    public function cetakInvoice($id)
+    {
+        $penugasan = Keranjang::findOrFail($id);
+        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'pembayaran'])
+            ->findOrFail($penugasan->penyewaan_id);
+
+        $pdf = Pdf::loadView('dashboard.penyewaanAdmin.invoice', compact('penyewaan'));
+        
+        return $pdf->download('invoice-' . $penyewaan->kode_transaksi . '.pdf');
+    }
 }

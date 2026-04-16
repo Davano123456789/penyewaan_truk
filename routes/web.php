@@ -163,6 +163,7 @@ Route::get('/dashboard/masukan', [MasukanController::class , 'index'])->name('ta
 Route::get('/dashboard/penyewaan', [PenyewaanController::class , 'index'])->name('penyewaan.index');
 Route::get('/dashboard/penyewaan/{id}', [PenyewaanController::class , 'show'])->name('penyewaan.show');
 Route::get('/dashboard/penyewaan/{id}/keranjang', [PenyewaanController::class , 'keranjang'])->name('penyewaan.keranjang');
+Route::get('/dashboard/penyewaan/{id}/invoice', [PenyewaanController::class , 'cetakInvoice'])->name('penyewaan.invoice');
 Route::delete('/dashboard/penyewaan/{id}', [PenyewaanController::class , 'destroy'])->name('penyewaan.destroy');
 
 // Keranjang Item
@@ -181,6 +182,7 @@ Route::put('/dashboard/profil', [ProfilController::class , 'update'])->name('pro
 // sopir
 Route::get('/dashboard/penugasan', [PenugasanController::class , 'index'])->name('penugasan.index');
 Route::get('/dashboard/penugasan/{id}', [PenugasanController::class , 'show'])->name('penugasan.show');
+Route::get('/dashboard/penugasan/{id}/invoice', [PenugasanController::class , 'cetakInvoice'])->name('penugasan.invoice');
 Route::post('/dashboard/penugasan/{id}/upload-bukti', [PenugasanController::class , 'uploadBukti'])->name('penugasan.upload-bukti');
 
 // Notifikasi

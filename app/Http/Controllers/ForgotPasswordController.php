@@ -26,7 +26,7 @@ class ForgotPasswordController extends Controller
         ], [
             'email.required' => 'Email harus diisi',
             'email.email' => 'Format email tidak valid',
-            'email.exists' => 'Email tidak terdaftar dalam sistem',
+            'email.exists' => 'Email tidak ditemukan',
         ]);
 
         if ($validator->fails()) {

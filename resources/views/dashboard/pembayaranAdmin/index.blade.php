@@ -49,10 +49,12 @@
                                 <td class="text-center">{{ $index + $pembayarans->firstItem() }}</td>
                                 <td><span class="badge badge-light border">{{ $p->penyewaan->kode_transaksi ?? $p->penyewaan_id }}</span></td>
                                 <td>
-                                    @if($p->penyewaan->client)
+                                    @if($p->penyewaan && $p->penyewaan->client)
                                         {{ $p->penyewaan->client->nama ?? $p->penyewaan->client->email }}
                                     @else
-                                        <span class="text-danger font-italic"><i class="fas fa-exclamation-circle text-xs"></i> User Dihapus</span>
+                                        <span class="text-danger font-italic"><i class="fas fa-exclamation-circle text-xs"></i> 
+                                            {{ !$p->penyewaan ? 'Data Transaksi Hilang' : 'User Dihapus' }}
+                                        </span>
                                     @endif
                                 </td>
                                 <td>Rp {{ number_format($p->jumlah_bayar ?? 0, 0, ',', '.') }}</td>

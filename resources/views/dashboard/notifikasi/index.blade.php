@@ -44,7 +44,16 @@
                                 <i class="fas fa-calendar-alt mr-1"></i> {{ $n->created_at->format('d M Y, H:i') }}
                             </small>
                         </div>
-                        <div class="p-3">
+                        <div class="p-3 d-flex border-left">
+                            <button class="btn btn-sm btn-info btn-view-notif mr-2" 
+                                data-id="{{ $n->id }}" 
+                                data-judul="{{ $n->judul }}" 
+                                data-pesan="{{ $n->pesan }}" 
+                                data-url="{{ $n->url }}" 
+                                data-waktu="{{ $n->created_at->format('d M Y, H:i') }}"
+                                title="Lihat Notifikasi">
+                                <i class="fas fa-eye mr-1"></i> Lihat
+                            </button>
                             <button class="btn btn-sm btn-outline-danger btn-delete-notif" data-id="{{ $n->id }}" title="Hapus Notifikasi">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
@@ -67,12 +76,50 @@
         @endif
     </div>
 </div>
+
+<!-- Modal Detail Notifikasi -->
+<div class="modal fade" id="notifDetailModal" tabindex="-1" role="dialog" aria-labelledby="notifDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="notifDetailModalLabel">
+                    <i class="fas fa-bell mr-2"></i> Detail Notifikasi
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <span class="text-xs font-weight-bold text-primary text-uppercase mb-1 d-block">Judul</span>
+                    <h5 id="modal-judul" class="h6 font-weight-bold text-gray-800"></h5>
+                </div>
+                <div class="mb-3">
+                    <span class="text-xs font-weight-bold text-info text-uppercase mb-1 d-block">Pesan</span>
+                    <p id="modal-pesan" class="text-gray-900 mb-0"></p>
+                </div>
+                <div class="mb-0">
+                    <span class="text-xs font-weight-bold text-secondary text-uppercase mb-1 d-block">Waktu</span>
+                    <small class="text-gray-600">
+                        <i class="fas fa-calendar-alt mr-1"></i> <span id="modal-waktu"></span>
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                <a href="#" id="modal-url" class="btn btn-primary px-4">
+                    <i class="fas fa-external-link-alt mr-1"></i> Buka Link
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Handle clicking a notification
+        // Handle clicking a notification content (Redirect)
         document.querySelectorAll('.notification-content').forEach(content => {
             content.addEventListener('click', function() {
                 const parent = this.closest('.page-notification-item');
@@ -88,6 +135,48 @@
                 }).then(() => {
                     window.location.href = url;
                 });
+            });
+        });
+
+        // Handle clicking "Lihat" button (Modal)
+        document.querySelectorAll('.btn-view-notif').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = this.dataset.id;
+                const judul = this.dataset.judul;
+                const pesan = this.dataset.pesan;
+                const url = this.dataset.url;
+                const waktu = this.dataset.waktu;
+                
+                // Set data to modal
+                document.getElementById('modal-judul').innerText = judul;
+                document.getElementById('modal-pesan').innerText = pesan;
+                document.getElementById('modal-waktu').innerText = waktu;
+                document.getElementById('modal-url').href = url;
+                
+                // Mark as read in background if unread
+                const parent = this.closest('.page-notification-item');
+                if (parent.classList.contains('bg-light')) {
+                    fetch(`/api/notifikasi/${id}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(() => {
+                        // Optional: update UI without refresh
+                        parent.classList.remove('bg-light', 'border-left-primary', 'shadow-sm');
+                        parent.querySelector('.h5').classList.remove('font-weight-bold', 'text-primary');
+                        parent.querySelector('.h5').classList.add('text-gray-800');
+                        const badge = parent.querySelector('.badge-primary');
+                        if (badge) badge.remove();
+                        const dot = parent.querySelector('.fa-circle');
+                        if (dot) dot.remove();
+                    });
+                }
+                
+                // Show modal
+                $('#notifDetailModal').modal('show');
             });
         });
 

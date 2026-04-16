@@ -9,6 +9,7 @@ use App\Services\NotifikasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenyewaanController extends Controller
 {
@@ -254,5 +255,16 @@ class PenyewaanController extends Controller
         }
 
         return view('dashboard.pembayaran.detail', compact('pembayaran'));
+    }
+
+    public function cetakInvoice($id)
+    {
+        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'pembayaran'])
+            ->where('client_id', Auth::id())
+            ->findOrFail($id);
+
+        $pdf = Pdf::loadView('dashboard.penyewaanAdmin.invoice', compact('penyewaan'));
+        
+        return $pdf->download('invoice-' . $penyewaan->kode_transaksi . '.pdf');
     }
 }

@@ -20,7 +20,7 @@
                             <div class="mb-8">
                                 <div class="inline-flex items-center space-x-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full">
                                     <i class="fas fa-truck-moving text-2xl"></i>
-                                    <span class="text-xl font-bold">TruckRental</span>
+                                    <span class="text-xl font-bold">sutera jaya</span>
                                 </div>
                             </div>
 

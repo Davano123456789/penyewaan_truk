@@ -76,7 +76,7 @@
     <div class="container mx-auto px-6">
         <!-- Header -->
         <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">Form Pemesanan Truk</h1>
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">{{ isset($editItem) ? 'Edit Pemesanan Truk' : 'Form Pemesanan Truk' }}</h1>
             <p class="text-gray-600">Pilih jenis truk dan lokasi untuk mendapatkan rekomendasi armada terdekat</p>
         </div>
 
@@ -298,8 +298,8 @@
             <!-- Submit Button -->
             <div class="mt-8 text-center">
                 <button type="submit" class="bg-blue-600 text-white px-12 py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-all duration-300 inline-flex items-center gap-3">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span>Tambah ke Keranjang</span>
+                    <i class="fas fa-{{ isset($editItem) ? 'save' : 'shopping-cart' }}"></i>
+                    <span>{{ isset($editItem) ? 'Simpan Perubahan' : 'Tambah ke Keranjang' }}</span>
                 </button>
             </div>
         </form>
