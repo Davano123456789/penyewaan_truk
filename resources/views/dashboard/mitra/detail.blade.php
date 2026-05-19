@@ -29,19 +29,9 @@
 
                 <!-- Kolom Informasi -->
                 <div class="col-md-8">
-                <div class="form-group">
+                    <div class="form-group">
                         <label class="font-weight-bold">Nama</label>
                         <input type="text" class="form-control" value="{{ $mitra->nama }}" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="font-weight-bold">Tanggal Ditambahkan</label>
-                        <input type="text" class="form-control" value="{{ $mitra->created_at->format('d F Y H:i') }}" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="font-weight-bold">Terakhir Diperbarui</label>
-                        <input type="text" class="form-control" value="{{ $mitra->updated_at->format('d F Y H:i') }}" readonly>
                     </div>
                 </div>
             </div>

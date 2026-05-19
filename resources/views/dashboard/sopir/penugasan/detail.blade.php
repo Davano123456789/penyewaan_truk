@@ -59,17 +59,17 @@
 
                     <div class="form-group">
                         <label class="font-weight-bold">Tempat Jemput</label>
-                        <textarea class="form-control" rows="2" readonly>{{ $penugasan->tempat_jemput }}</textarea>
+                        <textarea class="form-control" rows="2" readonly>{{ $penugasan->rute->tempat_jemput ?? $penugasan->tempat_jemput }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold">Tempat Antar</label>
-                        <textarea class="form-control" rows="2" readonly>{{ $penugasan->tempat_antar }}</textarea>
+                        <textarea class="form-control" rows="2" readonly>{{ $penugasan->rute->tempat_antar ?? $penugasan->tempat_antar }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold">Total Jarak</label>
-                        <input type="text" class="form-control" value="{{ $penugasan->total_jarak }} km" readonly>
+                        <input type="text" class="form-control" value="{{ $penugasan->rute->total_jarak ?? $penugasan->total_jarak }} km" readonly>
                     </div>
 
                     <div class="form-group">
@@ -96,21 +96,21 @@
                         </div>
                     </div>
 
-                    @if($penugasan->catatan_penugasan)
+                    @if(($penugasan->penugasan->catatan_penugasan ?? $penugasan->catatan_penugasan))
                     <div class="alert alert-warning border-left-warning shadow-sm">
                         <h6 class="font-weight-bold"><i class="fas fa-exclamation-triangle"></i> Catatan dari Admin:</h6>
-                        <p class="mb-0 italic">"{{ $penugasan->catatan_penugasan }}"</p>
+                        <p class="mb-0 italic">"{{ $penugasan->penugasan->catatan_penugasan ?? $penugasan->catatan_penugasan }}"</p>
                         <hr class="my-2">
                         <small class="text-dark">Silakan periksa kembali bukti yang Anda unggah dan lakukan upload ulang jika diperlukan.</small>
                     </div>
                     @endif
-
+ 
                     <!-- Tambahan Bukti Selesai -->
                     <div class="form-group">
                         <label class="font-weight-bold">Bukti Selesai</label>
                         <div>
-                            @if($penugasan->bukti_selesai)
-                                <img src="{{ $penugasan->bukti_selesai }}" 
+                            @if(($penugasan->penugasan->bukti_selesai ?? $penugasan->bukti_selesai))
+                                <img src="{{ $penugasan->penugasan->bukti_selesai ?? $penugasan->bukti_selesai }}" 
                                      alt="Bukti Selesai" 
                                      class="img-thumbnail" 
                                      style="max-width: 300px;">

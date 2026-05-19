@@ -39,6 +39,8 @@ class MitraController extends Controller
                 $validated['logo'] = $uploadedFileUrl;
             }
 
+            $validated['user_id'] = auth()->id();
+
             Mitra::create($validated);
 
             return redirect()->route('mitra.index')->with('success', 'Mitra berhasil ditambahkan!');
@@ -88,6 +90,8 @@ class MitraController extends Controller
                 
                 $validated['logo'] = $uploadedFileUrl;
             }
+
+            $validated['user_id'] = auth()->id();
 
             $mitra->update($validated);
 

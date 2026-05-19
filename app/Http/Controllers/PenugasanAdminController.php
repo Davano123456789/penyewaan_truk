@@ -15,10 +15,10 @@ class PenugasanAdminController extends Controller
      */
     public function index()
     {
-        $penugasans = Keranjang::with(['penyewaan', 'armada', 'sopir'])
-            ->where('status', 'menunggu_konfirmasi_selesai')
+        $penugasans = Keranjang::with(['penyewaan', 'armada', 'sopir', 'penugasan'])
+            ->whereIn('status', ['aktif', 'revisi_bukti', 'menunggu_konfirmasi_selesai', 'selesai'])
             ->orderBy('updated_at', 'desc')
-            ->get();
+            ->paginate(10);
 
         return view('dashboard.penugasanAdmin.index', compact('penugasans'));
     }
@@ -88,6 +88,10 @@ class PenugasanAdminController extends Controller
         $keranjang->update([
             'status' => 'revisi_bukti',
             'catatan_penugasan' => $request->alasan
+        ]);
+
+        $keranjang->penugasan()->updateOrCreate([], [
+            'catatan_penugasan' => $request->alasan,
         ]);
 
         // Kirim notifikasi ke Sopir bahwa buktinya ditolak

@@ -4,7 +4,7 @@
         <div class="flex items-center justify-between">
             <!-- Logo -->
             <div class="text-2xl font-bold text-blue-600">
-                <i class="fas fa-truck mr-2"></i>TruckRental
+                PT Sutera Jaya
             </div>
 
             <!-- Desktop Menu -->

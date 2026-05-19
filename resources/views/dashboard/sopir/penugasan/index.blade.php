@@ -51,7 +51,7 @@
                                     <td>
                                         <span class="badge badge-info">{{ $penugasan->kode_keranjang ?? '-' }}</span>
                                         <br>
-                                        <small class="text-muted">#{{ $penugasan->penyewaan->kode_transaksi }}</small>
+                                        <small class="text-muted">#{{ $penugasan->penyewaan->kode_transaksi ?? 'TANPA KODE' }}</small>
                                     </td>
                                     <td>{{ $penugasan->armada->no_polisi ?? '-' }}</td>
                                     <td>{{ $penugasan->tanggal_mulai ? \Carbon\Carbon::parse($penugasan->tanggal_mulai)->format('d-m-Y') : '-' }}
@@ -59,13 +59,13 @@
                                     <td>{{ $penugasan->estimasi_hari ?? '-' }}</td>
                                     <td>
                                         <small>
-                                            <strong>Jemput:</strong> {{ Str::limit($penugasan->tempat_jemput, 30) }}<br>
-                                            <strong>Antar:</strong> {{ Str::limit($penugasan->tempat_antar, 30) }}
+                                            <strong>Jemput:</strong> {{ Str::limit($penugasan->rute->tempat_jemput ?? $penugasan->tempat_jemput, 30) }}<br>
+                                            <strong>Antar:</strong> {{ Str::limit($penugasan->rute->tempat_antar ?? $penugasan->tempat_antar, 30) }}
                                         </small>
                                     </td>
                                     <!-- Kolom Pembayaran -->
                                     <td class="text-center">
-                                        @if($penugasan->penyewaan->pembayaran)
+                                        @if($penugasan->penyewaan && $penugasan->penyewaan->pembayaran)
                                             <span class="badge badge-light border text-dark">{{ ucfirst($penugasan->penyewaan->pembayaran->jenis) }}</span>
                                             <br>
                                             <small class="p-1 font-weight-bold text-{{ $penugasan->penyewaan->pembayaran->status == 'lunas' ? 'success' : 'primary' }}">
@@ -102,7 +102,7 @@
                                         </a>
 
                                         <!-- Tombol Cetak (Hanya jika pembayaran 50% / menunggu pelunasan) -->
-                                        @if($penugasan->penyewaan->pembayaran && $penugasan->penyewaan->pembayaran->status == 'menunggu_pelunasan')
+                                        @if($penugasan->penyewaan && $penugasan->penyewaan->pembayaran && $penugasan->penyewaan->pembayaran->status == 'menunggu_pelunasan')
                                         <a href="{{ route('penugasan.invoice', $penugasan->id) }}" class="btn btn-secondary btn-sm"
                                             title="Cetak Invoice Penagihan">
                                             <i class="fas fa-print"></i> Cetak

@@ -29,7 +29,7 @@
                 <div class="form-group">
                     <label for="gambar" class="font-weight-bold">Gambar</label>
                     <div class="custom-file">
-                        <input type="file" class="custom-file-input @error('gambar') is-invalid @enderror" id="gambar" name="gambar" accept="image/*" onchange="previewImage(event)">
+                        <input type="file" class="custom-file-input @error('gambar') is-invalid @enderror" id="gambar" name="gambar" accept="image/*, .svg" onchange="previewImage(event)">
                         <label class="custom-file-label" for="gambar">Pilih gambar...</label>
                     </div>
                     @error('gambar')

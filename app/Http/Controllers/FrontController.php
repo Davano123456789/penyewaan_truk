@@ -26,7 +26,7 @@ class FrontController extends Controller
         $keunggulans = Keunggulan::orderBy('created_at', 'desc')->get();
 
         // Ambil riwayat penyewaan yang selesai
-        $riwayatPenyewaan = Penyewaan::with(['client', 'keranjangs'])
+        $riwayatPenyewaan = Penyewaan::with(['client', 'keranjangs.armada'])
             ->where('status', 'selesai')
             ->orderBy('updated_at', 'desc')
             ->take(6)
@@ -51,7 +51,7 @@ class FrontController extends Controller
 
         $editItem = null;
         if ($id) {
-            $editItem = Keranjang::with('armada')->findOrFail($id);
+            $editItem = Keranjang::with(['armada', 'rute'])->findOrFail($id);
             // Tambahkan jenis truk yang sedang diedit jika tidak ada di list tersedia
             if ($editItem->armada && !in_array($editItem->armada->jenis, $jenisTruk)) {
                 $jenisTruk[] = $editItem->armada->jenis;
@@ -167,9 +167,19 @@ public function storePemesanan(Request $request)
         
         // STEP 1: BUAT/AMBIL PENYEWAAN - STATUS MENUNGGU_PEMBAYARAN
         $penyewaan = Penyewaan::firstOrCreate(
-            ['client_id' => $clientId, 'status' => 'menunggu_pembayaran'], // UBAH DARI pending KE menunggu_pembayaran
-            ['harga_total' => 0]
+            ['client_id' => $clientId, 'status' => 'menunggu_pembayaran'],
+            [
+                'harga_total' => 0,
+                'kode_transaksi' => 'TRK-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)))
+            ]
         );
+
+        // Jika kode_transaksi masih kosong (untuk data lama), generate sekarang
+        if (!$penyewaan->kode_transaksi) {
+            $penyewaan->update([
+                'kode_transaksi' => 'TRK-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)))
+            ]);
+        }
 
         // STEP 2: SIMPAN KE KERANJANG
         $itemCount = $penyewaan->keranjangs()->count() + 1;
@@ -194,6 +204,24 @@ public function storePemesanan(Request $request)
             'parkir_latitude' => $validated['parkir_latitude'],
             'parkir_longitude' => $validated['parkir_longitude'],
             'status' => 'pending'
+        ]);
+
+        // Simpan data rute perjalanan ke tabel baru
+        $keranjang->rute()->create([
+            'tempat_jemput' => $validated['tempat_jemput'],
+            'tempat_antar' => $validated['tempat_antar'],
+            'latitude_penjemputan' => $validated['latitude_penjemputan'],
+            'longitude_penjemputan' => $validated['longitude_penjemputan'],
+            'latitude_antar' => $validated['latitude_antar'],
+            'longitude_antar' => $validated['longitude_antar'],
+            'parkir_latitude' => $validated['parkir_latitude'],
+            'parkir_longitude' => $validated['parkir_longitude'],
+            'total_jarak' => $validated['total_jarak'],
+        ]);
+
+        // Simpan data penugasan sopir ke tabel baru
+        $keranjang->penugasan()->create([
+            'sopir_id' => $armada->sopir_id,
         ]);
 
         // STEP 3: UPDATE STATUS ARMADA MENJADI TIDAK TERSEDIA

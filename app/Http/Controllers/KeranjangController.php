@@ -96,6 +96,22 @@ class KeranjangController extends Controller
 
         $keranjang = Keranjang::create($validated);
 
+        $keranjang->rute()->create([
+            'tempat_jemput' => $validated['tempat_jemput'],
+            'tempat_antar' => $validated['tempat_antar'],
+            'latitude_penjemputan' => $validated['latitude_penjemputan'],
+            'longitude_penjemputan' => $validated['longitude_penjemputan'],
+            'latitude_antar' => $validated['latitude_antar'],
+            'longitude_antar' => $validated['longitude_antar'],
+            'parkir_latitude' => $validated['parkir_latitude'],
+            'parkir_longitude' => $validated['parkir_longitude'],
+            'total_jarak' => $validated['total_jarak'],
+        ]);
+
+        $keranjang->penugasan()->create([
+            'sopir_id' => $validated['sopir_id'],
+        ]);
+
         return redirect()->route('keranjang.index')
                         ->with('success', 'Pesanan berhasil ditambahkan ke keranjang!');
     }
@@ -161,6 +177,24 @@ class KeranjangController extends Controller
             // Update keranjang
             $keranjang->update($validated);
 
+            // Update atau buat data rute perjalanan di tabel rute_keranjangs
+            $keranjang->rute()->updateOrCreate([], [
+                'tempat_jemput' => $validated['tempat_jemput'],
+                'tempat_antar' => $validated['tempat_antar'],
+                'latitude_penjemputan' => $validated['latitude_penjemputan'],
+                'longitude_penjemputan' => $validated['longitude_penjemputan'],
+                'latitude_antar' => $validated['latitude_antar'],
+                'longitude_antar' => $validated['longitude_antar'],
+                'parkir_latitude' => $validated['parkir_latitude'],
+                'parkir_longitude' => $validated['parkir_longitude'],
+                'total_jarak' => $validated['total_jarak'],
+            ]);
+
+            // Update atau buat data penugasan sopir di tabel penugasan_sopirs
+            $keranjang->penugasan()->updateOrCreate([], [
+                'sopir_id' => $validated['sopir_id'] ?? $keranjang->sopir_id,
+            ]);
+
             // Update total harga penyewaan
             $totalHarga = $penyewaan->keranjangs()->sum('harga_sewa');
             $penyewaan->update(['harga_total' => $totalHarga]);
@@ -225,6 +259,11 @@ class KeranjangController extends Controller
 
             $keranjang->update([
                 'status' => 'menunggu_konfirmasi_batal',
+                'alasan_batal' => $request->alasan_batal
+            ]);
+
+            // Simpan ke tabel pembatalan_sewas untuk normalisasi
+            $keranjang->pembatalan()->updateOrCreate([], [
                 'alasan_batal' => $request->alasan_batal
             ]);
 

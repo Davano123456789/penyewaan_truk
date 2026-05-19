@@ -59,7 +59,7 @@
                         @forelse ($penyewaans as $index => $penyewaan)
                         <tr data-status="{{ $penyewaan->status }}">
                             <td class="text-center">{{ $index + 1 }}</td>
-                            <td>{{ $penyewaan->created_at->format('d M Y H:i') }}</td>
+                            <td>{{ $penyewaan->created_at->format('d M Y') }}</td>
                             <td><strong>Rp {{ number_format($penyewaan->harga_total_aktif, 0, ',', '.') }}</strong></td>
                             
                             <!-- Status Pesanan -->

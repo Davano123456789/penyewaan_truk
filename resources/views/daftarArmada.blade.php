@@ -4,15 +4,33 @@
 
 @section('content')
     <!-- Main Content -->
-    <div class="pt-24 pb-16 bg-gray-50">
-        <div class="container mx-auto px-6">
-            <!-- Header -->
-            <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold text-gray-800 mb-4">Daftar Armada Kami</h1>
-                <p class="text-gray-600">Pilih armada terbaik sesuai kebutuhan transportasi Anda</p>
-            </div>
+    <!-- Hero Header -->
+    <section class="relative pt-40 pb-24 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1600" alt="Hero Background" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-gray-50"></div>
+        </div>
 
-            <!-- Search & Filter Section -->
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="text-center" data-aos="fade-up">
+                <span class="inline-block px-4 py-1 rounded-full bg-blue-600/20 text-blue-400 font-semibold text-sm mb-4 border border-blue-600/30">
+                    Armada PT Sutera Jaya
+                </span>
+                <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6">
+                    Daftar <span class="text-blue-500">Armada Kami</span>
+                </h1>
+                <p class="text-gray-300 text-lg max-w-2xl mx-auto font-light">
+                    Pilih unit transportasi terbaik yang sesuai dengan spesifikasi dan kebutuhan logistik bisnis Anda.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="pb-24 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="-mt-12 relative z-20">
+                <!-- Search & Filter Section -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-8">
                 <form action="{{ route('daftarArmada') }}" method="GET" class="flex flex-col md:flex-row gap-4">
                     <!-- Search Input -->
@@ -73,76 +91,74 @@
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @forelse($armadas as $armada)
                 <!-- Armada Card -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 group" 
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden h-full flex flex-col group" 
                      data-aos="fade-up" 
                      data-aos-delay="{{ $loop->iteration * 100 }}">
                     <!-- Image Section -->
-                    <div class="relative overflow-hidden h-48">
+                    <div class="relative h-64 overflow-hidden">
                         @if($armada->gambar)
-                            <img src="{{ $armada->gambar }}" 
-                                 alt="{{ $armada->merek }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="{{ $armada->gambar }}" alt="{{ $armada->merek }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                         @else
-                            <div class="bg-gradient-to-br from-gray-300 to-gray-400 h-full flex items-center justify-center">
-                                <i class="fas fa-truck text-gray-500 text-5xl"></i>
+                            <div class="bg-gradient-to-br from-gray-100 to-gray-200 h-full flex flex-col items-center justify-center">
+                                <i class="fas fa-truck text-gray-300 text-6xl mb-2"></i>
+                                <span class="text-gray-400 text-xs font-bold uppercase tracking-widest">No Image</span>
                             </div>
                         @endif
                         
-                        <!-- Badge Jenis - Minimalis -->
-                        <div class="absolute top-3 left-3 bg-white px-3 py-1 rounded-full shadow-sm">
-                            <span class="text-gray-700 font-semibold text-xs">{{ $armada->jenis ?? 'N/A' }}</span>
+                        <!-- Status Badge -->
+                        <div class="absolute top-4 left-4">
+                            @php
+                                $statusColors = [
+                                    'tersedia' => 'bg-green-500',
+                                    'perawatan' => 'bg-amber-500',
+                                    'tidak_tersedia' => 'bg-red-500'
+                                ];
+                                $color = $statusColors[$armada->status] ?? 'bg-gray-500';
+                            @endphp
+                            <span class="{{ $color }} text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg border border-white/20">
+                                {{ str_replace('_', ' ', $armada->status) }}
+                            </span>
+                        </div>
+
+                        <!-- Brand Overlay -->
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6 pt-12">
+                            <h3 class="text-white text-xl font-black uppercase tracking-tight">{{ $armada->merek ?? 'Armada Unit' }}</h3>
+                            <p class="text-blue-300 text-xs font-bold">{{ $armada->jenis ?? 'General Cargo' }}</p>
                         </div>
                     </div>
                     
                     <!-- Content Section -->
-                    <div class="p-4">
-                        <!-- Judul -->
-                        <h3 class="text-lg font-bold text-gray-800 mb-3">{{ $armada->merek ?? 'N/A' }}</h3>
-
-                        <!-- Info Minimal -->
-                        <div class="space-y-2 mb-3 text-xs text-gray-600">
-                            <div class="flex items-center justify-between">
+                    <div class="p-6 flex-1 flex flex-col">
+                        <!-- Details Grid -->
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
+                                <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">Kapasitas</p>
                                 <div class="flex items-center gap-2">
-                                    <i class="fas fa-cube text-gray-400 text-sm"></i>
-                                    <span>Kapasitas</span>
+                                    <i class="fas fa-weight-hanging text-blue-600 text-xs"></i>
+                                    <span class="text-sm font-bold text-gray-800">{{ $armada->kapasitas ?? '0' }} Ton</span>
                                 </div>
-                                <span class="font-semibold text-gray-800">{{ $armada->kapasitas ?? '0' }} Ton</span>
                             </div>
-                            <div class="flex items-center justify-between">
+                            <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
+                                <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">No Polisi</p>
                                 <div class="flex items-center gap-2">
-                                    <i class="fas fa-tag text-gray-400 text-sm"></i>
-                                    <span>No Polisi</span>
+                                    <i class="fas fa-id-card text-blue-600 text-xs"></i>
+                                    <span class="text-sm font-bold text-gray-800">{{ $armada->no_polisi ?? '-' }}</span>
                                 </div>
-                                <span class="font-semibold text-gray-800">{{ $armada->no_polisi ?? '-' }}</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-calendar text-gray-400 text-sm"></i>
-                                    <span>Tahun</span>
-                                </div>
-                                <span class="font-semibold text-gray-800">{{ $armada->tahun ?? '-' }}</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-check-circle text-gray-400 text-sm"></i>
-                                    <span>Kondisi</span>
-                                </div>
-                                <span class="font-semibold">
-                                    @if($armada->kondisi === 'baik')
-                                        <span class="text-green-600">Baik</span>
-                                    @elseif($armada->kondisi === 'sedang')
-                                        <span class="text-yellow-600">Sedang</span>
-                                    @else
-                                        <span class="text-gray-800">{{ $armada->kondisi ?? '-' }}</span>
-                                    @endif
-                                </span>
                             </div>
                         </div>
 
-                        <!-- Button -->
+                        <!-- Description (Limited) -->
+                        <div class="mb-8 flex-1">
+                            <p class="text-gray-500 text-xs leading-relaxed line-clamp-2 italic">
+                                {{ $armada->deskripsi ?? 'Armada andalan PT Sutera Jaya untuk pengiriman logistik yang aman dan terpercaya ke seluruh wilayah.' }}
+                            </p>
+                        </div>
+
+                        <!-- Action Button -->
                         <a href="{{ route('armada.detail', $armada->id) }}" 
-                           class="block w-full bg-blue-600 text-white py-2 rounded text-sm font-semibold hover:bg-blue-700 transition-colors duration-300 text-center">
+                           class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group/btn">
                             Lihat Detail
+                            <i class="fas fa-eye text-[10px] group-hover/btn:scale-110 transition-transform"></i>
                         </a>
                     </div>
                 </div>

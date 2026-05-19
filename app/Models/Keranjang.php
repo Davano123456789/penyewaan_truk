@@ -52,4 +52,22 @@ class Keranjang extends Model
     {
         return $this->belongsTo(User::class, 'sopir_id');
     }
+
+    // Relasi ke Pembatalan Sewa
+    public function pembatalan()
+    {
+        return $this->hasOne(PembatalanSewa::class, 'keranjang_id');
+    }
+
+    // Relasi ke Penugasan Sopir
+    public function penugasan()
+    {
+        return $this->hasOne(PenugasanSopir::class, 'keranjang_id');
+    }
+
+    // Relasi ke Rute Perjalanan
+    public function rute()
+    {
+        return $this->hasOne(RuteKeranjang::class, 'keranjang_id');
+    }
 }

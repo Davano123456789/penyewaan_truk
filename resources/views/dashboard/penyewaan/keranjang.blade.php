@@ -112,10 +112,10 @@
                                     </div>
                                     <div class="mb-1">
                                         <i class="fas fa-map-marker-alt text-success"></i>
-                                        <strong>Jemput:</strong> {{ $item->tempat_jemput }}
+                                        <strong>Jemput:</strong> {{ $item->rute->tempat_jemput }}
                                         <span class="mx-2">|</span>
                                         <i class="fas fa-flag-checkered text-info"></i>
-                                        <strong>Antar:</strong> {{ $item->tempat_antar }}
+                                        <strong>Antar:</strong> {{ $item->rute->tempat_antar }}
                                     </div>
                                     <div class="mb-1">
                                         <i class="fas fa-calendar text-warning"></i>
@@ -123,7 +123,7 @@
                                         {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M Y') }}
                                         <span class="mx-2">|</span>
                                         <i class="fas fa-road text-secondary"></i>
-                                        <strong>Jarak:</strong> {{ $item->total_jarak }} km
+                                        <strong>Jarak:</strong> {{ $item->rute->total_jarak }} km
                                         <span class="mx-2">|</span>
                                         <strong>Estimasi:</strong> {{ $item->estimasi_hari }} hari
                                     </div>
@@ -194,13 +194,17 @@
                                             <span class="badge badge-warning">Menunggu Konfirmasi Batal</span>
                                         @elseif($item->status == 'dibatalkan')
                                             <span class="badge badge-danger mb-2">Dibatalkan</span>
-                                            @if($item->nominal_refund > 0)
+                                            @php
+                                                $nominalRefund = $item->pembatalan->nominal_refund ?? 0;
+                                                $buktiRefund = $item->pembatalan->bukti_refund ?? null;
+                                            @endphp
+                                            @if($nominalRefund > 0)
                                                 <br>
                                                 <small class="text-success font-weight-bold">Refund: Rp
-                                                    {{ number_format($item->nominal_refund, 0, ',', '.') }}</small>
-                                                @if($item->bukti_refund)
+                                                    {{ number_format($nominalRefund, 0, ',', '.') }}</small>
+                                                @if($buktiRefund)
                                                     <br>
-                                                    <a href="{{ $item->bukti_refund }}" target="_blank" class="btn btn-sm btn-info mt-1">
+                                                    <a href="{{ $buktiRefund }}" target="_blank" class="btn btn-sm btn-info mt-1">
                                                         <i class="fas fa-receipt"></i> Bukti Refund
                                                     </a>
                                                 @endif

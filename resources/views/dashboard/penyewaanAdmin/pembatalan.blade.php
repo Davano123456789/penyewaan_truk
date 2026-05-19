@@ -31,8 +31,8 @@
                         <tr>
                             <td>{{ $keranjangs->firstItem() + $index }}</td>
                             <td>
-                                <strong>{{ $item->penyewaan->client->nama ?? '-' }}</strong><br>
-                                <small>{{ $item->penyewaan->client->email ?? '-' }}</small>
+                                <strong>{{ $item->penyewaan?->client?->nama ?? '-' }}</strong><br>
+                                <small>{{ $item->penyewaan?->client?->email ?? '-' }}</small>
                             </td>
                             <td>
                                 {{ $item->armada->no_polisi ?? '-' }}<br>
@@ -44,7 +44,7 @@
                                 @php
                                     $denda = $item->harga_sewa * 0.3;
                                     $refund = 0;
-                                    if($item->penyewaan->pembayaran) {
+                                    if($item->penyewaan && $item->penyewaan->pembayaran) {
                                         $bayar = 0;
                                         if($item->penyewaan->pembayaran->jenis == 'cash' && $item->penyewaan->pembayaran->status == 'lunas') {
                                             $bayar = $item->harga_sewa;
@@ -92,7 +92,7 @@
                                                 <div class="modal-body">
                                                     <div class="form-group">
                                                         <label class="font-weight-bold">Alasan Pembatalan (User)</label>
-                                                        <textarea class="form-control" rows="3" readonly>{{ $item->alasan_batal }}</textarea>
+                                                        <textarea class="form-control" rows="3" readonly>{{ $item->pembatalan->alasan_batal }}</textarea>
                                                     </div>
 
                                                     <hr>
@@ -146,14 +146,18 @@
                                                         </div>
 
                                                     @elseif($item->status == 'dibatalkan')
-                                                        @if($item->bukti_refund)
+                                                        @php
+                                                            $buktiRefund = $item->pembatalan->bukti_refund;
+                                                            $nominalRefund = $item->pembatalan->nominal_refund;
+                                                        @endphp
+                                                        @if($buktiRefund)
                                                             <div class="form-group">
                                                                 <label class="font-weight-bold text-dark">Bukti Refund Terupload</label><br>
-                                                                <a href="{{ $item->bukti_refund }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                                <a href="{{ $buktiRefund }}" target="_blank" class="btn btn-outline-primary btn-sm">
                                                                     <i class="fas fa-image"></i> Lihat Bukti Refund
                                                                 </a>
                                                                 <div class="mt-2 p-2 bg-light border rounded">
-                                                                    <small>Nominal: <strong>Rp {{ number_format($item->nominal_refund, 0, ',', '.') }}</strong></small>
+                                                                    <small>Nominal: <strong>Rp {{ number_format($nominalRefund, 0, ',', '.') }}</strong></small>
                                                                 </div>
                                                             </div>
                                                         @endif

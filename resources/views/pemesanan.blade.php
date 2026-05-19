@@ -72,13 +72,31 @@
 @endsection
 
 @section('content')
-<div class="pt-24 pb-16">
-    <div class="container mx-auto px-6">
-        <!-- Header -->
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">{{ isset($editItem) ? 'Edit Pemesanan Truk' : 'Form Pemesanan Truk' }}</h1>
-            <p class="text-gray-600">Pilih jenis truk dan lokasi untuk mendapatkan rekomendasi armada terdekat</p>
+    <!-- Hero Header -->
+    <section class="relative pt-40 pb-24 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600" alt="Hero Background" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-gray-50"></div>
         </div>
+
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="text-center" data-aos="fade-up">
+                <span class="inline-block px-4 py-1 rounded-full bg-blue-600/20 text-blue-400 font-semibold text-sm mb-4 border border-blue-600/30">
+                    Sistem Pemesanan Cerdas
+                </span>
+                <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6">
+                    {{ isset($editItem) ? 'Edit' : 'Form' }} <span class="text-blue-500">Pemesanan Truk</span>
+                </h1>
+                <p class="text-gray-300 text-lg max-w-2xl mx-auto font-light">
+                    Tentukan spesifikasi armada dan rute pengiriman Anda untuk mendapatkan layanan logistik terbaik.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="pb-16 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="-mt-12 relative z-20">
 
         <form action="{{ isset($editItem) ? route('keranjang.update', $editItem->id) : route('pemesanan.store') }}" 
               method="POST" 
@@ -385,11 +403,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // 2. Set Pin & Address
-        if (editData.latitude_penjemputan && editData.longitude_penjemputan) {
-            setLocation(editData.latitude_penjemputan, editData.longitude_penjemputan, 'jemput', editData.tempat_jemput);
+        let editLatJemput = (editData.rute && editData.rute.latitude_penjemputan) ? editData.rute.latitude_penjemputan : editData.latitude_penjemputan;
+        let editLngJemput = (editData.rute && editData.rute.longitude_penjemputan) ? editData.rute.longitude_penjemputan : editData.longitude_penjemputan;
+        let editTempatJemput = (editData.rute && editData.rute.tempat_jemput) ? editData.rute.tempat_jemput : editData.tempat_jemput;
+
+        let editLatAntar = (editData.rute && editData.rute.latitude_antar) ? editData.rute.latitude_antar : editData.latitude_antar;
+        let editLngAntar = (editData.rute && editData.rute.longitude_antar) ? editData.rute.longitude_antar : editData.longitude_antar;
+        let editTempatAntar = (editData.rute && editData.rute.tempat_antar) ? editData.rute.tempat_antar : editData.tempat_antar;
+
+        if (editLatJemput && editLngJemput) {
+            setLocation(editLatJemput, editLngJemput, 'jemput', editTempatJemput);
         }
-        if (editData.latitude_antar && editData.longitude_antar) {
-            setLocation(editData.latitude_antar, editData.longitude_antar, 'antar', editData.tempat_antar);
+        if (editLatAntar && editLngAntar) {
+            setLocation(editLatAntar, editLngAntar, 'antar', editTempatAntar);
         }
 
         // 3. Set Inputs

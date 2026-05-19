@@ -133,7 +133,7 @@
                     <td>
                         <strong>{{ $item->armada->jenis }}</strong><br>
                         No Pol: {{ $item->armada->no_polisi }}<br>
-                        <small>{{ $item->tempat_jemput }} &rarr; {{ $item->tempat_antar }}</small>
+                        <small>{{ $item->rute->tempat_jemput ?? '-' }} &rarr; {{ $item->rute->tempat_antar ?? '-' }}</small>
                     </td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d/m/Y') }}</td>
                     <td class="text-center">{{ $item->estimasi_hari }} Hari</td>

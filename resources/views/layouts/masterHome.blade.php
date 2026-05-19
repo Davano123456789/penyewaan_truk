@@ -9,14 +9,22 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
     @yield('styles')
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 flex flex-col min-h-screen">
     <!-- Navbar -->
     @include('layouts.navbarHome')
 
     <!-- Main Content -->
-    @yield('content')
+    <main class="flex-grow">
+        @yield('content')
+    </main>
 
     <!-- Footer -->
     @include('layouts.footerHome')

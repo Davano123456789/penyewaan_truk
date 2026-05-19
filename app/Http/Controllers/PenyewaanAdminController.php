@@ -14,7 +14,7 @@ class PenyewaanAdminController extends Controller
 {
      public function index(Request $request)
     {
-        $query = Penyewaan::with(['client', 'keranjangs.armada', 'pembayaran'])
+        $query = Penyewaan::with(['client', 'keranjangs.armada', 'keranjangs.rute', 'keranjangs.penugasan', 'pembayaran'])
             ->withCount('keranjangs')
             ->orderBy('created_at', 'desc');
 
@@ -44,7 +44,7 @@ class PenyewaanAdminController extends Controller
      */
     public function show($id)
     {
-        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'pembayaran'])
+        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'keranjangs.rute', 'keranjangs.penugasan', 'pembayaran'])
             ->findOrFail($id);
 
         return view('dashboard.penyewaanAdmin.show', compact('penyewaan'));
@@ -52,7 +52,7 @@ class PenyewaanAdminController extends Controller
 
     public function cetakInvoice($id)
     {
-        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'pembayaran'])
+        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'keranjangs.rute', 'pembayaran'])
             ->findOrFail($id);
 
         $pdf = Pdf::loadView('dashboard.penyewaanAdmin.invoice', compact('penyewaan'));
@@ -353,7 +353,8 @@ class PenyewaanAdminController extends Controller
 
     public function indexPembatalan()
     {
-        $keranjangs = \App\Models\Keranjang::with(['penyewaan.client', 'armada', 'sopir'])
+        $keranjangs = \App\Models\Keranjang::with(['penyewaan.client', 'armada', 'sopir', 'pembatalan'])
+            ->whereHas('penyewaan')
             ->whereIn('status', ['menunggu_konfirmasi_batal', 'dibatalkan'])
             ->orderBy('updated_at', 'desc')
             ->paginate(10);
@@ -377,6 +378,7 @@ class PenyewaanAdminController extends Controller
 
             if ($request->action === 'approve') {
                 $updateData = ['status' => 'dibatalkan'];
+                $pembatalanData = [];
 
                 // Handle Refund
                 if ($request->hasFile('bukti_refund')) {
@@ -385,12 +387,19 @@ class PenyewaanAdminController extends Controller
                         'folder' => 'bukti_refund'
                     ]);
                     
-                    $updateData['bukti_refund'] = $upload->getSecurePath();
+                    $securePath = $upload->getSecurePath();
+                    $updateData['bukti_refund'] = $securePath;
                     $updateData['nominal_refund'] = $request->nominal_refund;
+
+                    $pembatalanData['bukti_refund'] = $securePath;
+                    $pembatalanData['nominal_refund'] = $request->nominal_refund;
                 }
 
                 // Setujui pembatalan
                 $keranjang->update($updateData);
+
+                // Simpan ke tabel pembatalan_sewas untuk normalisasi
+                $keranjang->pembatalan()->updateOrCreate([], $pembatalanData);
                 
                 // Kembalikan armada menjadi tersedia (aktif)
                 if ($keranjang->armada) {
@@ -421,6 +430,11 @@ class PenyewaanAdminController extends Controller
                 // Tolak pembatalan, kembalikan ke aktif
                 $keranjang->update([
                     'status' => 'aktif',
+                    'catatan' => $request->catatan
+                ]);
+
+                // Simpan ke tabel pembatalan_sewas untuk normalisasi
+                $keranjang->pembatalan()->updateOrCreate([], [
                     'catatan' => $request->catatan
                 ]);
 

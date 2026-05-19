@@ -24,7 +24,7 @@ class KeunggulanController extends Controller
         try {
             $validated = $request->validate([
                 'judul' => 'required|string|max:255',
-                'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+                'gambar' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:4096',
                 'deskripsi' => 'nullable|string',
             ]);
 
@@ -35,6 +35,8 @@ class KeunggulanController extends Controller
 
                 $validated['gambar'] = $uploadedFileUrl;
             }
+
+            $validated['user_id'] = auth()->id();
 
             Keunggulan::create($validated);
 
@@ -63,7 +65,7 @@ class KeunggulanController extends Controller
 
             $validated = $request->validate([
                 'judul' => 'required|string|max:255',
-                'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+                'gambar' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:4096',
                 'deskripsi' => 'nullable|string',
             ]);
 
@@ -79,6 +81,8 @@ class KeunggulanController extends Controller
 
                 $validated['gambar'] = $uploadedFileUrl;
             }
+
+            $validated['user_id'] = auth()->id();
 
             $keunggulan->update($validated);
 

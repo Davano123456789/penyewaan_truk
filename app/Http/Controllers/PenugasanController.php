@@ -17,12 +17,12 @@ class PenugasanController extends Controller
         $sopirId = Auth::id();
         // Ambil semua keranjang/penugasan yang sopir_id sesuai user login
         // Status bisa aktif atau selesai (tampilkan semua penugasan, baik yang sedang berjalan maupun yang sudah selesai)
-        $penugasans = Keranjang::with(['penyewaan', 'armada'])
+        $penugasans = Keranjang::with(['penyewaan', 'armada', 'rute', 'penugasan'])
             ->where('sopir_id', $sopirId)
             ->whereHas('penyewaan', function($query) {
                 $query->whereIn('status', ['aktif', 'selesai']);
             })
-            ->orderBy('tanggal_mulai', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
 
         return view('dashboard.sopir.penugasan.index', compact('penugasans'));
@@ -31,7 +31,7 @@ class PenugasanController extends Controller
     {
         $sopirId = Auth::id();
 
-        $penugasan = Keranjang::with(['penyewaan', 'armada'])
+        $penugasan = Keranjang::with(['penyewaan', 'armada', 'rute', 'penugasan'])
             ->where('id', $id)
             ->where('sopir_id', $sopirId)
             ->whereHas('penyewaan', function($query) {
@@ -86,6 +86,10 @@ class PenugasanController extends Controller
                     $penugasan->update([
                         'bukti_selesai' => $uploadedFileUrl,
                         'status' => 'menunggu_konfirmasi_selesai'
+                    ]);
+
+                    $penugasan->penugasan()->updateOrCreate([], [
+                        'bukti_selesai' => $uploadedFileUrl,
                     ]);
 
                     // Kirim Notifikasi ke Admin

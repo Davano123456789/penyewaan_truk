@@ -121,19 +121,19 @@
                                         <i class="fas fa-user-circle fa-lg text-gray-400"></i>
                                     </div>
                                     <div>
-                                        <div class="small font-weight-bold">{{ $item->sopir->nama ?? 'Belum Ditugaskan' }}</div>
-                                        <div class="small text-muted">{{ $item->sopir->telepon ?? '-' }}</div>
+                                        <div class="small font-weight-bold">{{ $item->penugasan->sopir->nama ?? 'Belum Ditugaskan' }}</div>
+                                        <div class="small text-muted">{{ $item->penugasan->sopir->telepon ?? '-' }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M Y') }}</td>
                             <td class="text-center">
                                 <div class="small font-weight-bold">{{ $item->estimasi_hari }} Hari</div>
-                                <div class="small text-muted">{{ $item->total_jarak }} Km</div>
+                                <div class="small text-muted">{{ $item->rute->total_jarak ?? 0 }} Km</div>
                             </td>
                             <td>
-                                <div class="small mb-1"><i class="fas fa-map-marker-alt text-danger"></i> {{ $item->tempat_jemput }}</div>
-                                <div class="small"><i class="fas fa-flag-checkered text-success"></i> {{ $item->tempat_antar }}</div>
+                                <div class="small mb-1"><i class="fas fa-map-marker-alt text-danger"></i> {{ $item->rute->tempat_jemput ?? '-' }}</div>
+                                <div class="small"><i class="fas fa-flag-checkered text-success"></i> {{ $item->rute->tempat_antar ?? '-' }}</div>
                             </td>
                             <td class="text-center">
                                 @if($item->status == 'pending')

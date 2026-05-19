@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,18 +8,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body class="bg-gray-100">
     <div class="min-h-screen flex items-center justify-center py-8 px-4">
         <div class="max-w-6xl w-full">
             <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
                 <div class="flex flex-col lg:flex-row min-h-[600px]">
                     <!-- Left Side -->
-                    <div class="lg:w-1/2 relative bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=2070');">
-                        <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-blue-800/85 to-blue-900/90"></div>
-                        
+                    <div class="lg:w-1/2 relative bg-cover bg-center"
+                        style="background-image: url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=2070');">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-blue-800/85 to-blue-900/90">
+                        </div>
+
                         <div class="relative z-10 h-full flex flex-col justify-center p-12 text-white">
                             <div class="mb-8">
-                                <div class="inline-flex items-center space-x-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full">
+                                <div
+                                    class="inline-flex items-center space-x-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full">
                                     <i class="fas fa-truck-moving text-2xl"></i>
                                     <span class="text-xl font-bold">sutera jaya</span>
                                 </div>
@@ -93,14 +98,9 @@
                                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
                                         Email
                                     </label>
-                                    <input 
-                                        type="email" 
-                                        id="email" 
-                                        name="email" 
+                                    <input type="email" id="email" name="email"
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                        placeholder="contoh@email.com"
-                                        required
-                                    >
+                                        placeholder="contoh@email.com" required>
                                 </div>
 
                                 <!-- Password -->
@@ -109,58 +109,54 @@
                                         Kata Sandi
                                     </label>
                                     <div class="relative">
-                                        <input 
-                                            type="password" 
-                                            id="kata_sandi" 
-                                            name="kata_sandi" 
+                                        <input type="password" id="kata_sandi" name="kata_sandi"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
-                                            placeholder="Masukkan kata sandi"
-                                            required
-                                        >
-                                        <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-blue-600 transition">
+                                            placeholder="Masukkan kata sandi" required>
+                                        <button type="button" onclick="togglePassword()"
+                                            class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-blue-600 transition">
                                             <i id="eyeIcon" class="fas fa-eye"></i>
                                         </button>
                                     </div>
                                 </div>
 
                                 <script>
-                                function togglePassword() {
-                                    const passwordInput = document.getElementById('kata_sandi');
-                                    const eyeIcon = document.getElementById('eyeIcon');
-                                    
-                                    if (passwordInput.type === 'password') {
-                                        passwordInput.type = 'text';
-                                        eyeIcon.classList.remove('fa-eye');
-                                        eyeIcon.classList.add('fa-eye-slash');
-                                    } else {
-                                        passwordInput.type = 'password';
-                                        eyeIcon.classList.remove('fa-eye-slash');
-                                        eyeIcon.classList.add('fa-eye');
+                                    function togglePassword() {
+                                        const passwordInput = document.getElementById('kata_sandi');
+                                        const eyeIcon = document.getElementById('eyeIcon');
+
+                                        if (passwordInput.type === 'password') {
+                                            passwordInput.type = 'text';
+                                            eyeIcon.classList.remove('fa-eye');
+                                            eyeIcon.classList.add('fa-eye-slash');
+                                        } else {
+                                            passwordInput.type = 'password';
+                                            eyeIcon.classList.remove('fa-eye-slash');
+                                            eyeIcon.classList.add('fa-eye');
+                                        }
                                     }
-                                }
                                 </script>
 
                                 <!-- Submit -->
-                                <button 
-                                    type="submit" 
-                                    class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-md hover:shadow-lg"
-                                >
+                                <button type="submit"
+                                    class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-md hover:shadow-lg">
                                     MASUK
                                 </button>
 
                                 <!-- Link ke register -->
                                 <div class="text-center mt-6">
                                     <p class="text-gray-600 text-sm">
-                                        Belum punya akun? 
-                                        <a href="{{ route('register') }}" class="text-blue-600 font-semibold hover:underline">Daftar di sini</a>
+                                        Belum punya akun?
+                                        <a href="{{ route('register') }}"
+                                            class="text-blue-600 font-semibold hover:underline">Daftar di sini</a>
                                     </p>
                                 </div>
                                 <!-- Tambahkan setelah input password -->
-                        <div class="flex justify-end mb-4">
-                            <a href="{{ route('password.request') }}" class="text-sm text-blue-600 hover:underline">
-                                Lupa kata sandi?
-                            </a>
-                        </div>
+                                <div class="flex justify-end mb-4">
+                                    <a href="{{ route('password.request') }}"
+                                        class="text-sm text-blue-600 hover:underline">
+                                        Lupa kata sandi?
+                                    </a>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -169,4 +165,5 @@
         </div>
     </div>
 </body>
+
 </html>

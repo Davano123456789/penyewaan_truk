@@ -4,34 +4,42 @@
 
 @section('content')
     <!-- Hero Section -->
-    <section id="home" class="pt-24 pb-16 bg-gradient-to-br from-blue-50 to-blue-100 min-h-[700px] flex items-center">
-        <div class="container mx-auto px-6">
-            <div class="flex flex-col md:flex-row items-center gap-12">
-                <div class="md:w-1/2" data-aos="fade-right">
-                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-                        Solusi Terpercaya untuk <span class="text-blue-600">Penyewaan Truk</span>
-                    </h1>
-                    <p class="text-gray-600 text-lg mb-8">
-                        Layanan penyewaan truk profesional dengan armada lengkap dan harga kompetitif untuk kebutuhan bisnis Anda.
-                    </p>
-                    <div class="flex gap-4">
-                        <a href="#kontak" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition">
-                            Hubungi Kami
-                        </a>
-                        <a href="#tentang" class="border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition">
-                            Pelajari Lebih
-                        </a>
-                    </div>
+    <!-- Hero Section -->
+    <section id="home" class="relative min-h-screen flex items-center pt-28 pb-24 overflow-hidden">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=1600" alt="Hero Background" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
+        </div>
+
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-3xl" data-aos="fade-up">
+                <span class="inline-block px-4 py-1 rounded-full bg-blue-600/20 text-blue-400 font-semibold text-sm mb-6 border border-blue-600/30">
+                    Logistik Terpercaya di Indonesia
+                </span>
+                <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
+                    PT Sutera Jaya <br>
+                    <span class="text-blue-500">Logistik & Distribusi</span>
+                </h1>
+                <p class="text-gray-300 text-xl mb-10 max-w-xl leading-relaxed font-light">
+                    Solusi transportasi logistik terpadu dengan armada modern untuk menjangkau seluruh pelosok negeri. Kami mengutamakan keamanan dan ketepatan waktu.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#kontak" class="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-600/30 flex items-center group">
+                        Mulai Menyewa
+                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="#tentang" class="bg-white/10 backdrop-blur-md text-white border border-white/20 px-10 py-4 rounded-xl font-bold hover:bg-white/20 transition-all duration-300">
+                        Pelajari Lebih Lanjut
+                    </a>
                 </div>
-                <div class="md:w-1/2" data-aos="fade-left">
-                    <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800" alt="Truk" class="rounded-xl shadow-2xl">
-                </div>
+                
             </div>
         </div>
     </section>
 
     <!-- Nilai Unggulan Perusahaan -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-24 bg-gray-50">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12" data-aos="fade-up">
                 <h2 class="text-4xl font-bold text-gray-800 mb-4">NILAI UNGGULAN PERUSAHAAN</h2>
@@ -43,17 +51,20 @@
             <div class="grid md:grid-cols-3 gap-6">
                 @forelse($keunggulans as $keunggulan)
                 <!-- Card -->
-                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group" data-aos="fade-up" data-aos-delay="100">
-                    <div class="p-6">
-                        <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-600 transition-all duration-300 overflow-hidden">
+                <div class="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden group relative hover:-translate-y-2" data-aos="fade-up" data-aos-delay="100">
+                    <!-- Background Filler Animation (Smooth Circle) -->
+                    <div class="absolute -top-10 -right-10 w-20 h-20 bg-blue-600 rounded-full transition-all duration-700 ease-in-out group-hover:scale-[15] opacity-0 group-hover:opacity-100 z-0"></div>
+                    
+                    <div class="p-8 relative z-10">
+                        <div class="w-14 h-14 flex items-center justify-center mb-6 transition-all duration-300">
                             @if($keunggulan->gambar)
-                                <img src="{{ $keunggulan->gambar }}" alt="{{ $keunggulan->judul }}" class="w-full h-full object-cover">
+                                <img src="{{ $keunggulan->gambar }}" alt="{{ $keunggulan->judul }}" class="w-full h-full object-contain group-hover:brightness-0 group-hover:invert transition-all duration-300">
                             @else
-                                <i class="fas fa-star text-blue-600 text-2xl group-hover:text-white transition-all duration-300"></i>
+                                <i class="fas fa-star text-blue-600 text-3xl group-hover:text-white transition-all duration-300"></i>
                             @endif
                         </div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $keunggulan->judul }}</h3>
-                        <p class="text-gray-600">{{ $keunggulan->deskripsi }}</p>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 group-hover:text-white transition-all duration-300">{{ $keunggulan->judul }}</h3>
+                        <p class="text-gray-600 group-hover:text-blue-50 transition-all duration-300 leading-relaxed">{{ $keunggulan->deskripsi }}</p>
                     </div>
                 </div>
                 @empty
@@ -66,11 +77,11 @@
     </section>
 
     <!-- Tentang Kami Section -->
-    <section id="tentang" class="py-16 bg-white">
+    <section id="tentang" class="py-24 bg-white">
         <div class="container mx-auto px-6">
             <div class="flex flex-col md:flex-row gap-12 items-center">
                 <!-- Left Side - Images -->
-                <div class="md:w-1/2 space-y-6">
+                <div class="md:w-1/2 space-y-6" data-aos="fade-up">
                     <div class="bg-gray-200 h-72 rounded-lg overflow-hidden">
                         <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800" alt="Truk 1" class="w-full h-full object-cover">
                     </div>
@@ -80,7 +91,7 @@
                 </div>
 
                 <!-- Right Side - Content -->
-                <div class="md:w-1/2">
+                <div class="md:w-1/2" data-aos="fade-up">
                     <h2 class="text-4xl font-bold text-gray-800 mb-6">TENTANG KAMI</h2>
                     <p class="text-gray-600 leading-relaxed mb-4">
                         Kami adalah perusahaan penyewaan truk yang telah berpengalaman melayani berbagai kebutuhan transportasi logistik. Dengan komitmen tinggi terhadap kepuasan pelanggan, kami menyediakan layanan yang handal dan efisien.
@@ -94,14 +105,14 @@
 
                     <!-- Social Media Icons -->
                     <div class="flex gap-4">
-                        <a href="#" class="bg-gray-200 w-14 h-14 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300">
+                        <a href="https://facebook.com" target="_blank" class="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300 text-blue-600">
+                            <i class="fab fa-facebook-f text-xl"></i>
+                        </a>
+                        <a href="https://instagram.com" target="_blank" class="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300 text-blue-600">
                             <i class="fab fa-instagram text-xl"></i>
                         </a>
-                        <a href="#" class="bg-gray-200 w-14 h-14 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300">
+                        <a href="https://linkedin.com" target="_blank" class="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300 text-blue-600">
                             <i class="fab fa-linkedin-in text-xl"></i>
-                        </a>
-                        <a href="#" class="bg-gray-200 w-14 h-14 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300">
-                            <i class="fab fa-x-twitter text-xl"></i>
                         </a>
                     </div>
                 </div>
@@ -110,12 +121,12 @@
     </section>
 
     <!-- Visi Misi Section -->
-    <section id="visi-misi" class="py-16 relative bg-cover bg-center bg-fixed" style="background-image: url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600');">
+    <section id="visi-misi" class="py-24 relative bg-cover bg-center bg-fixed" style="background-image: url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600');">
         <!-- Overlay gelap -->
         <div class="absolute inset-0 bg-black bg-opacity-70"></div>
         
         <div class="container mx-auto px-6 relative z-10">
-            <div class="max-w-5xl mx-auto">
+            <div class="max-w-5xl mx-auto" data-aos="fade-up">
                 <h2 class="text-4xl font-bold text-center mb-12 text-white">VISI DAN MISI KAMI</h2>
                 <div class="grid md:grid-cols-2 gap-12">
                     <div class="bg-blue-600 bg-opacity-90 backdrop-blur-sm p-8 rounded-lg shadow-xl hover:bg-opacity-100 transition-all duration-300">
@@ -157,9 +168,9 @@
     </section>
 
     <!-- Riwayat Penyewaan Client Section -->
-    <section class="py-16 bg-white">
+    <section class="py-24 bg-white">
         <div class="container mx-auto px-6">
-            <div class="text-center mb-12">
+            <div class="text-center mb-12" data-aos="fade-up">
                 <h2 class="text-4xl font-bold text-gray-800 mb-4">RIWAYAT PENYEWAAN CLIENT</h2>
                 <p class="text-gray-600 max-w-2xl mx-auto">
                     Testimoni dan pengalaman dari berbagai klien yang telah mempercayakan kebutuhan logistik mereka kepada kami
@@ -173,39 +184,91 @@
                     <div id="testimonialSlider" class="flex transition-transform duration-500 ease-in-out">
                         @forelse($riwayatPenyewaan as $penyewaan)
                         <!-- Rental Card -->
-                        <div class="flex-shrink-0 w-full md:w-1/3 px-4" data-aos="zoom-in">
-                            <div class="bg-gray-50 rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col">
-                                <!-- Image -->
-                                <div class="bg-gray-200 h-48 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <div class="flex-shrink-0 w-full md:w-1/3 px-4" data-aos="fade-up">
+                            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden h-full flex flex-col group relative">
+                                <!-- Background Filler Animation -->
+                                <div class="absolute -top-20 -right-20 w-32 h-32 bg-blue-600 rounded-full transition-all duration-700 ease-in-out group-hover:scale-[15] opacity-0 group-hover:opacity-100 z-0"></div>
+
+                                <!-- Image Section -->
+                                <div class="relative h-48 overflow-hidden z-10">
                                     @php
-                                        $buktiSelesai = $penyewaan->keranjangs->first()->bukti_selesai ?? null;
+                                        $firstKeranjang = $penyewaan->keranjangs->first();
+                                        $buktiSelesai = $firstKeranjang->bukti_selesai ?? null;
                                     @endphp
                                     
                                     @if($buktiSelesai)
-                                        <img src="{{ $buktiSelesai }}" alt="Bukti Selesai" class="w-full h-full object-cover">
+                                        <img src="{{ $buktiSelesai }}" alt="Bukti" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                                     @else
-                                        <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600" alt="Truck" class="w-full h-full object-cover">
+                                        <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600" alt="Truck" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                                     @endif
-                                </div>
-                                <!-- Content -->
-                                <div class="p-6 flex-1 flex flex-col">
-                                    <!-- Status Badge -->
-                                    <div class="mb-3">
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            {{ ucfirst($penyewaan->status) }}
+                                    
+                                    <div class="absolute top-4 right-4">
+                                        <span class="px-3 py-1 bg-white/90 backdrop-blur-sm text-green-600 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm border border-green-100 group-hover:bg-green-500 group-hover:text-white group-hover:border-transparent transition-colors duration-300">
+                                            Selesai
                                         </span>
                                     </div>
-                                    <!-- Client Name -->
-                                    <h3 class="text-lg font-bold text-gray-800 mb-2">{{ $penyewaan->client->nama ?? 'Client' }}</h3>
-                                    <!-- Details -->
-                                    <div class="text-gray-600 text-sm leading-relaxed mb-4 flex-1">
-                                        <p class="mb-1"><span class="font-semibold">Total Harga:</span> Rp {{ number_format($penyewaan->harga_total, 0, ',', '.') }}</p>
-                                        <p><span class="font-semibold">Item:</span> {{ $penyewaan->keranjangs->count() ?? 0 }} Barang</p>
+                                </div>
+
+                                <div class="p-6 flex-1 flex flex-col relative z-10">
+                                    <!-- Client Header -->
+                                    <div class="flex items-center gap-4 mb-6">
+                                        <div class="relative">
+                                            <div class="bg-gradient-to-br from-blue-600 to-blue-400 w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200 group-hover:shadow-none group-hover:from-white/20 group-hover:to-white/10 transition-all duration-300">
+                                                <i class="fas fa-user-tie text-xl"></i>
+                                            </div>
+                                            <div class="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-white group-hover:border-blue-600 transition-all duration-300"></div>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-base font-bold text-gray-800 leading-tight group-hover:text-white transition-colors duration-300">{{ $penyewaan->client->nama ?? 'Client' }}</h3>
+                                            <div class="flex items-center gap-1">
+                                                <i class="fas fa-star text-amber-400 text-[10px]"></i>
+                                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-tighter group-hover:text-blue-100 transition-colors duration-300">Verified Client</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <!-- Date -->
-                                    <div class="flex justify-between text-xs text-gray-500 mt-auto pt-4 border-t border-gray-200">
-                                        <span><i class="fas fa-check-circle mr-1 text-green-500"></i>Terverifikasi</span>
-                                        <span><i class="fas fa-calendar mr-1"></i>{{ $penyewaan->updated_at->format('d M Y') }}</span>
+
+                                    <!-- Route & Details Box -->
+                                    <div class="bg-blue-50/50 rounded-2xl p-4 mb-6 border border-blue-50 group-hover:bg-white/10 group-hover:border-white/20 transition-all duration-300">
+                                        <div class="flex flex-col gap-4">
+                                            <!-- Delivery Route -->
+                                            <div class="relative pl-6">
+                                                <div class="absolute left-1.5 top-1.5 bottom-1.5 w-0.5 bg-blue-200 border-l border-dashed group-hover:bg-white/30"></div>
+                                                <div class="absolute left-0 top-0 w-3 h-3 rounded-full bg-blue-600 border-2 border-white group-hover:bg-white group-hover:border-blue-600"></div>
+                                                <div class="absolute left-0 bottom-0 w-3 h-3 rounded-full bg-red-500 border-2 border-white"></div>
+                                                
+                                                <div class="mb-4">
+                                                    <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-0.5 group-hover:text-blue-200 transition-colors duration-300">Asal</p>
+                                                    <p class="text-xs text-gray-700 font-bold line-clamp-1 group-hover:text-white transition-colors duration-300">{{ $firstKeranjang->tempat_jemput ?? '-' }}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-0.5 group-hover:text-blue-200 transition-colors duration-300">Tujuan</p>
+                                                    <p class="text-xs text-gray-700 font-bold line-clamp-1 group-hover:text-white transition-colors duration-300">{{ $firstKeranjang->tempat_antar ?? '-' }}</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Cargo Info -->
+                                            <div class="flex justify-between items-center pt-3 border-t border-blue-100/50 group-hover:border-white/10 transition-colors duration-300">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm group-hover:bg-white/20">
+                                                        <i class="fas fa-box-open text-blue-500 text-xs group-hover:text-white"></i>
+                                                    </div>
+                                                    <span class="text-xs text-gray-600 font-bold group-hover:text-white">{{ $firstKeranjang->barang_muatan ?? 'Logistik' }}</span>
+                                                </div>
+                                                <span class="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-md font-bold tracking-tight group-hover:bg-white group-hover:text-blue-600 transition-all duration-300">{{ $firstKeranjang->armada->merek ?? 'Unit' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Footer Meta -->
+                                    <div class="mt-auto flex justify-between items-center">
+                                        <div class="flex items-center gap-1.5 text-gray-400 group-hover:text-blue-200 transition-colors duration-300">
+                                            <i class="fas fa-fingerprint text-xs"></i>
+                                            <span class="text-[9px] font-bold uppercase tracking-widest">TRX-{{ substr($penyewaan->kode_transaksi, -6) }}</span>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest group-hover:text-blue-200 transition-colors duration-300">Tgl Selesai</p>
+                                            <p class="text-[10px] text-gray-800 font-black group-hover:text-white transition-colors duration-300">{{ $penyewaan->updated_at->format('d/m/Y') }}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -237,7 +300,7 @@
 
     <!-- Bekerja Sama Dengan Section -->
 <!-- Bekerja Sama Dengan Section -->
-<section class="py-16 bg-gray-50">
+<section class="py-24 bg-blue-50">
     <div class="container mx-auto px-6">
         <div class="text-center mb-12">
             <h2 class="text-4xl font-bold text-gray-800 mb-4">BEKERJA SAMA DENGAN</h2>
@@ -254,7 +317,7 @@
                     @forelse($mitras as $mitra)
                     <!-- Logo Card -->
                     <div class="flex-shrink-0 w-full md:w-1/4 px-4">
-                        <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center h-40">
+                        <div class="bg-white border border-blue-100 p-8 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center h-40">
                             <div class="text-center">
                                 @if($mitra->logo)
                                     <div class="w-32 h-20 mx-auto rounded flex items-center justify-center mb-2 overflow-hidden">
@@ -274,7 +337,7 @@
                     @empty
                     <!-- Default jika tidak ada data -->
                     <div class="flex-shrink-0 w-full md:w-1/4 px-4">
-                        <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center h-40">
+                        <div class="bg-white border border-blue-100 p-8 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center h-40">
                             <div class="text-center">
                                 <div class="bg-gray-200 w-32 h-20 mx-auto rounded flex items-center justify-center mb-2">
                                     <i class="fas fa-building text-4xl text-gray-400"></i>
@@ -305,7 +368,7 @@
     </div>
 </section>
     <!-- Informasi Kami Section -->
-    <section class="py-16 bg-white">
+    <section class="py-24 bg-white">
         <div class="container mx-auto px-6">
             <div class="flex flex-col md:flex-row gap-12 items-center">
                 <!-- Left Side - Content -->
@@ -327,32 +390,32 @@
                     <div class="space-y-4">
                         <!-- WhatsApp -->
                         <div class="flex items-center gap-4 group">
-                            <div class="bg-green-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:bg-green-500 transition-all duration-300">
-                                <i class="fab fa-whatsapp text-green-600 text-2xl group-hover:text-white transition-all duration-300"></i>
+                            <div class="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-all duration-300">
+                                <i class="fab fa-whatsapp text-blue-600 text-2xl group-hover:text-white transition-all duration-300"></i>
                             </div>
-                            <a href="https://wa.me/6289872124874" class="text-gray-700 text-lg hover:text-green-600 transition-all duration-300">089-872-124-874</a>
+                            <a href="https://wa.me/6282211167667" class="text-gray-700 text-lg hover:text-blue-600 transition-all duration-300">0822-1116-7667 (Adang)</a>
                         </div>
 
                         <!-- Instagram -->
                         <div class="flex items-center gap-4 group">
-                            <div class="bg-pink-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-purple-600 group-hover:to-pink-500 transition-all duration-300">
-                                <i class="fab fa-instagram text-pink-600 text-2xl group-hover:text-white transition-all duration-300"></i>
+                            <div class="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-all duration-300">
+                                <i class="fab fa-instagram text-blue-600 text-2xl group-hover:text-white transition-all duration-300"></i>
                             </div>
-                            <a href="https://instagram.com/truckrental" class="text-gray-700 text-lg hover:text-pink-600 transition-all duration-300">@truckrental</a>
+                            <a href="https://instagram.com/suterajaya" class="text-gray-700 text-lg hover:text-blue-600 transition-all duration-300">@suterajaya</a>
                         </div>
 
                         <!-- Facebook -->
                         <div class="flex items-center gap-4 group">
-                            <div class="bg-blue-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-all duration-300">
+                            <div class="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-all duration-300">
                                 <i class="fab fa-facebook-f text-blue-600 text-2xl group-hover:text-white transition-all duration-300"></i>
                             </div>
-                            <a href="https://facebook.com/truckrental" class="text-gray-700 text-lg hover:text-blue-600 transition-all duration-300">TruckRental Indonesia</a>
+                            <a href="https://facebook.com/suterajaya" class="text-gray-700 text-lg hover:text-blue-600 transition-all duration-300">PT Sutera Jaya</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Right Side - Image -->
-                <div class="md:w-1/2">
+                <div class="md:w-1/2" data-aos="fade-up">
                     <div class="rounded-lg overflow-hidden shadow-2xl">
                         <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800" alt="Truk Kami" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
                     </div>
@@ -362,21 +425,21 @@
     </section>
 
     <!-- Layanan Kami Section -->
-    <section class="py-16 relative bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=1600');">
+    <section class="py-24 relative bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=1600');">
         <!-- Overlay gelap -->
         <div class="absolute inset-0 bg-black bg-opacity-75"></div>
         
         <div class="container mx-auto px-6 relative z-10">
             <div class="flex flex-col md:flex-row gap-12 items-center">
                 <!-- Left Side - Image -->
-                <div class="md:w-1/2 flex justify-center" data-aos="fade-right">
+                <div class="md:w-1/2 flex justify-center" data-aos="fade-up">
                     <div class="relative w-full max-w-md">
                         <img src="{{ asset('images/gambar truk.png') }}" alt="Truk Layanan" class="w-full h-auto object-contain drop-shadow-2xl">
                     </div>
                 </div>
 
                 <!-- Right Side - Content -->
-                <div class="md:w-1/2" data-aos="fade-left">
+                <div class="md:w-1/2" data-aos="fade-up">
                     <div class="border-l-4 border-blue-500 pl-6">
                         <h2 class="text-4xl font-bold text-white mb-4">Layanan Kami</h2>
                         <p class="text-gray-300 leading-relaxed mb-6">

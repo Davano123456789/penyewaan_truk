@@ -35,7 +35,7 @@ class PenyewaanController extends Controller
     // Halaman Keranjang (Daftar Item dalam Penyewaan)
     public function keranjang($id)
     {
-        $penyewaan = Penyewaan::with('keranjangs.armada.sopir', 'keranjangs.sopir')
+        $penyewaan = Penyewaan::with('keranjangs.armada.sopir', 'keranjangs.sopir', 'keranjangs.rute', 'keranjangs.penugasan')
             ->findOrFail($id);
         
         return view('dashboard.penyewaan.keranjang', compact('penyewaan'));
@@ -73,7 +73,7 @@ class PenyewaanController extends Controller
     }
         public function showPembayaran($penyewaanId)
     {
-        $penyewaan = Penyewaan::with(['keranjangs.armada', 'pembayaran'])
+        $penyewaan = Penyewaan::with(['keranjangs.armada', 'keranjangs.rute', 'keranjangs.penugasan', 'pembayaran'])
             ->where('id', $penyewaanId)
             ->where('client_id', Auth::id())
             ->first();
@@ -246,7 +246,7 @@ class PenyewaanController extends Controller
 
     public function detailPembayaran($id)
     {
-        $pembayaran = Pembayaran::with(['penyewaan.keranjangs.armada', 'penyewaan.client'])
+        $pembayaran = Pembayaran::with(['penyewaan.keranjangs.armada', 'penyewaan.keranjangs.rute', 'penyewaan.keranjangs.penugasan', 'penyewaan.client'])
             ->findOrFail($id);
 
         // Security check
@@ -259,7 +259,7 @@ class PenyewaanController extends Controller
 
     public function cetakInvoice($id)
     {
-        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'pembayaran'])
+        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'keranjangs.rute', 'keranjangs.penugasan', 'pembayaran'])
             ->where('client_id', Auth::id())
             ->findOrFail($id);
 
