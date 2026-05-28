@@ -24,14 +24,6 @@
 
                         <!-- Content -->
                         <div class="relative z-10 h-full flex flex-col justify-center p-12 text-white">
-                            <!-- Logo/Brand -->
-                            <div class="mb-8">
-                                <div
-                                    class="inline-flex items-center space-x-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full">
-                                    <i class="fas fa-truck-moving text-2xl"></i>
-                                    <span class="text-xl font-bold">sutera jaya</span>
-                                </div>
-                            </div>
 
                             <!-- Welcome Text -->
                             <div>
@@ -78,8 +70,9 @@
                     <!-- Right Side - Registration Form -->
                     <div class="lg:w-1/2 p-8 lg:p-12 flex items-center overflow-y-auto">
                         <div class="w-full max-w-md mx-auto">
-                            <!-- Header -->
-                            <div class="mb-8">
+                             <!-- Header -->
+                            <div class="mb-8 text-center">
+                                <img src="{{ asset('logo-sutra-jaya.png') }}" alt="Logo" class="h-16 w-auto object-contain mx-auto mb-6">
                                 <h2 class="text-3xl font-bold text-gray-800 mb-2">Daftar Akun</h2>
                                 <p class="text-gray-600">Isi form di bawah untuk membuat akun</p>
                             </div>
@@ -190,16 +183,7 @@
 
 
 
-                                <!-- Terms -->
-                                <div class="flex items-start">
-                                    <input type="checkbox" name="terms" id="terms"
-                                        class="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                        required>
-                                    <label for="terms" class="text-sm text-gray-600">
-                                        Saya setuju dengan <a href="#"
-                                            class="text-blue-600 hover:underline font-semibold">Syarat & Ketentuan</a>
-                                    </label>
-                                </div>
+
 
                                 <!-- Submit Button -->
                                 <button type="submit"
@@ -211,8 +195,7 @@
                                 <div class="text-center mt-6">
                                     <p class="text-gray-600 text-sm">
                                         Sudah punya akun?
-                                        <a href="#" class="text-blue-600 font-semibold hover:underline">Login di
-                                            sini</a>
+                                        <a href="{{ route('login') }}" class="text-blue-600 font-semibold hover:underline">Login di sini</a>
                                     </p>
                                 </div>
                             </form>

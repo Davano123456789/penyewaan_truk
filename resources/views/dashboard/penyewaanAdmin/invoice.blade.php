@@ -90,11 +90,23 @@
     </style>
 </head>
 <body>
-    <div class="invoice-box">
+    <div class="invoice-box" style="position: relative;">
+        @if($penyewaan->pembayaran && $penyewaan->pembayaran->status === 'lunas')
+            <div style="position: absolute; top: 250px; left: 150px; font-size: 80px; color: rgba(46, 125, 50, 0.12); transform: rotate(-30deg); font-weight: bold; z-index: -100; font-family: sans-serif; border: 8px double rgba(46, 125, 50, 0.12); padding: 10px 30px; border-radius: 10px;">LUNAS</div>
+        @endif
+        
         <table style="width: 100%; margin-bottom: 20px;">
             <tr>
-                <td class="logo">SISTEM ARMADA TRUK</td>
-                <td class="text-right" style="font-size: 24px; font-weight: bold; color: #555;">INVOICE</td>
+                <td class="logo" style="vertical-align: middle;">
+                    <img src="{{ public_path('logo-sutra-jaya.png') }}" style="height: 50px; vertical-align: middle;">
+                </td>
+                <td class="text-right" style="font-size: 24px; font-weight: bold; color: #555; vertical-align: middle;">
+                    @if(in_array($penyewaan->status, ['pending', 'menunggu_pembayaran']))
+                        PROFORMA INVOICE
+                    @else
+                        INVOICE RESMI
+                    @endif
+                </td>
             </tr>
         </table>
 
@@ -109,9 +121,9 @@
                 </td>
                 <td class="invoice-info">
                     <h3 style="margin-bottom: 5px;">Detail:</h3>
-                    ID Penyewaan: #{{ $penyewaan->id }}<br>
+                    Kode Transaksi: <strong>{{ $penyewaan->kode_transaksi }}</strong><br>
                     Tanggal Transaksi: {{ $penyewaan->created_at->format('d/m/Y') }}<br>
-                    Status: <span class="status-badge status-{{ $penyewaan->status }}">{{ $penyewaan->status }}</span>
+                    Status: <span class="status-badge status-{{ $penyewaan->status }}">{{ str_replace('_', ' ', $penyewaan->status) }}</span>
                 </td>
             </tr>
         </table>
@@ -120,10 +132,11 @@
             <thead>
                 <tr>
                     <th width="5%">No</th>
-                    <th>Detail Armada</th>
-                    <th width="20%">Jadwal</th>
-                    <th width="15%">Durasi</th>
-                    <th width="20%" class="text-right">Subtotal</th>
+                    <th width="25%">Armada</th>
+                    <th width="20%">Asal</th>
+                    <th width="20%">Tujuan</th>
+                    <th width="15%">Jadwal</th>
+                    <th width="15%" class="text-right">Subtotal</th>
                 </tr>
             </thead>
             <tbody>
@@ -131,32 +144,42 @@
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>
-                        <strong>{{ $item->armada->jenis }}</strong><br>
-                        No Pol: {{ $item->armada->no_polisi }}<br>
-                        <small>{{ $item->rute->tempat_jemput ?? '-' }} &rarr; {{ $item->rute->tempat_antar ?? '-' }}</small>
+                        <strong>{{ $item->armada->merek ?? $item->armada->jenis }}</strong><br>
+                        <small>No Pol: {{ $item->armada->no_polisi }}</small>
                     </td>
+                    <td>{{ $item->rute->tempat_jemput ?? '-' }}</td>
+                    <td>{{ $item->rute->tempat_antar ?? '-' }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d/m/Y') }}</td>
-                    <td class="text-center">{{ $item->estimasi_hari }} Hari</td>
                     <td class="text-right">Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}</td>
                 </tr>
                 @endforeach
             </tbody>
             <tfoot>
-                <tr class="total-row">
-                    <td colspan="4" class="text-right">TOTAL PEMBAYARAN:</td>
-                    <td class="text-right">Rp {{ number_format($penyewaan->harga_total, 0, ',', '.') }}</td>
+                <tr>
+                    <td colspan="5" class="text-right" style="font-weight: bold; border-top: 2px solid #4e73df;">TOTAL HARGA SEWA:</td>
+                    <td class="text-right" style="font-weight: bold; border-top: 2px solid #4e73df;">Rp {{ number_format($penyewaan->harga_total_aktif, 0, ',', '.') }}</td>
                 </tr>
+                @if($penyewaan->pembayaran && $penyewaan->pembayaran->jenis === 'talangan')
+                    <tr>
+                        <td colspan="5" class="text-right" style="color: #2e7d32; font-weight: bold;">TELAH DIBAYAR (DP 50%):</td>
+                        <td class="text-right" style="color: #2e7d32; font-weight: bold;">Rp {{ number_format($penyewaan->pembayaran->jumlah_bayar, 0, ',', '.') }}</td>
+                    </tr>
+                    @php
+                        $sisaKekurangan = max(0, $penyewaan->harga_total_aktif - $penyewaan->pembayaran->jumlah_bayar);
+                    @endphp
+                    <tr class="total-row">
+                        <td colspan="5" class="text-right" style="color: #c62828;">SISA KEKURANGAN:</td>
+                        <td class="text-right" style="color: #c62828;">Rp {{ number_format($sisaKekurangan, 0, ',', '.') }}</td>
+                    </tr>
+                @else
+                    <tr class="total-row">
+                        <td colspan="5" class="text-right">TOTAL PEMBAYARAN:</td>
+                        <td class="text-right">Rp {{ number_format($penyewaan->harga_total_aktif, 0, ',', '.') }}</td>
+                    </tr>
+                @endif
             </tfoot>
         </table>
 
-        @if($penyewaan->pembayaran)
-        <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fc; border-left: 4px solid #4e73df;">
-            <strong>Informasi Pembayaran:</strong><br>
-            Metode: {{ str_replace('_', ' ', strtoupper($penyewaan->pembayaran->metode)) }}<br>
-            Status: {{ strtoupper($penyewaan->pembayaran->status) }}<br>
-            Jumlah Bayar: Rp {{ number_format($penyewaan->pembayaran->jumlah_bayar, 0, ',', '.') }}
-        </div>
-        @endif
 
         <div class="footer">
             Terima kasih telah mempercayai layanan kami.<br>

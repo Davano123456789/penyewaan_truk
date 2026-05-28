@@ -3,9 +3,9 @@
     <div class="container mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
             <!-- Logo -->
-            <div class="text-2xl font-bold text-blue-600">
-                PT Sutera Jaya
-            </div>
+            <a href="{{ route('home') }}" class="flex items-center">
+                <img src="{{ asset('logo-sutra-jaya.png') }}" alt="Logo" class="h-10 w-auto object-contain">
+            </a>
 
             <!-- Desktop Menu -->
             <div class="hidden md:flex items-center space-x-8">

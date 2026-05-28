@@ -25,7 +25,7 @@
                     Solusi transportasi logistik terpadu dengan armada modern untuk menjangkau seluruh pelosok negeri. Kami mengutamakan keamanan dan ketepatan waktu.
                 </p>
                 <div class="flex flex-wrap gap-4">
-                    <a href="#kontak" class="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-600/30 flex items-center group">
+                    <a href="{{ route('pemesanan') }}" class="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-600/30 flex items-center group">
                         Mulai Menyewa
                         <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                     </a>

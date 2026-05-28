@@ -3,10 +3,10 @@
 
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard') }}">
-        <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-truck"></i>
+        <div class="sidebar-brand-icon">
+            <img src="{{ asset('logo-sutra-jaya.png') }}" alt="Logo" class="bg-white rounded p-1" style="height: 40px; max-width: 40px; object-fit: contain;">
         </div>
-        <div class="sidebar-brand-text mx-3">Sistem Armada</div>
+        <div class="sidebar-brand-text mx-2 text-capitalize">Sutera Jaya</div>
     </a>
 
     <!-- Divider -->

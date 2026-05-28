@@ -310,7 +310,6 @@ public function storePemesanan(Request $request)
         'kata_sandi' => 'required|string|min:8',
         'telepon' => 'nullable|string|max:20',
         'alamat' => 'nullable|string|max:255',
-        'terms' => 'required|accepted',
     ], [
         'nama.required' => 'Nama lengkap wajib diisi',
         'email.required' => 'Email wajib diisi',
@@ -321,7 +320,6 @@ public function storePemesanan(Request $request)
         'umur.max' => 'Umur tidak valid',
         'kata_sandi.required' => 'Kata sandi wajib diisi',
         'kata_sandi.min' => 'Kata sandi minimal 8 karakter',
-        'terms.accepted' => 'Anda harus menyetujui syarat & ketentuan',
     ]);
 
     // Buat user baru

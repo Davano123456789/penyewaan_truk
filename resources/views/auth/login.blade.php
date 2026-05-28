@@ -21,13 +21,6 @@
                         </div>
 
                         <div class="relative z-10 h-full flex flex-col justify-center p-12 text-white">
-                            <div class="mb-8">
-                                <div
-                                    class="inline-flex items-center space-x-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full">
-                                    <i class="fas fa-truck-moving text-2xl"></i>
-                                    <span class="text-xl font-bold">sutera jaya</span>
-                                </div>
-                            </div>
 
                             <h1 class="text-5xl font-bold mb-6 leading-tight">
                                 Selamat Datang<br>Kembali!
@@ -69,7 +62,8 @@
                     <!-- Right Side -->
                     <div class="lg:w-1/2 p-8 lg:p-12 flex items-center">
                         <div class="w-full max-w-md mx-auto">
-                            <div class="mb-8">
+                            <div class="mb-8 text-center">
+                                <img src="{{ asset('logo-sutra-jaya.png') }}" alt="Logo" class="h-16 w-auto object-contain mx-auto mb-6">
                                 <h2 class="text-3xl font-bold text-gray-800 mb-2">Masuk Akun</h2>
                                 <p class="text-gray-600">Gunakan email dan kata sandi Anda</p>
                             </div>

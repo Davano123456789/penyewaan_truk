@@ -78,6 +78,59 @@
             </div>
         @endif
 
+        <!-- Informasi Pembayaran Talangan -->
+        @if($penyewaan->pembayaran && $penyewaan->pembayaran->jenis === 'talangan')
+            <div class="card shadow mb-4 border-left-warning">
+                <div class="card-header py-3 bg-light">
+                    <h6 class="m-0 font-weight-bold text-warning"><i class="fas fa-money-bill-wave"></i> Informasi Pembayaran Talangan (DP)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <p class="mb-2">Anda memilih metode pembayaran <strong>Talangan / DP (50%)</strong>.</p>
+                            <div class="row">
+                                <div class="col-sm-4 border-right">
+                                    <span class="text-muted small">Total Biaya</span>
+                                    <h5 class="font-weight-bold text-dark">Rp {{ number_format($penyewaan->harga_total_aktif, 0, ',', '.') }}</h5>
+                                </div>
+                                <div class="col-sm-4 border-right">
+                                    <span class="text-muted small">Sudah Dibayar</span>
+                                    <h5 class="font-weight-bold text-success">Rp {{ number_format($penyewaan->pembayaran->jumlah_bayar, 0, ',', '.') }}</h5>
+                                </div>
+                                <div class="col-sm-4">
+                                    @php
+                                        $sisaTagihan = max(0, $penyewaan->harga_total_aktif - $penyewaan->pembayaran->jumlah_bayar);
+                                    @endphp
+                                    <span class="text-muted small">Sisa Tagihan</span>
+                                    <h5 class="font-weight-bold text-danger">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</h5>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge badge-secondary px-3 py-2 text-capitalize">
+                                    Status Pembayaran: <strong>{{ str_replace('_', ' ', $penyewaan->pembayaran->status) }}</strong>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            @if($penyewaan->pembayaran->status === 'menunggu_pelunasan')
+                                <a href="{{ route('pembayaran.show', $penyewaan->id) }}" class="btn btn-warning btn-block">
+                                    <i class="fas fa-upload"></i> Bayar Sisa Tagihan (Pelunasan)
+                                </a>
+                            @elseif($penyewaan->pembayaran->status === 'menunggu_konfirmasi_pelunasan')
+                                <div class="alert alert-info text-center mb-0">
+                                    <i class="fas fa-hourglass-half"></i> Pelunasan Sedang Diverifikasi
+                                </div>
+                            @elseif($penyewaan->pembayaran->status === 'lunas')
+                                <div class="alert alert-success text-center mb-0">
+                                    <i class="fas fa-check-circle"></i> Lunas Sepenuhnya
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Daftar Item -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
