@@ -1,0 +1,310 @@
+===========================================================
+PANDUAN CLASS DIAGRAM LENGKAP (TABEL & CONTROLLER)
+PROYEK: PENYEWAAN TRUK
+===========================================================
+
+Gaya Class Diagram ini menggabungkan:
+1. ATRIBUT (Bagian Tengah): Kolom database dari tabel migration.
+2. OPERASI/FUNCTION (Bagian Bawah): Fungsi-fungsi dari controller terkait.
+
+Anda bisa membuka file ini di Notepad dan menyalin datanya ke diagram Anda (misal draw.io atau StarUML).
+
+-----------------------------------------------------------
+1. CLASS: users (Model: User)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ nama: varchar(255)
++ email: varchar(255)
++ kata_sandi: varchar(255)
++ alamat: text
++ telepon: varchar(20)
++ umur: int
++ peran_id: bigint
++ gambar: varchar(255)
++ email_verified_at: timestamp
++ remember_token: varchar(100)
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller (Gabungan Sopir, Client & Profil)]
++ index()
++ show(id: int)
++ create()
++ store(request: Request)
++ edit(id: int)
++ update(request: Request, id: int)
++ destroy(id: int)
++ updateProfil(request: Request)
+
+
+-----------------------------------------------------------
+2. CLASS: perans (Model: Peran)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ nama: varchar(255)
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller]
+(Biasanya hanya tabel master statis, tidak ada controller khusus CRUD)
+
+
+-----------------------------------------------------------
+3. CLASS: armadas (Model: Armada)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ no_polisi: varchar(255)
++ sopir_id: bigint (unique)
++ parkir_id: bigint
++ merek: varchar(255)
++ jenis: varchar(255)
++ kapasitas: int
++ deskripsi: text
++ gambar: varchar(255)
++ status: enum('tersedia', 'tidak_tersedia', 'perawatan')
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller - ArmadaController]
++ index()
++ tambah()
++ store(request: Request)
++ show(id: int)
++ edit(id: int)
++ update(request: Request, id: int)
++ destroy(id: int)
+
+
+-----------------------------------------------------------
+4. CLASS: parkirs (Model: Parkir)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ nama: varchar(255)
++ alamat: varchar(255)
++ latitude: decimal(10,7)
++ longitude: decimal(10,7)
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller - ParkirController]
++ index()
++ armada(id: int)
++ tambah()
++ store(request: Request)
++ show(id: int)
++ edit(id: int)
++ update(request: Request, id: int)
++ destroy(id: int)
+
+
+-----------------------------------------------------------
+5. CLASS: keunggulans (Model: Keunggulan)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ judul: varchar(255)
++ gambar: varchar(255)
++ deskripsi: text
++ user_id: bigint
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller - KeunggulanController]
++ index()
++ tambah()
++ store(request: Request)
++ show(id: int)
++ edit(id: int)
++ update(request: Request, id: int)
++ destroy(id: int)
+
+
+-----------------------------------------------------------
+6. CLASS: mitra_kerjas (Model: Mitra)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ nama: varchar(255)
++ logo: varchar(255)
++ user_id: bigint
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller - MitraController]
++ index()
++ tambah()
++ store(request: Request)
++ show(id: int)
++ edit(id: int)
++ update(request: Request, id: int)
++ destroy(id: int)
+
+
+-----------------------------------------------------------
+7. CLASS: penyewaans (Model: Penyewaan)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ kode_transaksi: varchar(255)
++ client_id: bigint
++ harga_total: decimal(15,2)
++ catatan: text
++ status: varchar(255)
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller - PenyewaanAdminController & PenyewaanController]
++ index(request: Request)
++ show(id: int)
++ cetakInvoice(id: int)
++ konfirmasiPembayaran(id: int)
++ tolakPembayaran(request: Request, id: int)
++ destroy(id: int)
++ indexPembatalan()
++ prosesPembatalan(request: Request, id: int)
++ showPembayaran(penyewaanId: int)
++ storePembayaran(request: Request, penyewaanId: int)
++ riwayatPembayaran()
+
+
+-----------------------------------------------------------
+8. CLASS: keranjangs (Model: Keranjang)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ penyewaan_id: bigint
++ sopir_id: bigint
++ armada_id: bigint
++ kode_keranjang: varchar(255)
++ tanggal_mulai: date
++ bukti_selesai: varchar(255)
++ harga_sewa: decimal(15,2)
++ total_jarak: decimal(10,2)
++ estimasi_hari: int
++ tempat_jemput: varchar(255)
++ tempat_antar: varchar(255)
++ barang_muatan: varchar(255)
++ bobot: decimal(10,2)
++ alasan_batal: text
++ bukti_refund: varchar(255)
++ nominal_refund: decimal(15,2)
++ latitude_penjemputan: decimal(10,7)
++ longitude_penjemputan: decimal(10,7)
++ latitude_antar: decimal(10,7)
++ longitude_antar: decimal(10,7)
++ parkir_latitude: decimal(10,7)
++ parkir_longitude: decimal(10,7)
++ status: varchar(255)
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller - KeranjangController]
++ index()
++ tambah()
++ store(request: Request)
++ destroy(id: int)
+
+
+-----------------------------------------------------------
+9. CLASS: pembayarans (Model: Pembayaran)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ penyewaan_id: bigint
++ metode: varchar(255)
++ jenis: enum('cash', 'talangan')
++ jumlah_bayar: decimal(15,2)
++ tanggal_bayar: date
++ bukti_transfer: varchar(255)
++ status: varchar(255)
++ catatan: text
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller - PembayaranAdminController]
++ index()
++ store(request: Request)
++ show(id: int)
+
+
+-----------------------------------------------------------
+10. CLASS: pembatalan_sewas (Model: PembatalanSewa)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ keranjang_id: bigint
++ alasan_batal: text
++ catatan: text
++ bukti_refund: varchar(255)
++ nominal_refund: decimal(15,2)
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller]
+(Diakses/dikelola lewat fungsi prosesPembatalan di PenyewaanAdminController)
+
+
+-----------------------------------------------------------
+11. CLASS: penugasan_sopirs (Model: PenugasanSopir)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ keranjang_id: bigint
++ sopir_id: bigint
++ catatan_penugasan: text
++ bukti_selesai: varchar(255)
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller - PenugasanAdminController & PenugasanController]
++ index()
++ show(id: int)
++ store(request: Request)
++ updateStatus(request: Request, id: int)
++ uploadBuktiSelesai(request: Request, id: int)
+
+
+-----------------------------------------------------------
+12. CLASS: rute_keranjangs (Model: RuteKeranjang)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ keranjang_id: bigint
++ tempat_jemput: varchar(255)
++ tempat_antar: varchar(255)
++ latitude_penjemputan: decimal(10,7)
++ longitude_penjemputan: decimal(10,7)
++ latitude_antar: decimal(10,7)
++ longitude_antar: decimal(10,7)
++ parkir_latitude: decimal(10,7)
++ parkir_longitude: decimal(10,7)
++ total_jarak: decimal(10,2)
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller]
+(Dikelola otomatis melalui KeranjangController saat klien memesan rute)
+
+
+-----------------------------------------------------------
+13. CLASS: notifikasis (Model: Notifikasi)
+-----------------------------------------------------------
+[Atribut / Kolom Tabel]
++ id: bigint
++ user_id: bigint
++ penyewaan_id: bigint
++ judul: varchar(255)
++ pesan: text
++ url: varchar(255)
++ is_read: boolean
++ created_at: timestamp
++ updated_at: timestamp
+
+[Operasi / Method Controller - NotifikasiController]
++ index()
++ markAsRead(id: int)
++ markAllAsRead()
