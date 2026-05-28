@@ -80,6 +80,7 @@ class KeranjangController extends Controller
             'tempat_jemput' => 'required|string',
             'tempat_antar' => 'required|string',
             'barang_muatan' => 'required|string',
+            'bobot' => 'required|integer|min:1',
             'latitude_penjemputan' => 'required|numeric',
             'longitude_penjemputan' => 'required|numeric',
             'latitude_antar' => 'required|numeric',
@@ -89,6 +90,13 @@ class KeranjangController extends Controller
             'harga_sewa' => 'required|numeric',
             'total_jarak' => 'required|numeric'
         ]);
+
+        $armada = Armada::findOrFail($validated['armada_id']);
+        if ($validated['bobot'] > $armada->kapasitas) {
+            return redirect()->back()
+                ->with('error', 'Bobot muatan (' . $validated['bobot'] . ' Ton) melebihi kapasitas armada ' . $armada->no_polisi . ' (' . $armada->kapasitas . ' Ton).')
+                ->withInput();
+        }
 
         // Tambahkan client_id = 2 otomatis
         $validated['client_id'] = 2;
@@ -133,6 +141,7 @@ class KeranjangController extends Controller
                 'tempat_jemput' => 'required|string',
                 'tempat_antar' => 'required|string',
                 'barang_muatan' => 'required|string',
+                'bobot' => 'required|integer|min:1',
                 'latitude_penjemputan' => 'required|numeric',
                 'longitude_penjemputan' => 'required|numeric',
                 'latitude_antar' => 'required|numeric',
@@ -143,6 +152,13 @@ class KeranjangController extends Controller
                 'total_jarak' => 'required|numeric',
                 'harga_tawar' => 'nullable|numeric|min:0'
             ]);
+
+            $armada = Armada::findOrFail($validated['armada_id']);
+            if ($validated['bobot'] > $armada->kapasitas) {
+                return redirect()->back()
+                    ->with('error', 'Bobot muatan (' . $validated['bobot'] . ' Ton) melebihi kapasitas armada ' . $armada->no_polisi . ' (' . $armada->kapasitas . ' Ton).')
+                    ->withInput();
+            }
 
             // Validasi harga tawar jika ada
             if (isset($validated['harga_tawar']) && $validated['harga_tawar'] > 0) {

@@ -11,7 +11,12 @@
             <div class="hidden md:flex items-center space-x-8">
                 <a href="{{ route('home') }}" class="{{ Request::is('/') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Beranda</a>
                 <a href="{{ route('daftarArmada') }}" class="{{ Request::is('daftar-armada*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Armada</a>
+                <a href="{{ url('/#keunggulan') }}" class="text-gray-700 hover:text-blue-600 transition">Keunggulan</a>
+                <a href="{{ url('/#tentang') }}" class="text-gray-700 hover:text-blue-600 transition">Tentang Kami</a>
+                <a href="{{ url('/#client') }}" class="text-gray-700 hover:text-blue-600 transition">Client</a>
+                @auth
                 <a href="{{ route('pemesanan') }}" class="{{ Request::is('pemesanan*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Penyewaan</a>
+                @endauth
                 @auth
                     @if(Auth::user()->peran_id == 1)
                         <a href="{{ route('dashboard') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Dashboard</a>
@@ -59,7 +64,12 @@
             
                 <a href="{{ route('home') }}" class="{{ Request::is('/') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Beranda</a>
                 <a href="{{ route('daftarArmada') }}" class="{{ Request::is('daftar-armada*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Armada</a>
+                <a href="{{ url('/#keunggulan') }}" class="text-gray-700 hover:text-blue-600 transition text-left">Keunggulan</a>
+                <a href="{{ url('/#tentang') }}" class="text-gray-700 hover:text-blue-600 transition text-left">Tentang Kami</a>
+                <a href="{{ url('/#client') }}" class="text-gray-700 hover:text-blue-600 transition text-left">Client</a>
+                @auth
                 <a href="{{ route('pemesanan') }}" class="{{ Request::is('pemesanan*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Penyewaan</a>
+                @endauth
                 @auth
                     @if(Auth::user()->peran_id == 1)
                         <a href="{{ route('dashboard') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Dashboard</a>
@@ -95,8 +105,17 @@
 
 <!-- JavaScript untuk Mobile Menu -->
 <script>
-    document.getElementById('mobile-menu-button').addEventListener('click', function() {
-        const menu = document.getElementById('mobile-menu');
-        menu.classList.toggle('hidden');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    mobileMenuButton.addEventListener('click', function() {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Close mobile menu when any link is clicked
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
     });
 </script>

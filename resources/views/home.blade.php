@@ -39,7 +39,7 @@
     </section>
 
     <!-- Nilai Unggulan Perusahaan -->
-    <section class="py-24 bg-gray-50">
+    <section id="keunggulan" class="py-24 bg-gray-50">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12" data-aos="fade-up">
                 <h2 class="text-4xl font-bold text-gray-800 mb-4">NILAI UNGGULAN PERUSAHAAN</h2>
@@ -193,7 +193,7 @@
                                 <div class="relative h-48 overflow-hidden z-10">
                                     @php
                                         $firstKeranjang = $penyewaan->keranjangs->first();
-                                        $buktiSelesai = $firstKeranjang->bukti_selesai ?? null;
+                                        $buktiSelesai = $firstKeranjang->penugasan->bukti_selesai ?? $firstKeranjang->bukti_selesai ?? null;
                                     @endphp
                                     
                                     @if($buktiSelesai)
@@ -238,11 +238,11 @@
                                                 
                                                 <div class="mb-4">
                                                     <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-0.5 group-hover:text-blue-200 transition-colors duration-300">Asal</p>
-                                                    <p class="text-xs text-gray-700 font-bold line-clamp-1 group-hover:text-white transition-colors duration-300">{{ $firstKeranjang->tempat_jemput ?? '-' }}</p>
+                                                    <p class="text-xs text-gray-700 font-bold line-clamp-1 group-hover:text-white transition-colors duration-300">{{ $firstKeranjang->rute->tempat_jemput ?? $firstKeranjang->tempat_jemput ?? '-' }}</p>
                                                 </div>
                                                 <div>
                                                     <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-0.5 group-hover:text-blue-200 transition-colors duration-300">Tujuan</p>
-                                                    <p class="text-xs text-gray-700 font-bold line-clamp-1 group-hover:text-white transition-colors duration-300">{{ $firstKeranjang->tempat_antar ?? '-' }}</p>
+                                                    <p class="text-xs text-gray-700 font-bold line-clamp-1 group-hover:text-white transition-colors duration-300">{{ $firstKeranjang->rute->tempat_antar ?? $firstKeranjang->tempat_antar ?? '-' }}</p>
                                                 </div>
                                             </div>
 
@@ -300,7 +300,7 @@
 
     <!-- Bekerja Sama Dengan Section -->
 <!-- Bekerja Sama Dengan Section -->
-<section class="py-24 bg-blue-50">
+<section id="client" class="py-24 bg-blue-50">
     <div class="container mx-auto px-6">
         <div class="text-center mb-12">
             <h2 class="text-4xl font-bold text-gray-800 mb-4">BEKERJA SAMA DENGAN</h2>

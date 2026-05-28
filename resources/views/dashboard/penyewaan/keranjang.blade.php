@@ -130,6 +130,11 @@
                                     <div class="mb-1">
                                         <i class="fas fa-box text-info"></i>
                                         <strong>Muatan:</strong> {{ $item->barang_muatan }}
+                                        @if($item->bobot)
+                                            <span class="mx-2">|</span>
+                                            <i class="fas fa-weight-hanging text-dark"></i>
+                                            <strong>Bobot:</strong> {{ $item->bobot }} Ton
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="col-md-3 text-right">

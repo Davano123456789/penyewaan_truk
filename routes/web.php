@@ -26,10 +26,10 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/', [FrontController::class , 'index'])->name('home');
 // Halaman form pemesanan
-Route::get('/pemesanan', [FrontController::class , 'pemesanan'])->name('pemesanan');
+Route::get('/pemesanan', [FrontController::class , 'pemesanan'])->name('pemesanan')->middleware('auth');
 
 // Submit form ke keranjang
-Route::post('/pemesanan', [FrontController::class , 'storePemesanan'])->name('pemesanan.store');
+Route::post('/pemesanan', [FrontController::class , 'storePemesanan'])->name('pemesanan.store')->middleware('auth');
 // Halaman keranjang
 Route::get('/api/armada-tersedia', [FrontController::class , 'getArmadaTersedia']);
 Route::get('/daftar-armada', [FrontController::class , 'daftarArmada'])->name('daftarArmada');
@@ -168,7 +168,7 @@ Route::delete('/dashboard/penyewaan/{id}', [PenyewaanController::class , 'destro
 
 // Keranjang Item
 Route::delete('/dashboard/keranjang/{id}', [KeranjangController::class , 'destroy'])->name('keranjang.destroy');
-Route::get('/pemesanan/{id}/edit', [FrontController::class , 'pemesanan'])->name('keranjang.edit');
+Route::get('/pemesanan/{id}/edit', [FrontController::class , 'pemesanan'])->name('keranjang.edit')->middleware('auth');
 Route::put('/dashboard/keranjang/{id}', [KeranjangController::class , 'update'])->name('keranjang.update');
 Route::post('/dashboard/keranjang/{id}/ajukan-batal', [KeranjangController::class , 'ajukanBatal'])->name('keranjang.ajukan-batal');
 

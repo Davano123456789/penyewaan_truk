@@ -11,26 +11,12 @@ class Keranjang extends Model
 
     protected $fillable = [
         'penyewaan_id',
-        'sopir_id',  // Ini juga merujuk ke users.id
         'armada_id',
         'tanggal_mulai',
-        'bukti_selesai',
         'harga_sewa',
-        'total_jarak',
         'estimasi_hari',
-        'tempat_jemput',
-        'tempat_antar',
         'barang_muatan',
         'bobot',
-        'alasan_batal',
-        'bukti_refund',
-        'nominal_refund',
-        'latitude_penjemputan',
-        'longitude_penjemputan',
-        'latitude_antar',
-        'longitude_antar',
-        'parkir_latitude',
-        'parkir_longitude',
         'status',
         'kode_keranjang'
     ];
@@ -47,10 +33,16 @@ class Keranjang extends Model
         return $this->belongsTo(Armada::class);
     }
 
-    // Relasi ke User (Sopir) - langsung dari keranjang
+    // Relasi ke User (Sopir) - lewat penugasan_sopirs
     public function sopir()
     {
-        return $this->belongsTo(User::class, 'sopir_id');
+        return $this->hasOneThrough(User::class, PenugasanSopir::class, 'keranjang_id', 'id', 'id', 'sopir_id');
+    }
+
+    // Accessor untuk backward compatibility jika memanggil $keranjang->sopir_id secara langsung
+    public function getSopirIdAttribute()
+    {
+        return $this->penugasan->sopir_id ?? null;
     }
 
     // Relasi ke Pembatalan Sewa

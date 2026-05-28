@@ -225,10 +225,16 @@
                             <td>
                                 @if($penyewaan->pembayaran->status == 'lunas')
                                     <span class="badge badge-success"><i class="fas fa-check-circle"></i> Lunas</span>
+                                @elseif($penyewaan->pembayaran->status == 'menunggu_konfirmasi')
+                                    <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Menunggu Konfirmasi</span>
                                 @elseif($penyewaan->pembayaran->status == 'menunggu_pelunasan')
-                                    <span class="badge badge-warning"><i class="fas fa-clock"></i> Menunggu Pelunasan</span>
+                                    <span class="badge badge-info"><i class="fas fa-clock"></i> Menunggu Pelunasan</span>
                                 @elseif($penyewaan->pembayaran->status == 'menunggu_konfirmasi_pelunasan')
-                                    <span class="badge badge-danger"><i class="fas fa-hourglass-half"></i> Menunggu Konfirmasi Pelunasan</span>
+                                    <span class="badge badge-primary"><i class="fas fa-hourglass-half"></i> Menunggu Konfirmasi Pelunasan</span>
+                                @elseif($penyewaan->pembayaran->status == 'ditolak')
+                                    <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Ditolak</span>
+                                @else
+                                    <span class="badge badge-secondary">{{ ucfirst(str_replace('_', ' ', $penyewaan->pembayaran->status)) }}</span>
                                 @endif
                             </td>
                         </tr>

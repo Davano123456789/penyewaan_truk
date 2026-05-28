@@ -50,8 +50,6 @@
                                     <td class="text-center">{{ $key + 1 }}</td>
                                     <td>
                                         <span class="badge badge-info">{{ $penugasan->kode_keranjang ?? '-' }}</span>
-                                        <br>
-                                        <small class="text-muted">#{{ $penugasan->penyewaan->kode_transaksi ?? 'TANPA KODE' }}</small>
                                     </td>
                                     <td>{{ $penugasan->armada->no_polisi ?? '-' }}</td>
                                     <td>{{ $penugasan->tanggal_mulai ? \Carbon\Carbon::parse($penugasan->tanggal_mulai)->format('d-m-Y') : '-' }}

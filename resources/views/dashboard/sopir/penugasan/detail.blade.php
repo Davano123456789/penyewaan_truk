@@ -77,6 +77,13 @@
                         <textarea class="form-control" rows="2" readonly>{{ $penugasan->barang_muatan }}</textarea>
                     </div>
 
+                    @if($penugasan->bobot)
+                    <div class="form-group">
+                        <label class="font-weight-bold">Bobot Muatan</label>
+                        <input type="text" class="form-control" value="{{ $penugasan->bobot }} Ton" readonly>
+                    </div>
+                    @endif
+
                     <div class="form-group">
                         <label class="font-weight-bold">Status</label>
                         <div>

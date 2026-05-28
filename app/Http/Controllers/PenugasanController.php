@@ -18,7 +18,9 @@ class PenugasanController extends Controller
         // Ambil semua keranjang/penugasan yang sopir_id sesuai user login
         // Status bisa aktif atau selesai (tampilkan semua penugasan, baik yang sedang berjalan maupun yang sudah selesai)
         $penugasans = Keranjang::with(['penyewaan', 'armada', 'rute', 'penugasan'])
-            ->where('sopir_id', $sopirId)
+            ->whereHas('penugasan', function($query) use ($sopirId) {
+                $query->where('sopir_id', $sopirId);
+            })
             ->whereHas('penyewaan', function($query) {
                 $query->whereIn('status', ['aktif', 'selesai']);
             })
@@ -33,7 +35,9 @@ class PenugasanController extends Controller
 
         $penugasan = Keranjang::with(['penyewaan', 'armada', 'rute', 'penugasan'])
             ->where('id', $id)
-            ->where('sopir_id', $sopirId)
+            ->whereHas('penugasan', function($query) use ($sopirId) {
+                $query->where('sopir_id', $sopirId);
+            })
             ->whereHas('penyewaan', function($query) {
                 $query->whereIn('status', ['aktif', 'selesai']);
             })
@@ -56,7 +60,9 @@ class PenugasanController extends Controller
             $sopirId = Auth::id();
 
             $penugasan = Keranjang::where('id', $id)
-                ->where('sopir_id', $sopirId)
+                ->whereHas('penugasan', function($query) use ($sopirId) {
+                    $query->where('sopir_id', $sopirId);
+                })
                 ->whereHas('penyewaan', function($query) {
                     $query->whereIn('status', ['aktif', 'selesai']);
                 })

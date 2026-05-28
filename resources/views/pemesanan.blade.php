@@ -241,9 +241,20 @@
                             </div>
                         </div>
 
-                        <div class="mt-4">
-                            <label class="block text-gray-700 font-semibold mb-2">Barang Muatan</label>
-                            <textarea name="barang_muatan" id="barang_muatan" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Deskripsi barang yang akan dimuat..." required></textarea>
+                        <div class="grid md:grid-cols-3 gap-6 mt-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-gray-700 font-semibold mb-2">
+                                    <i class="fas fa-box text-blue-500"></i> Barang Muatan
+                                </label>
+                                <textarea name="barang_muatan" id="barang_muatan" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Deskripsi barang yang akan dimuat..." required></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">
+                                    <i class="fas fa-weight-hanging text-blue-500"></i> Bobot Muatan (Ton)
+                                </label>
+                                <input type="number" name="bobot" id="bobot" min="1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Contoh: 5" required oninput="checkCapacity()">
+                                <p id="bobot-warning" class="text-xs text-red-500 mt-2 font-semibold hidden"></p>
+                            </div>
                         </div>
                         <div class="mt-4">
     <label class="block text-gray-700 font-semibold mb-2">
@@ -344,6 +355,23 @@ let hargaAsli = 0;
 let editMode = @json(isset($editItem));
 let editData = @json($editItem ?? null);
 let currentArmadaId = editData ? editData.armada_id : null;
+let selectedArmadaKapasitas = null;
+
+function checkCapacity() {
+    const bobotInput = document.getElementById('bobot');
+    const warningElement = document.getElementById('bobot-warning');
+    if (!bobotInput || !warningElement) return;
+
+    const bobotVal = parseFloat(bobotInput.value);
+    
+    if (selectedArmadaKapasitas && bobotVal > selectedArmadaKapasitas) {
+        warningElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Peringatan: Bobot muatan (${bobotVal} Ton) melebihi kapasitas maksimal armada (${selectedArmadaKapasitas} Ton)!`;
+        warningElement.classList.remove('hidden');
+    } else {
+        warningElement.classList.add('hidden');
+        warningElement.innerHTML = '';
+    }
+}
 
 // Initialize map
 document.addEventListener('DOMContentLoaded', function() {
@@ -421,6 +449,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 3. Set Inputs
         document.getElementById('tanggal_mulai').value = editData.tanggal_mulai;
         document.getElementById('barang_muatan').value = editData.barang_muatan;
+        document.getElementById('bobot').value = editData.bobot || '';
         
         // 4. Set Price Tawar if different from base (assuming we store final price in harga_sewa)
         // This part depends on how you want to handle existing pricing
@@ -538,6 +567,37 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
     }
 }
 
+function updateParkirSelection(parkir) {
+    nearestParkir = parkir;
+    
+    if (markerParkir) map.removeLayer(markerParkir);
+    
+    markerParkir = L.marker([parkir.latitude, parkir.longitude], {
+        icon: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        })
+    }).addTo(map).bindPopup(`<b>Parkir Terdekat</b><br>${parkir.nama}`);
+
+    document.getElementById('parkirInfo').style.display = 'block';
+    document.getElementById('parkirNama').textContent = parkir.nama;
+    document.getElementById('parkirAlamat').textContent = parkir.alamat;
+    
+    let distance = parseFloat(parkir.distance);
+    if (isNaN(distance) && jemputCoords) {
+        distance = calculateDistance(jemputCoords.lat, jemputCoords.lng, parkir.latitude, parkir.longitude);
+    }
+    
+    document.getElementById('parkirJarak').textContent = !isNaN(distance) ? distance.toFixed(2) : '-';
+    
+    document.getElementById('parkir_latitude').value = parkir.latitude;
+    document.getElementById('parkir_longitude').value = parkir.longitude;
+}
+
 function findNearestParkir(lat, lng) {
     let minDistance = Infinity;
     let nearest = null;
@@ -551,28 +611,7 @@ function findNearestParkir(lat, lng) {
     });
 
     if (nearest) {
-        nearestParkir = nearest;
-        
-        if (markerParkir) map.removeLayer(markerParkir);
-        
-        markerParkir = L.marker([nearest.latitude, nearest.longitude], {
-            icon: L.icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            })
-        }).addTo(map).bindPopup(`<b>Parkir Terdekat</b><br>${nearest.nama}`);
-
-        document.getElementById('parkirInfo').style.display = 'block';
-        document.getElementById('parkirNama').textContent = nearest.nama;
-        document.getElementById('parkirAlamat').textContent = nearest.alamat;
-        document.getElementById('parkirJarak').textContent = minDistance.toFixed(2);
-        
-        document.getElementById('parkir_latitude').value = nearest.latitude;
-        document.getElementById('parkir_longitude').value = nearest.longitude;
+        updateParkirSelection(nearest);
     }
 }
 
@@ -678,6 +717,11 @@ async function loadArmada(lat, lng) {
         const response = await fetch(`/api/armada-tersedia?lat=${lat}&lng=${lng}&jenis=${selectedJenisTruk}${currentArmadaId ? '&current_armada_id='+currentArmadaId : ''}`);
         const result = await response.json();
 
+        // Update parkir selection dynamically if the backend recommended a different parking lot
+        if (result.parkir) {
+            updateParkirSelection(result.parkir);
+        }
+
         const armadaList = document.getElementById('armadaList');
         
         if (result.data.length === 0) {
@@ -691,7 +735,7 @@ async function loadArmada(lat, lng) {
         }
 
         armadaList.innerHTML = result.data.map(armada => `
-            <div class="armada-card p-4 rounded-lg cursor-pointer" onclick="selectArmada(${armada.id})">
+            <div class="armada-card p-4 rounded-lg cursor-pointer" onclick="selectArmada(${armada.id}, ${armada.kapasitas})">
                 <div class="flex items-start gap-3">
                     <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-truck text-blue-600 text-xl"></i>
@@ -708,7 +752,7 @@ async function loadArmada(lat, lng) {
 
         // Auto-select current armada if editing
         if (editMode && currentArmadaId) {
-            const currentCard = document.querySelector(`.armada-card[onclick="selectArmada(${currentArmadaId})"]`);
+            const currentCard = document.querySelector(`.armada-card[onclick*="selectArmada(${currentArmadaId},"]`);
             if (currentCard) {
                 currentCard.click();
             }
@@ -718,13 +762,23 @@ async function loadArmada(lat, lng) {
     }
 }
 
-function selectArmada(id) {
+function selectArmada(id, kapasitas) {
     document.getElementById('armada_id').value = id;
+    selectedArmadaKapasitas = kapasitas;
+    
+    // Check capacity dynamically
+    checkCapacity();
     
     document.querySelectorAll('.armada-card').forEach(card => {
         card.classList.remove('selected');
     });
-    event.currentTarget.classList.add('selected');
+    
+    if (window.event && event.currentTarget) {
+        event.currentTarget.classList.add('selected');
+    } else {
+        const card = document.querySelector(`.armada-card[onclick*="selectArmada(${id},"]`);
+        if (card) card.classList.add('selected');
+    }
 
     if (antarCoords && jemputCoords && nearestParkir) {
         calculateRouteWithParkir(nearestParkir.latitude, nearestParkir.longitude);
@@ -877,6 +931,19 @@ document.getElementById('formPemesanan').addEventListener('submit', function(e) 
         
         // Update harga_sewa dengan harga tawar jika valid
         document.getElementById('harga_sewa').value = hargaTawar;
+    }
+
+    // Validasi bobot vs kapasitas armada
+    const bobotVal = parseFloat(document.getElementById('bobot').value);
+    if (selectedArmadaKapasitas && bobotVal > selectedArmadaKapasitas) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Bobot Melebihi Kapasitas',
+            text: `Bobot muatan (${bobotVal} Ton) melebihi kapasitas maksimal armada yang dipilih (${selectedArmadaKapasitas} Ton)!`,
+            confirmButtonColor: '#ef4444'
+        });
+        return;
     }
 });
 </script>

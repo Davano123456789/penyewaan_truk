@@ -29,10 +29,10 @@
                         {{ $item->tanggal_mulai ? \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M Y') : '-' }}
                     </td>
                     <td style="border: 1px solid #ddd; padding: 10px;">
-                        {{ $item->tempat_jemput ?? '-' }}
+                        {{ $item->rute->tempat_jemput ?? '-' }}
                     </td>
                     <td style="border: 1px solid #ddd; padding: 10px;">
-                        {{ $item->tempat_antar ?? '-' }}
+                        {{ $item->rute->tempat_antar ?? '-' }}
                     </td>
                 </tr>
             @empty

@@ -26,7 +26,7 @@ class FrontController extends Controller
         $keunggulans = Keunggulan::orderBy('created_at', 'desc')->get();
 
         // Ambil riwayat penyewaan yang selesai
-        $riwayatPenyewaan = Penyewaan::with(['client', 'keranjangs.armada'])
+        $riwayatPenyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'keranjangs.rute', 'keranjangs.penugasan'])
             ->where('status', 'selesai')
             ->orderBy('updated_at', 'desc')
             ->take(6)
@@ -72,50 +72,74 @@ public function getArmadaTersedia(Request $request)
     $lat = $request->query('lat');
     $lng = $request->query('lng');
     $jenis = $request->query('jenis');
+    $currentArmadaId = $request->query('current_armada_id');
 
-    // Cari parkir terdekat
-    $nearestParkir = Parkir::selectRaw(
+    // Ambil semua tempat parkir yang diurutkan dari terdekat ke terluar
+    $parkirs = Parkir::selectRaw(
         "*, 
         (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance",
         [$lat, $lng, $lat]
     )
     ->orderBy('distance', 'asc')
-    ->first();
+    ->get();
 
-    if (!$nearestParkir) {
-        return response()->json(['data' => []]);
+    if ($parkirs->isEmpty()) {
+        return response()->json(['data' => [], 'parkir' => null]);
     }
 
-    // Ambil armada yang AKTIF saja, sesuai jenis, dan di parkir terdekat
-    $query = Armada::where('parkir_id', $nearestParkir->id)
-        ->where('jenis', $jenis)
-        ->with('sopir');
+    $chosenParkir = null;
+    $armadas = [];
 
-    // Jika sedang edit, masukkan juga armada yang sedang digunakan di item tersebut
-    $currentArmadaId = $request->query('current_armada_id');
-    if ($currentArmadaId) {
-        $query->where(function($q) use ($currentArmadaId) {
-            $q->where('status', 'tersedia')
-              ->orWhere('id', $currentArmadaId);
-        });
-    } else {
-        $query->where('status', 'tersedia');
+    foreach ($parkirs as $parkir) {
+        // Ambil armada yang AKTIF saja, sesuai jenis, dan di parkir ini
+        $query = Armada::where('parkir_id', $parkir->id)
+            ->where('jenis', $jenis)
+            ->with('sopir');
+
+        // Jika sedang edit, masukkan juga armada yang sedang digunakan di item tersebut
+        if ($currentArmadaId) {
+            $query->where(function($q) use ($currentArmadaId) {
+                $q->where('status', 'tersedia')
+                  ->orWhere('id', $currentArmadaId);
+            });
+        } else {
+            $query->where('status', 'tersedia');
+        }
+
+        $availableArmadas = $query->get();
+
+        if ($availableArmadas->count() > 0) {
+            $chosenParkir = $parkir;
+            $armadas = $availableArmadas->map(function($armada) {
+                return [
+                    'id' => $armada->id,
+                    'no_polisi' => $armada->no_polisi,
+                    'merek' => $armada->merek,
+                    'jenis' => $armada->jenis,
+                    'kapasitas' => $armada->kapasitas,
+                    'sopir' => $armada->sopir->nama ?? 'Tidak ada sopir',
+                    'status' => $armada->status
+                ];
+            })->toArray();
+            break; // Berhenti mencari karena sudah menemukan parkir terdekat yang memiliki armada tersedia
+        }
     }
 
-    $armadas = $query->get()
-        ->map(function($armada) {
-            return [
-                'id' => $armada->id,
-                'no_polisi' => $armada->no_polisi,
-                'merek' => $armada->merek,
-                'jenis' => $armada->jenis,
-                'kapasitas' => $armada->kapasitas,
-                'sopir' => $armada->sopir->nama ?? 'Tidak ada sopir',
-                'status' => $armada->status
-            ];
-        });
+    // Fallback: Jika tidak ada parkir yang memiliki armada dari jenis terpilih, gunakan parkir terdekat pertama
+    if (!$chosenParkir && $parkirs->isNotEmpty()) {
+        $chosenParkir = $parkirs->first();
+    }
 
-    return response()->json(['data' => $armadas]);
+    return response()->json([
+        'data' => $armadas,
+        'parkir' => $chosenParkir ? [
+            'id' => $chosenParkir->id,
+            'nama' => $chosenParkir->nama,
+            'alamat' => $chosenParkir->alamat,
+            'latitude' => $chosenParkir->latitude,
+            'longitude' => $chosenParkir->longitude
+        ] : null
+    ]);
 }
 
 public function storePemesanan(Request $request)
@@ -128,6 +152,7 @@ public function storePemesanan(Request $request)
             'tempat_jemput' => 'required|string',
             'tempat_antar' => 'required|string',
             'barang_muatan' => 'required|string',
+            'bobot' => 'required|integer|min:1',
             'latitude_penjemputan' => 'required|numeric',
             'longitude_penjemputan' => 'required|numeric',
             'latitude_antar' => 'required|numeric',
@@ -145,6 +170,13 @@ public function storePemesanan(Request $request)
         if ($armada->status !== 'tersedia') {
             return redirect()->back()
                 ->with('error', 'Armada sudah tidak tersedia. Silakan pilih armada lain.')
+                ->withInput();
+        }
+
+        // CEK APAKAH BOBOT MELEBIHI KAPASITAS ARMADA
+        if ($validated['bobot'] > $armada->kapasitas) {
+            return redirect()->back()
+                ->with('error', 'Bobot muatan (' . $validated['bobot'] . ' Ton) melebihi kapasitas armada ' . $armada->no_polisi . ' (' . $armada->kapasitas . ' Ton).')
                 ->withInput();
         }
         
@@ -188,21 +220,12 @@ public function storePemesanan(Request $request)
         $keranjang = Keranjang::create([
             'penyewaan_id' => $penyewaan->id,
             'kode_keranjang' => $kodeKeranjang,
-            'sopir_id' => $armada->sopir_id,
             'armada_id' => $validated['armada_id'],
             'tanggal_mulai' => $validated['tanggal_mulai'],
             'harga_sewa' => $validated['harga_sewa'],
-            'total_jarak' => $validated['total_jarak'],
             'estimasi_hari' => $validated['estimasi_hari'],
-            'tempat_jemput' => $validated['tempat_jemput'],
-            'tempat_antar' => $validated['tempat_antar'],
             'barang_muatan' => $validated['barang_muatan'],
-            'latitude_penjemputan' => $validated['latitude_penjemputan'],
-            'longitude_penjemputan' => $validated['longitude_penjemputan'],
-            'latitude_antar' => $validated['latitude_antar'],
-            'longitude_antar' => $validated['longitude_antar'],
-            'parkir_latitude' => $validated['parkir_latitude'],
-            'parkir_longitude' => $validated['parkir_longitude'],
+            'bobot' => $validated['bobot'],
             'status' => 'pending'
         ]);
 

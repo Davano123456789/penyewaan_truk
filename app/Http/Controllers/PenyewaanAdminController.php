@@ -94,13 +94,15 @@ class PenyewaanAdminController extends Controller
                 try {
                     \Log::info('=== START Pengiriman Email Penugasan ===');
                     
-                    $keranjangs = \App\Models\Keranjang::with(['sopir', 'armada'])
+                    $keranjangs = \App\Models\Keranjang::with(['penugasan.sopir', 'armada', 'rute'])
                         ->where('penyewaan_id', $penyewaan->id)
                         ->get();
 
                     \Log::info('Total keranjang untuk penyewaan_id=' . $penyewaan->id . ': ' . $keranjangs->count());
                     
-                    $groupedBySopir = $keranjangs->groupBy('sopir_id');
+                    $groupedBySopir = $keranjangs->groupBy(function($item) {
+                        return $item->penugasan->sopir_id ?? null;
+                    });
                     \Log::info('Jumlah grup sopir: ' . $groupedBySopir->count());
 
                     foreach ($groupedBySopir as $sopirId => $items) {
@@ -112,7 +114,7 @@ class PenyewaanAdminController extends Controller
                         }
 
                         $first = $items->first();
-                        $sopir = $first->sopir;
+                        $sopir = $first->penugasan->sopir ?? null;
 
                         if (!$sopir) {
                             \Log::warning('Sopir tidak ditemukan untuk sopir_id=' . $sopirId . ' pada penyewaan ' . $penyewaan->id);
@@ -154,7 +156,7 @@ class PenyewaanAdminController extends Controller
                                 foreach ($items as $index => $item) {
                                     $num = $items->count() > 1 ? ($index + 1) . ". " : "";
                                     $pesanWA .= "{$num}*Tanggal*: " . date('d-m-Y', strtotime($item->tanggal_mulai)) . "\n";
-                                    $pesanWA .= "   *Rute*: {$item->tempat_jemput} -> {$item->tempat_antar}\n";
+                                    $pesanWA .= "   *Rute*: " . ($item->rute->tempat_jemput ?? '-') . " -> " . ($item->rute->tempat_antar ?? '-') . "\n";
                                     $pesanWA .= "   *Muatan*: {$item->barang_muatan}\n";
                                     $pesanWA .= "   *Armada*: {$item->armada->no_polisi} ({$item->armada->merek})\n\n";
                                 }
