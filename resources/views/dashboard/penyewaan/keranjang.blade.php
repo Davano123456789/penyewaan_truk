@@ -6,7 +6,7 @@
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">
-                Daftar Keranjang - Pesanan #{{ str_pad($penyewaan->id, 5, '0', STR_PAD_LEFT) }}
+                Daftar Keranjang
             </h1>
             <div>
                 <a href="{{ route('penyewaan.invoice', $penyewaan->id) }}" class="btn btn-primary btn-sm mr-2">
@@ -26,8 +26,8 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3">
-                        <p class="mb-1 text-muted">ID Pesanan</p>
-                        <h5><strong>#{{ str_pad($penyewaan->id, 5, '0', STR_PAD_LEFT) }}</strong></h5>
+                        <p class="mb-1 text-muted">Kode Transaksi</p>
+                        <h6><strong>{{ $penyewaan->kode_transaksi }}</strong></h6>
                     </div>
                     <div class="col-md-3">
                         <p class="mb-1 text-muted">Status</p>
@@ -38,8 +38,10 @@
                                 <span class="badge badge-info">Menunggu Pembayaran</span>
                             @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
                                 <span class="badge badge-primary">Menunggu Konfirmasi Pembayaran</span>
+                            @elseif($penyewaan->status == 'aktif')
+                                <span class="badge badge-success">Aktif</span>
                             @elseif($penyewaan->status == 'selesai')
-                                <span class="badge badge-primary">Selesai</span>
+                                <span class="badge badge-dark">Selesai</span>
                             @elseif($penyewaan->status == 'dibatalkan')
                                 <span class="badge badge-danger">Dibatalkan</span>
                             @endif
@@ -112,9 +114,9 @@
                             </div>
                         </div>
                         <div class="col-md-4 text-right">
-                            @if($penyewaan->pembayaran->status === 'menunggu_pelunasan')
+                            @if(in_array($penyewaan->pembayaran->status, ['menunggu_pelunasan', 'ditolak']))
                                 <a href="{{ route('pembayaran.show', $penyewaan->id) }}" class="btn btn-warning btn-block">
-                                    <i class="fas fa-upload"></i> Bayar Sisa Tagihan (Pelunasan)
+                                    <i class="fas fa-upload"></i> {{ $penyewaan->pembayaran->status === 'ditolak' ? 'Bayar Ulang Sisa Tagihan' : 'Bayar Sisa Tagihan (Pelunasan)' }}
                                 </a>
                             @elseif($penyewaan->pembayaran->status === 'menunggu_konfirmasi_pelunasan')
                                 <div class="alert alert-info text-center mb-0">
@@ -138,56 +140,90 @@
             </div>
             <div class="card-body">
                 @forelse($penyewaan->keranjangs as $index => $item)
-                    <div class="card mb-4 shadow-sm border-0">
-                        <div class="card-body py-4 px-3">
+                    @php
+                        $borderClass = 'border-left-secondary';
+                        if ($item->status == 'pending' || in_array($item->status, ['menunggu_pembayaran', 'menunggu_konfirmasi_pembayaran'])) {
+                            $borderClass = 'border-left-warning';
+                        } elseif (in_array($item->status, ['aktif', 'revisi_bukti', 'menunggu_konfirmasi_selesai'])) {
+                            $borderClass = 'border-left-info';
+                        } elseif ($item->status == 'selesai') {
+                            $borderClass = 'border-left-success';
+                        } elseif ($item->status == 'dibatalkan' || $item->status == 'menunggu_konfirmasi_batal') {
+                            $borderClass = 'border-left-danger';
+                        }
+                    @endphp
+                    <div class="card mb-4 shadow-sm {{ $borderClass }}">
+                        <div class="card-body py-4 px-4">
                             <div class="row align-items-center">
                                 <div class="col-md-9">
-                                    <div class="mb-2">
-                                        <span class="badge badge-primary mr-2">Item #{{ $index + 1 }}</span>
+                                    <div class="mb-3">
+                                        <span class="badge badge-light border text-secondary mr-2">{{ $item->kode_keranjang }}</span>
                                         @if($item->status == 'pending')
                                             <span class="badge badge-secondary mr-2"><i class="fas fa-clock"></i> Pending</span>
                                         @elseif(in_array($item->status, ['menunggu_pembayaran', 'menunggu_konfirmasi_pembayaran']))
-                                            <span class="badge badge-secondary mr-2"><i class="fas fa-hourglass-half"></i>
-                                                Persiapan</span>
+                                            <span class="badge badge-secondary mr-2"><i class="fas fa-hourglass-half"></i> Persiapan</span>
                                         @elseif(in_array($item->status, ['aktif', 'revisi_bukti', 'menunggu_konfirmasi_selesai']))
-                                            <span class="badge badge-info mr-2"><i class="fas fa-truck-moving"></i> Sedang
-                                                Berjalan</span>
+                                            <span class="badge badge-info mr-2"><i class="fas fa-truck-moving"></i> Sedang Berjalan</span>
                                         @elseif($item->status == 'selesai')
-                                            <span class="badge badge-success mr-2"><i class="fas fa-check-circle"></i>
-                                                Selesai</span>
+                                            <span class="badge badge-success mr-2"><i class="fas fa-check-circle"></i> Selesai</span>
                                         @elseif($item->status == 'menunggu_konfirmasi_batal')
-                                            <span class="badge badge-warning mr-2"><i class="fas fa-times-circle"></i> Pengajuan
-                                                Batal</span>
+                                            <span class="badge badge-warning mr-2"><i class="fas fa-times-circle"></i> Pengajuan Batal</span>
                                         @elseif($item->status == 'dibatalkan')
                                             <span class="badge badge-danger mr-2"><i class="fas fa-ban"></i> Dibatalkan</span>
                                         @endif
-                                        <span class="font-weight-bold text-dark">{{ $item->armada->no_polisi ?? '-' }}</span>
+                                        <span class="font-weight-bold text-dark ml-1">
+                                            @if($item->armada)
+                                                {{ $item->armada->merek }} {{ $item->armada->jenis }} ({{ $item->armada->no_polisi }})
+                                            @else
+                                                -
+                                            @endif
+                                        </span>
                                     </div>
-                                    <div class="mb-1">
-                                        <i class="fas fa-map-marker-alt text-success"></i>
-                                        <strong>Jemput:</strong> {{ $item->rute->tempat_jemput }}
-                                        <span class="mx-2">|</span>
-                                        <i class="fas fa-flag-checkered text-info"></i>
-                                        <strong>Antar:</strong> {{ $item->rute->tempat_antar }}
+                                    
+                                    <!-- Rute Penjemputan & Pengantaran Grid -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-6 mb-3 mb-md-0">
+                                            <div class="p-3 bg-light rounded" style="border-left: 4px solid #28a745; min-height: 90px;">
+                                                <span class="text-success font-weight-bold small uppercase d-block mb-1">
+                                                    <i class="fas fa-map-marker-alt"></i> Alamat Penjemputan
+                                                </span>
+                                                <p class="mb-0 text-dark small font-weight-bold" style="line-height: 1.5;">
+                                                    {{ $item->rute->tempat_jemput }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded" style="border-left: 4px solid #17a2b8; min-height: 90px;">
+                                                <span class="text-info font-weight-bold small uppercase d-block mb-1">
+                                                    <i class="fas fa-flag-checkered"></i> Alamat Pengantaran
+                                                </span>
+                                                <p class="mb-0 text-dark small font-weight-bold" style="line-height: 1.5;">
+                                                    {{ $item->rute->tempat_antar }}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="mb-1">
-                                        <i class="fas fa-calendar text-warning"></i>
-                                        <strong>Tanggal:</strong>
-                                        {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M Y') }}
-                                        <span class="mx-2">|</span>
-                                        <i class="fas fa-road text-secondary"></i>
-                                        <strong>Jarak:</strong> {{ $item->rute->total_jarak }} km
-                                        <span class="mx-2">|</span>
-                                        <strong>Estimasi:</strong> {{ $item->estimasi_hari }} hari
-                                    </div>
-                                    <div class="mb-1">
-                                        <i class="fas fa-box text-info"></i>
-                                        <strong>Muatan:</strong> {{ $item->barang_muatan }}
-                                        @if($item->bobot)
-                                            <span class="mx-2">|</span>
-                                            <i class="fas fa-weight-hanging text-dark"></i>
-                                            <strong>Bobot:</strong> {{ $item->bobot }} Ton
-                                        @endif
+
+                                    <!-- Informasi Detail Item -->
+                                    <div class="row pt-3 border-top">
+                                        <div class="col-md-4 mb-2 mb-md-0">
+                                            <span class="text-muted small d-block"><i class="fas fa-calendar text-warning mr-1"></i> Tanggal Mulai</span>
+                                            <span class="text-dark font-weight-bold" style="font-size: 0.9rem;">
+                                                {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M Y') }}
+                                            </span>
+                                        </div>
+                                        <div class="col-md-4 mb-2 mb-md-0">
+                                            <span class="text-muted small d-block"><i class="fas fa-road text-secondary mr-1"></i> Jarak & Estimasi</span>
+                                            <span class="text-dark font-weight-bold" style="font-size: 0.9rem;">
+                                                {{ $item->rute->total_jarak }} km <span class="text-muted font-weight-normal">/</span> {{ $item->estimasi_hari }} Hari
+                                            </span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <span class="text-muted small d-block"><i class="fas fa-box text-info mr-1"></i> Muatan & Bobot</span>
+                                            <span class="text-dark font-weight-bold" style="font-size: 0.9rem;">
+                                                {{ $item->barang_muatan }} @if($item->bobot) <span class="text-muted font-weight-normal">({{ $item->bobot }} Ton)</span> @endif
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-3 text-right">

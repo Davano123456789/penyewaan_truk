@@ -67,6 +67,50 @@
     }
     .jenis-truk-btn i {
         font-size: 24px;
+        transition: color 0.3s;
+    }
+    .jenis-truk-btn.active i {
+        color: #3b82f6 !important;
+    }
+    .jenis-truk-btn.active span {
+        color: #3b82f6 !important;
+    }
+    
+    /* Solid disabled state styling (no transparency) */
+    .section-disabled,
+    .section-disabled > div {
+        background-color: #f8fafc !important; /* solid slate-50 */
+        border-color: #e2e8f0 !important;
+        pointer-events: none !important;
+    }
+    .section-disabled h2,
+    .section-disabled h3,
+    .section-disabled label,
+    .section-disabled p,
+    .section-disabled span,
+    .section-disabled i {
+        color: #94a3b8 !important; /* solid slate-400 */
+    }
+    .section-disabled input {
+        background-color: #f1f5f9 !important; /* solid slate-100 */
+        color: #94a3b8 !important;
+        border-color: #cbd5e1 !important;
+        pointer-events: none !important;
+    }
+    .section-disabled button,
+    .section-disabled button i {
+        background-color: #cbd5e1 !important; /* solid slate-300 */
+        color: #64748b !important; /* solid slate-500 */
+        pointer-events: none !important;
+    }
+    .section-disabled .armada-card {
+        background-color: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #94a3b8 !important;
+        pointer-events: none !important;
+    }
+    .section-disabled #map {
+        filter: grayscale(100%);
     }
 </style>
 @endsection
@@ -75,13 +119,13 @@
     <!-- Hero Header -->
     <section class="relative pt-40 pb-24 overflow-hidden">
         <div class="absolute inset-0 z-0">
-            <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600" alt="Hero Background" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-gray-50"></div>
+            <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1600" alt="Hero Background" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black"></div>
         </div>
 
         <div class="container mx-auto px-6 relative z-10">
             <div class="text-center" data-aos="fade-up">
-                <span class="inline-block px-4 py-1 rounded-full bg-blue-600/20 text-blue-400 font-semibold text-sm mb-4 border border-blue-600/30">
+                <span class="inline-block px-4 py-1 rounded-full bg-blue-100 text-blue-800 font-semibold text-sm mb-4 border border-blue-200">
                     Sistem Pemesanan Cerdas
                 </span>
                 <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6">
@@ -113,25 +157,21 @@
                     <!-- Pilih Jenis Truk -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                            <i class="fas fa-truck text-blue-600"></i> Pilih Jenis Truk
+                            Pilih Jenis Truk
                         </h2>
                         
-                        <div class="grid grid-cols-4 gap-4">
+                        <div class="grid grid-cols-3 gap-4">
                             <div class="jenis-truk-btn" onclick="selectJenisTruk('CDD')">
-                                <i class="fas fa-truck text-blue-600"></i>
+                                <i class="fas fa-truck text-slate-500 mb-1"></i>
                                 <span class="font-semibold text-sm">CDD</span>
                             </div>
                             <div class="jenis-truk-btn" onclick="selectJenisTruk('BOX')">
-                                <i class="fas fa-cube text-green-600"></i>
+                                <i class="fas fa-box text-slate-500 mb-1"></i>
                                 <span class="font-semibold text-sm">BOX</span>
                             </div>
                             <div class="jenis-truk-btn" onclick="selectJenisTruk('WINGBOX')">
-                                <i class="fas fa-box-open text-purple-600"></i>
+                                <i class="fas fa-truck-moving text-slate-500 mb-1"></i>
                                 <span class="font-semibold text-sm">WINGBOX</span>
-                            </div>
-                            <div class="jenis-truk-btn" onclick="selectJenisTruk('TERBUKA')">
-                                <i class="fas fa-truck-loading text-orange-600"></i>
-                                <span class="font-semibold text-sm">TERBUKA</span>
                             </div>
                         </div>
                         <input type="hidden" name="jenis_truk" id="jenis_truk" required>
@@ -139,9 +179,9 @@
                     </div>
 
                     <!-- Map -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="bg-white rounded-lg shadow-lg p-6" id="lokasiSection">
                         <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                            <i class="fas fa-map-marked-alt text-blue-600"></i> Pilih Lokasi
+                            <i class="fas fa-map-marked-alt text-slate-700"></i> Pilih Lokasi
                         </h2>
                         
                         <div class="mb-4">
@@ -160,7 +200,7 @@
                                        placeholder="Ketik alamat dan tekan Enter atau klik tombol cari..." 
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg pr-12"
                                        autocomplete="off">
-                                <button type="button" onclick="searchLocation()" class="absolute right-2 top-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                <button type="button" onclick="searchLocation()" id="btnSearchLoc" class="absolute right-2 top-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                                     <i class="fas fa-search"></i>
                                 </button>
                                 <div id="searchResults" class="search-results" style="display: none;"></div>
@@ -171,11 +211,11 @@
                         
                         <div class="mt-4 grid md:grid-cols-2 gap-4">
                             <div class="info-box">
-                                <p class="font-semibold text-blue-600 mb-1"><i class="fas fa-map-marker-alt"></i> Titik Jemput:</p>
+                                <p class="font-semibold text-blue-600 mb-1"><i class="fas fa-map-marker-alt text-slate-700"></i> Titik Jemput:</p>
                                 <p id="jemputAddress" class="text-sm text-gray-700">Belum dipilih</p>
                             </div>
                             <div class="info-box">
-                                <p class="font-semibold text-green-600 mb-1"><i class="fas fa-flag-checkered"></i> Titik Antar:</p>
+                                <p class="font-semibold text-green-600 mb-1"><i class="fas fa-flag-checkered text-slate-700"></i> Titik Antar:</p>
                                 <p id="antarAddress" class="text-sm text-gray-700">Belum dipilih</p>
                             </div>
                         </div>
@@ -184,125 +224,117 @@
                     <!-- Parkir Terdekat Info -->
                     <div class="bg-white rounded-lg shadow-lg p-6" id="parkirInfo" style="display:none;">
                         <h3 class="text-xl font-bold text-gray-800 mb-4">
-                            <i class="fas fa-parking text-indigo-600"></i> Parkir Terdekat
+                            <i class="fas fa-parking text-slate-700"></i> Parkir Terdekat
                         </h3>
                         <div class="bg-indigo-50 p-4 rounded-lg">
-                            <p class="font-semibold text-indigo-800"><i class="fas fa-map-pin"></i> <span id="parkirNama">-</span></p>
+                            <p class="font-semibold text-indigo-800"><i class="fas fa-map-pin text-slate-700"></i> <span id="parkirNama">-</span></p>
                             <p class="text-sm text-gray-600 mt-1"><span id="parkirAlamat">-</span></p>
-                            <p class="text-sm text-indigo-600 mt-2"><i class="fas fa-ruler-horizontal"></i> Jarak ke titik jemput: <strong><span id="parkirJarak">-</span> km</strong></p>
+                            <p class="text-sm text-indigo-600 mt-2"><i class="fas fa-ruler-horizontal text-slate-700"></i> Jarak ke titik jemput: <strong><span id="parkirJarak">-</span> km</strong></p>
                         </div>
                     </div>
 
                     <!-- Route Info -->
                     <div class="bg-white rounded-lg shadow-lg p-6" id="routeInfo" style="display:none;">
                         <h3 class="text-xl font-bold text-gray-800 mb-4">
-                            <i class="fas fa-route text-purple-600"></i> Informasi Rute
+                            <i class="fas fa-route text-slate-700"></i> Informasi Rute
                         </h3>
-                        <div class="grid md:grid-cols-4 gap-4">
+                        <div class="grid md:grid-cols-3 gap-4">
                             <div class="text-center p-4 bg-blue-50 rounded-lg">
-                                <i class="fas fa-road text-blue-600 text-2xl mb-2"></i>
+                                <i class="fas fa-road text-slate-700 text-2xl mb-2"></i>
                                 <p class="text-sm text-gray-600">Total Jarak</p>
                                 <p class="text-2xl font-bold text-blue-600"><span id="totalJarak">0</span> km</p>
                             </div>
-                            <div class="text-center p-4 bg-green-50 rounded-lg">
-                                <i class="fas fa-money-bill-wave text-green-600 text-2xl mb-2"></i>
+                            <div class="text-center p-4 bg-blue-50 rounded-lg">
+                                <i class="fas fa-money-bill-wave text-slate-700 text-2xl mb-2"></i>
                                 <p class="text-sm text-gray-600">Estimasi Biaya</p>
-                                <p class="text-2xl font-bold text-green-600">Rp <span id="estimasiBiaya">0</span></p>
+                                <p class="text-2xl font-bold text-blue-600">Rp <span id="estimasiBiaya">0</span></p>
                             </div>
-                            <div class="text-center p-4 bg-yellow-50 rounded-lg">
-                                <i class="fas fa-clock text-yellow-600 text-2xl mb-2"></i>
-                                <p class="text-sm text-gray-600">Estimasi Waktu</p>
-                                <p class="text-2xl font-bold text-yellow-600"><span id="estimasiWaktu">0</span> jam</p>
-                            </div>
-                            <div class="text-center p-4 bg-purple-50 rounded-lg">
-                                <i class="fas fa-calendar-alt text-purple-600 text-2xl mb-2"></i>
+                            <div class="text-center p-4 bg-blue-50 rounded-lg">
+                                <i class="fas fa-calendar-alt text-slate-700 text-2xl mb-2"></i>
                                 <p class="text-sm text-gray-600">Estimasi Hari</p>
-                                <p class="text-2xl font-bold text-purple-600"><span id="estimasiHariDisplay">0</span> hari</p>
+                                <p class="text-2xl font-bold text-blue-600"><span id="estimasiHariDisplay">0</span> hari</p>
                                 <p class="text-xs text-gray-500 mt-1">(50km/hari)</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Detail Pemesanan -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="bg-white rounded-lg shadow-lg p-6" id="detailPemesananSection">
                         <h3 class="text-xl font-bold text-gray-800 mb-4">
-                            <i class="fas fa-clipboard-list text-indigo-600"></i> Detail Pemesanan
+                            <i class="fas fa-clipboard-list text-slate-700"></i> Detail Pemesanan
                         </h3>
                         
                         <div class="grid md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Tanggal Mulai</label>
                                 <input type="date" name="tanggal_mulai" id="tanggal_mulai" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <p class="text-xs text-gray-500 mt-1">*Pemesanan minimal H+1 s/d H+7 dari hari ini</p>
                             </div>
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Estimasi Hari</label>
-                                <input type="number" name="estimasi_hari" id="estimasi_hari" min="1" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Otomatis dihitung" readonly required>
-                                <p class="text-xs text-gray-500 mt-1">*Dihitung otomatis: 50km per hari</p>
-                            </div>
-                        </div>
+                            <input type="hidden" name="estimasi_hari" id="estimasi_hari" required>
 
-                        <div class="grid md:grid-cols-3 gap-6 mt-4">
-                            <div class="md:col-span-2">
-                                <label class="block text-gray-700 font-semibold mb-2">
-                                    <i class="fas fa-box text-blue-500"></i> Barang Muatan
-                                </label>
-                                <textarea name="barang_muatan" id="barang_muatan" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Deskripsi barang yang akan dimuat..." required></textarea>
-                            </div>
                             <div>
                                 <label class="block text-gray-700 font-semibold mb-2">
-                                    <i class="fas fa-weight-hanging text-blue-500"></i> Bobot Muatan (Ton)
+                                    Barang Muatan
+                                </label>
+                                <input type="text" name="barang_muatan" id="barang_muatan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Contoh: Pupuk, Besi, Sembako..." required>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">
+                                    Bobot Muatan (Ton)
                                 </label>
                                 <input type="number" name="bobot" id="bobot" min="1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Contoh: 5" required oninput="checkCapacity()">
                                 <p id="bobot-warning" class="text-xs text-red-500 mt-2 font-semibold hidden"></p>
                             </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">
+                                    Harga Tawar (Opsional)
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500">Rp</span>
+                                    </div>
+                                    <input type="number" 
+                                           name="harga_tawar" 
+                                           id="harga_tawar" 
+                                           class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                           placeholder="Masukkan harga tawar (maks 10%)"
+                                           oninput="validateHargaTawar()">
+                                </div>
+                                <div id="hargaTawarInfo" class="mt-2 text-sm hidden">
+                                    <p class="text-gray-600">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Harga Asli: <strong>Rp <span id="hargaAsliDisplay">0</span></strong>
+                                    </p>
+                                    <p class="text-gray-600">
+                                        <i class="fas fa-calculator"></i> 
+                                        Minimal Tawar (90%): <strong>Rp <span id="minHargaTawar">0</span></strong>
+                                    </p>
+                                    <p id="selisihInfo" class="hidden">
+                                        <i class="fas fa-arrow-down"></i> 
+                                        Selisih: <strong class="text-green-600">Rp <span id="selisihTawar">0</span></strong>
+                                    </p>
+                                </div>
+                                <p id="errorHargaTawar" class="text-red-600 text-sm mt-1 font-semibold hidden">
+                                    <i class="fas fa-exclamation-triangle"></i> 
+                                    Harga tawar tidak boleh kurang dari 90% harga asli!
+                                </p>
+                            </div>
                         </div>
-                        <div class="mt-4">
-    <label class="block text-gray-700 font-semibold mb-2">
-        <i class="fas fa-money-bill-wave"></i> Harga Tawar (Opsional)
-    </label>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="text-gray-500">Rp</span>
-        </div>
-        <input type="number" 
-               name="harga_tawar" 
-               id="harga_tawar" 
-               class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-               placeholder="Masukkan harga tawar (maks 10% dari harga asli)"
-               oninput="validateHargaTawar()">
-    </div>
-    <div id="hargaTawarInfo" class="mt-2 text-sm hidden">
-        <p class="text-gray-600">
-            <i class="fas fa-info-circle"></i> 
-            Harga Asli: <strong>Rp <span id="hargaAsliDisplay">0</span></strong>
-        </p>
-        <p class="text-gray-600">
-            <i class="fas fa-calculator"></i> 
-            Minimal Tawar (90%): <strong>Rp <span id="minHargaTawar">0</span></strong>
-        </p>
-        <p id="selisihInfo" class="hidden">
-            <i class="fas fa-arrow-down"></i> 
-            Selisih: <strong class="text-green-600">Rp <span id="selisihTawar">0</span></strong>
-        </p>
-    </div>
-    <p id="errorHargaTawar" class="text-red-600 text-sm mt-1 font-semibold hidden">
-        <i class="fas fa-exclamation-triangle"></i> 
-        Harga tawar tidak boleh kurang dari 90% harga asli!
-    </p>
-</div>
                     </div>
                 </div>
 
                 <!-- Right Side - Armada Selection -->
-                <div class="lg:col-span-1">
+                <div class="lg:col-span-1" id="armadaSection">
                     <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
                         <h3 class="text-xl font-bold text-gray-800 mb-4">
-                            <i class="fas fa-truck text-red-600"></i> Armada Tersedia
+                            <i class="fas fa-truck text-slate-700"></i> Armada Tersedia
                         </h3>
                         
                         <div id="armadaList" class="space-y-4 max-h-[600px] overflow-y-auto">
                             <div class="text-center py-8 text-gray-500">
-                                <i class="fas fa-info-circle text-4xl mb-3"></i>
+                                <i class="fas fa-info-circle text-slate-700 text-4xl mb-3"></i>
                                 <p class="text-sm">Pilih jenis truk dan titik jemput untuk melihat armada tersedia</p>
                             </div>
                         </div>
@@ -326,8 +358,7 @@
 
             <!-- Submit Button -->
             <div class="mt-8 text-center">
-                <button type="submit" class="bg-blue-600 text-white px-12 py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-all duration-300 inline-flex items-center gap-3">
-                    <i class="fas fa-{{ isset($editItem) ? 'save' : 'shopping-cart' }}"></i>
+                <button type="submit" class="bg-blue-600 text-white px-12 py-4 rounded-full font-bold text-lg hover:bg-blue-700 transition-all duration-300 inline-flex items-center">
                     <span>{{ isset($editItem) ? 'Simpan Perubahan' : 'Tambah ke Keranjang' }}</span>
                 </button>
             </div>
@@ -350,12 +381,128 @@ let nearestParkir = null;
 let parkirs = @json($parkirs);
 let searchTimeout;
 let hargaAsli = 0;
+let currentSearchResults = []; // To safely store Nominatim results and avoid quote escaping bugs
 
 // Initialize variables for edit mode
 let editMode = @json(isset($editItem));
 let editData = @json($editItem ?? null);
 let currentArmadaId = editData ? editData.armada_id : null;
 let selectedArmadaKapasitas = null;
+
+function updateFlowState() {
+    const lokasiSection = document.getElementById('lokasiSection');
+    const btnJemput = document.getElementById('btnJemput');
+    const btnAntar = document.getElementById('btnAntar');
+    const armadaSection = document.getElementById('armadaSection');
+    const btnSearchLoc = document.getElementById('btnSearchLoc');
+    const searchLocation = document.getElementById('searchLocation');
+    const detailPemesananSection = document.getElementById('detailPemesananSection');
+
+    if (!lokasiSection || !btnJemput || !btnAntar || !armadaSection) return;
+
+    // Reset styles/state (Fully Solid & Active)
+    lokasiSection.classList.remove('section-disabled', 'pointer-events-none');
+    btnJemput.removeAttribute('disabled');
+    btnJemput.classList.remove('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
+    btnAntar.removeAttribute('disabled');
+    btnAntar.classList.remove('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
+    armadaSection.classList.remove('section-disabled', 'pointer-events-none');
+    if (detailPemesananSection) {
+        detailPemesananSection.classList.remove('section-disabled', 'pointer-events-none');
+    }
+    
+    if (btnSearchLoc) {
+        btnSearchLoc.removeAttribute('disabled');
+        btnSearchLoc.classList.remove('pointer-events-none');
+    }
+    if (searchLocation) {
+        searchLocation.removeAttribute('disabled');
+        searchLocation.classList.remove('pointer-events-none');
+    }
+
+    // 1. Jika Jenis Truk belum dipilih
+    if (!selectedJenisTruk) {
+        lokasiSection.classList.add('section-disabled', 'pointer-events-none');
+        armadaSection.classList.add('section-disabled', 'pointer-events-none');
+        if (detailPemesananSection) {
+            detailPemesananSection.classList.add('section-disabled', 'pointer-events-none');
+        }
+        
+        btnJemput.setAttribute('disabled', 'true');
+        btnJemput.classList.add('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
+        btnAntar.setAttribute('disabled', 'true');
+        btnAntar.classList.add('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
+        
+        if (btnSearchLoc) {
+            btnSearchLoc.setAttribute('disabled', 'true');
+            btnSearchLoc.classList.add('pointer-events-none');
+        }
+        if (searchLocation) {
+            searchLocation.setAttribute('disabled', 'true');
+            searchLocation.classList.add('pointer-events-none');
+        }
+        return;
+    }
+
+    // 2. Jika Jenis Truk sudah dipilih, aktifkan Lokasi tetapi HANYA Titik Jemput
+    if (selectedJenisTruk && !jemputCoords) {
+        btnJemput.classList.remove('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
+        btnAntar.setAttribute('disabled', 'true');
+        btnAntar.classList.add('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
+        
+        if (currentMode !== 'jemput') {
+            setMapMode('jemput');
+        }
+        
+        armadaSection.classList.add('section-disabled', 'pointer-events-none');
+        if (detailPemesananSection) {
+            detailPemesananSection.classList.add('section-disabled', 'pointer-events-none');
+        }
+        return;
+    }
+
+    // 3. Jika Titik Jemput sudah dipilih, aktifkan Armada Section
+    const selectedArmadaId = document.getElementById('armada_id').value;
+    if (jemputCoords && !selectedArmadaId) {
+        btnAntar.setAttribute('disabled', 'true');
+        btnAntar.classList.add('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
+        
+        if (currentMode !== 'jemput') {
+            setMapMode('jemput');
+        }
+        
+        armadaSection.classList.remove('section-disabled', 'pointer-events-none');
+        if (detailPemesananSection) {
+            detailPemesananSection.classList.add('section-disabled', 'pointer-events-none');
+        }
+        return;
+    }
+
+    // 4. Jika Armada sudah dipilih, baru aktifkan Titik Antar
+    if (selectedArmadaId && !antarCoords) {
+        btnAntar.removeAttribute('disabled');
+        btnAntar.classList.remove('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
+        armadaSection.classList.remove('section-disabled', 'pointer-events-none');
+        if (detailPemesananSection) {
+            detailPemesananSection.classList.add('section-disabled', 'pointer-events-none');
+        }
+        
+        if (!antarCoords && currentMode === 'jemput') {
+            setMapMode('antar');
+        }
+        return;
+    }
+
+    // 5. Jika semua (termasuk titik antar) sudah diisi, aktifkan Detail Pemesanan
+    if (selectedArmadaId && antarCoords) {
+        btnAntar.removeAttribute('disabled');
+        btnAntar.classList.remove('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
+        armadaSection.classList.remove('section-disabled', 'pointer-events-none');
+        if (detailPemesananSection) {
+            detailPemesananSection.classList.remove('section-disabled', 'pointer-events-none');
+        }
+    }
+}
 
 function checkCapacity() {
     const bobotInput = document.getElementById('bobot');
@@ -396,10 +543,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     map.on('click', function(e) {
+        if (jemputCoords && antarCoords) {
+            // Completely disable clicks to prevent accidental shifts. Only allow viewing/zooming.
+            return;
+        }
         setLocation(e.latlng.lat, e.latlng.lng);
     });
 
-    document.getElementById('tanggal_mulai').min = new Date().toISOString().split('T')[0];
+    let tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    let yyyy = tomorrow.getFullYear();
+    let mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    let dd = String(tomorrow.getDate()).padStart(2, '0');
+    let minDateStr = `${yyyy}-${mm}-${dd}`;
+
+    let maxBookingDate = new Date(tomorrow);
+    maxBookingDate.setDate(tomorrow.getDate() + 7);
+    let max_yyyy = maxBookingDate.getFullYear();
+    let max_mm = String(maxBookingDate.getMonth() + 1).padStart(2, '0');
+    let max_dd = String(maxBookingDate.getDate()).padStart(2, '0');
+    let maxDateStr = `${max_yyyy}-${max_mm}-${max_dd}`;
+
+    const tanggalMulaiInput = document.getElementById('tanggal_mulai');
+    if (tanggalMulaiInput) {
+        tanggalMulaiInput.min = minDateStr;
+        tanggalMulaiInput.max = maxDateStr;
+    }
 
     const searchInput = document.getElementById('searchLocation');
     searchInput.addEventListener('keyup', function(e) {
@@ -420,6 +590,18 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
         if (!e.target.closest('#searchLocation') && !e.target.closest('#searchResults')) {
             hideSearchResults();
+        }
+    });
+
+    // Delegated click handler to safely resolve single/double quotes search results crashes
+    document.getElementById('searchResults').addEventListener('click', function(e) {
+        const itemEl = e.target.closest('.search-result-item');
+        if (itemEl && itemEl.hasAttribute('data-index')) {
+            const index = parseInt(itemEl.getAttribute('data-index'));
+            const item = currentSearchResults[index];
+            if (item) {
+                selectSearchResult(parseFloat(item.lat), parseFloat(item.lon), item.display_name);
+            }
         }
     });
 
@@ -454,6 +636,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // 4. Set Price Tawar if different from base (assuming we store final price in harga_sewa)
         // This part depends on how you want to handle existing pricing
     }
+    
+    // Inisialisasi status alur pemesanan
+    updateFlowState();
 });
 
 function selectJenisTruk(jenis) {
@@ -471,6 +656,8 @@ function selectJenisTruk(jenis) {
     if (jemputCoords) {
         loadArmada(jemputCoords.lat, jemputCoords.lng);
     }
+
+    updateFlowState();
 }
 
 function setMapMode(mode) {
@@ -559,9 +746,23 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
             document.getElementById('longitude_antar').value = lng;
         }
 
+        // Fit map bounds immediately to show all markers (ensuring pickup marker is always visible)
+        if (jemputCoords && antarCoords) {
+            const bounds = L.latLngBounds([
+                [jemputCoords.lat, jemputCoords.lng],
+                [antarCoords.lat, antarCoords.lng]
+            ]);
+            if (nearestParkir) {
+                bounds.extend([nearestParkir.latitude, nearestParkir.longitude]);
+            }
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+
         if (jemputCoords && antarCoords && nearestParkir) {
             calculateRouteWithParkir(nearestParkir.latitude, nearestParkir.longitude);
         }
+
+        updateFlowState();
     } catch (error) {
         console.error('Error getting address:', error);
     }
@@ -632,10 +833,11 @@ async function showSearchSuggestions(query) {
         const data = await response.json();
 
         const resultsDiv = document.getElementById('searchResults');
+        currentSearchResults = data;
         
         if (data.length > 0) {
-            resultsDiv.innerHTML = data.map(item => `
-                <div class="search-result-item" onclick="selectSearchResult(${item.lat}, ${item.lon}, '${item.display_name.replace(/'/g, "\\'")}')">
+            resultsDiv.innerHTML = data.map((item, index) => `
+                <div class="search-result-item" data-index="${index}">
                     <div class="font-semibold text-sm">${item.display_name.split(',')[0]}</div>
                     <div class="text-xs text-gray-500">${item.display_name}</div>
                 </div>
@@ -652,7 +854,7 @@ async function showSearchSuggestions(query) {
 
 function selectSearchResult(lat, lng, address) {
     map.setView([lat, lng], 16);
-    setLocation(lat, lng);
+    setLocation(lat, lng, null, address); // Pass address directly to avoid duplicate reverse search
     document.getElementById('searchLocation').value = address.split(',').slice(0, 3).join(',');
     hideSearchResults();
 }
@@ -681,7 +883,7 @@ async function searchLocation() {
             const lat = parseFloat(data[0].lat);
             const lng = parseFloat(data[0].lon);
             map.setView([lat, lng], 16);
-            setLocation(lat, lng);
+            setLocation(lat, lng, null, data[0].display_name); // Pass address directly to avoid duplicate reverse search
             hideSearchResults();
         } else {
             Swal.fire({
@@ -737,14 +939,14 @@ async function loadArmada(lat, lng) {
         armadaList.innerHTML = result.data.map(armada => `
             <div class="armada-card p-4 rounded-lg cursor-pointer" onclick="selectArmada(${armada.id}, ${armada.kapasitas})">
                 <div class="flex items-start gap-3">
-                    <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-truck text-blue-600 text-xl"></i>
+                    <div class="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-truck text-slate-700 text-xl"></i>
                     </div>
                     <div class="flex-1">
                         <h4 class="font-bold text-gray-800">${armada.no_polisi}</h4>
                         <p class="text-sm text-gray-600">${armada.merek} - ${armada.jenis}</p>
-                        <p class="text-sm text-gray-600"><i class="fas fa-weight-hanging"></i> ${armada.kapasitas} Ton</p>
-                        <p class="text-sm text-blue-600"><i class="fas fa-user"></i> ${armada.sopir}</p>
+                        <p class="text-sm text-gray-600"><i class="fas fa-weight-hanging text-slate-700"></i> ${armada.kapasitas} Ton</p>
+                        <p class="text-sm text-slate-700"><i class="fas fa-user text-slate-700"></i> ${armada.sopir}</p>
                     </div>
                 </div>
             </div>
@@ -773,16 +975,17 @@ function selectArmada(id, kapasitas) {
         card.classList.remove('selected');
     });
     
-    if (window.event && event.currentTarget) {
-        event.currentTarget.classList.add('selected');
-    } else {
-        const card = document.querySelector(`.armada-card[onclick*="selectArmada(${id},"]`);
-        if (card) card.classList.add('selected');
+    // Select the card in a browser-independent way without window.event ReferenceErrors
+    const card = document.querySelector(`.armada-card[onclick*="selectArmada(${id},"]`);
+    if (card) {
+        card.classList.add('selected');
     }
 
     if (antarCoords && jemputCoords && nearestParkir) {
         calculateRouteWithParkir(nearestParkir.latitude, nearestParkir.longitude);
     }
+
+    updateFlowState();
 }
 
 async function calculateRouteWithParkir(parkirLat, parkirLng) {
@@ -809,7 +1012,6 @@ async function calculateRouteWithParkir(parkirLat, parkirLng) {
             document.getElementById('routeInfo').style.display = 'block';
             document.getElementById('totalJarak').textContent = distance;
             document.getElementById('estimasiBiaya').textContent = harga.toLocaleString('id-ID');
-            document.getElementById('estimasiWaktu').textContent = duration;
             document.getElementById('estimasiHariDisplay').textContent = estimasiHari;
             document.getElementById('harga_sewa').value = harga;
             document.getElementById('total_jarak').value = distance;
@@ -817,7 +1019,7 @@ async function calculateRouteWithParkir(parkirLat, parkirLng) {
 
             if (routeLayer) map.removeLayer(routeLayer);
             routeLayer = L.geoJSON(route.geometry, {
-                style: { color: '#3b82f6', weight: 4, opacity: 0.7 }
+                style: { color: '#15eb4bff', weight: 4, opacity: 0.7 }
             }).addTo(map);
 
             const bounds = L.latLngBounds([

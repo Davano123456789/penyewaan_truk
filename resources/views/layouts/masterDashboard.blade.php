@@ -24,7 +24,24 @@
 <link href="{{ asset('dashboard_tamplate/css/sb-admin-2.min.css') }}" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-
+    <style>
+        @media (min-width: 768px) {
+            #accordionSidebar {
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                overflow-y: auto;
+            }
+            /* Sembunyikan scrollbar sidebar agar lebih rapi */
+            #accordionSidebar::-webkit-scrollbar {
+                display: none;
+            }
+            #accordionSidebar {
+                -ms-overflow-style: none;  /* IE and Edge */
+                scrollbar-width: none;  /* Firefox */
+            }
+        }
+    </style>
 </head>
 
 <body id="page-top">

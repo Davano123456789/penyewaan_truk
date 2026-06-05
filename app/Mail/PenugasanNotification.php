@@ -34,7 +34,7 @@ class PenugasanNotification extends Mailable
         
         return $this
                     ->from(config('mail.from.address'), config('mail.from.name'))
-                    ->subject('Penugasan Baru - Penyewaan #' . $this->penyewaan->id)
+                    ->subject('Anda Mendapat Tugas Baru - Sistem Penyewaan Truk')
                     ->view('emails.penugasan_notification')
                     ->with([
                         'sopir' => $this->sopir,

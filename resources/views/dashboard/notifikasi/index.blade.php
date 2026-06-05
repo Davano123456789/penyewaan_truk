@@ -36,13 +36,10 @@
                                     @endif
                                 </h5>
                                 <small class="{{ $n->is_read ? 'text-muted' : 'font-weight-bold text-primary' }}">
-                                    {{ $n->created_at->diffForHumans() }}
+                                    {{ $n->created_at->format('d M Y') }}
                                 </small>
                             </div>
                             <p class="mb-1 {{ $n->is_read ? 'text-gray-600' : 'text-gray-900 font-weight-500' }}">{{ $n->pesan }}</p>
-                            <small class="text-gray-500">
-                                <i class="fas fa-calendar-alt mr-1"></i> {{ $n->created_at->format('d M Y, H:i') }}
-                            </small>
                         </div>
                         <div class="p-3 d-flex border-left">
                             <button class="btn btn-sm btn-info btn-view-notif mr-2" 
@@ -50,7 +47,7 @@
                                 data-judul="{{ $n->judul }}" 
                                 data-pesan="{{ $n->pesan }}" 
                                 data-url="{{ $n->url }}" 
-                                data-waktu="{{ $n->created_at->format('d M Y, H:i') }}"
+                                data-waktu="{{ $n->created_at->format('d M Y') }}"
                                 title="Lihat Notifikasi">
                                 <i class="fas fa-eye mr-1"></i> Lihat
                             </button>

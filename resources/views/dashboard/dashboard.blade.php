@@ -14,12 +14,93 @@
         <div class="col-12">
             <div class="card shadow-sm border-0">
                 <div class="card-body py-3">
-                    <h5 class="mb-0 text-gray-800">Selamat Datang Admin</h5>
+                    <h5 class="mb-0 text-gray-800">Selamat Datang {{ Auth::user()->peran_id == 4 ? 'Owner' : 'Admin' }}</h5>
                 </div>
             </div>
         </div>
     </div>
 
+    @if(Auth::user()->peran_id == 4)
+    <!-- Layout Khusus Owner -->
+    <div class="row">
+        <!-- Total Seluruh Penyewaan -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Seluruh Penyewaan
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalPenyewaan ?? 0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-folder-open fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Armada Disewa -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Total Armada Disewa
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalArmadaDisewa ?? 0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-truck-loading fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Armada Tersedia -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Armada Tersedia
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalArmadaTersedia ?? 0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Seluruh Armada -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Total Seluruh Armada
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalArmada ?? 0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-truck fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @else
+    <!-- Layout Asli Admin (3 Kolom per Baris tanpa Statistik Baru) -->
     <!-- Statistics Cards Row 1 -->
     <div class="row">
         <!-- Total Penyewaan Aktif -->
@@ -139,8 +220,10 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Chart Section -->
+    @if(Auth::user()->peran_id == 4)
     <div class="row">
         <div class="col-12">
             <div class="card shadow mb-4">
@@ -155,6 +238,7 @@
             </div>
         </div>
     </div>
+    @endif
 
 </div>
 <!-- /.container-fluid -->
@@ -188,6 +272,7 @@
         return s.join(dec);
     }
 
+    @if(Auth::user()->peran_id == 4)
     // Omset Chart
     var ctx = document.getElementById("omsetChart");
     var omsetChart = new Chart(ctx, {
@@ -276,5 +361,6 @@
             }
         }
     });
+    @endif
 </script>
 @endsection

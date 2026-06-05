@@ -30,27 +30,27 @@
 
                 <!-- Table -->
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <table class="table table-bordered table-hover" id="dataTable" style="min-width:900px;" cellspacing="0">
                         <thead class="thead-light">
                             <tr>
-                                <th class="text-center" width="5%">No</th>
-                                <th width="12%">Kode Keranjang</th>
-                                <th width="15%">Armada</th>
-                                <th width="15%">Tanggal Mulai</th>
-                                <th width="12%">Estimasi Hari</th>
-                                <th width="20%">Rute</th>
-                                <th width="12%" class="text-center">Pembayaran</th>
-                                <th width="12%" class="text-center">Status</th>
-                                <th class="text-center" width="18%">Aksi</th>
+                                <th class="text-center" style="min-width:50px;">No</th>
+                                <th style="min-width:140px;">Kode Keranjang</th>
+                                <th style="min-width:140px;">Armada</th>
+                                <th style="min-width:130px;">Tanggal Mulai</th>
+                                <th style="min-width:110px;">Estimasi Hari</th>
+                                <th style="min-width:200px;">Rute</th>
+                                <th style="min-width:120px;" class="text-center">Pembayaran</th>
+                                <th style="min-width:110px;" class="text-center">Status</th>
+                                <th class="text-center" style="min-width:300px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($penugasans as $key => $penugasan)
                                 <tr>
                                     <td class="text-center">{{ $key + 1 }}</td>
-                                    <td>
-                                        <span class="badge badge-info">{{ $penugasan->kode_keranjang ?? '-' }}</span>
-                                    </td>
+                                     <td>
+                                         <span class="badge badge-info">{{ $penugasan->kode_keranjang ?? '-' }}</span>
+                                     </td>
                                     <td>{{ $penugasan->armada->no_polisi ?? '-' }}</td>
                                     <td>{{ $penugasan->tanggal_mulai ? \Carbon\Carbon::parse($penugasan->tanggal_mulai)->format('d-m-Y') : '-' }}
                                     </td>
@@ -61,18 +61,26 @@
                                             <strong>Antar:</strong> {{ Str::limit($penugasan->rute->tempat_antar ?? $penugasan->tempat_antar, 30) }}
                                         </small>
                                     </td>
-                                    <!-- Kolom Pembayaran -->
-                                    <td class="text-center">
-                                        @if($penugasan->penyewaan && $penugasan->penyewaan->pembayaran)
-                                            <span class="badge badge-light border text-dark">{{ ucfirst($penugasan->penyewaan->pembayaran->jenis) }}</span>
-                                            <br>
-                                            <small class="p-1 font-weight-bold text-{{ $penugasan->penyewaan->pembayaran->status == 'lunas' ? 'success' : 'primary' }}">
-                                                {{ str_replace('_', ' ', ucfirst($penugasan->penyewaan->pembayaran->status)) }}
-                                            </small>
-                                        @else
-                                            <span class="badge badge-secondary font-weight-normal small">Belum Diproses</span>
-                                        @endif
-                                    </td>
+                                     <!-- Kolom Pembayaran -->
+                                     <td class="text-center">
+                                         @if($penugasan->penyewaan && $penugasan->penyewaan->pembayaran)
+                                             @if($penugasan->penyewaan->pembayaran->status == 'lunas')
+                                                 <span class="badge badge-success">Lunas</span>
+                                             @elseif($penugasan->penyewaan->pembayaran->status == 'menunggu_konfirmasi')
+                                                 <span class="badge badge-warning">Menunggu Konfirmasi</span>
+                                             @elseif($penugasan->penyewaan->pembayaran->status == 'menunggu_pelunasan')
+                                                 <span class="badge badge-info">Menunggu Pelunasan</span>
+                                             @elseif($penugasan->penyewaan->pembayaran->status == 'menunggu_konfirmasi_pelunasan')
+                                                 <span class="badge badge-primary">Menunggu Konfirmasi Pelunasan</span>
+                                             @elseif($penugasan->penyewaan->pembayaran->status == 'ditolak')
+                                                 <span class="badge badge-danger">Ditolak</span>
+                                             @else
+                                                 <span class="badge badge-secondary">{{ ucfirst(str_replace('_', ' ', $penugasan->penyewaan->pembayaran->status)) }}</span>
+                                             @endif
+                                         @else
+                                             <span class="badge badge-secondary">Belum Diproses</span>
+                                         @endif
+                                     </td>
 
                                     <!-- Kolom Status Penugasan -->
                                     <td class="text-center">
@@ -93,37 +101,33 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <!-- Tombol Detail -->
-                                        <a href="{{ route('penugasan.show', $penugasan->id) }}" class="btn btn-info btn-sm"
-                                            title="Lihat Detail">
-                                            <i class="fas fa-eye"></i> Detail
-                                        </a>
+                                        <div class="d-flex flex-nowrap justify-content-center" style="gap:6px;">
 
-                                        <!-- Tombol Cetak (Hanya jika pembayaran 50% / menunggu pelunasan) -->
-                                        @if($penugasan->penyewaan && $penugasan->penyewaan->pembayaran && $penugasan->penyewaan->pembayaran->status == 'menunggu_pelunasan')
-                                        <a href="{{ route('penugasan.invoice', $penugasan->id) }}" class="btn btn-secondary btn-sm"
-                                            title="Cetak Invoice Penagihan">
-                                            <i class="fas fa-print"></i> Cetak
-                                        </a>
-                                        @endif
+                                            {{-- Tombol Detail --}}
+                                            <a href="{{ route('penugasan.show', $penugasan->id) }}" class="btn btn-info btn-sm" title="Lihat Detail">
+                                                Detail
+                                            </a>
 
-                                        <!-- Tombol Upload (jika belum selesai) -->
-                                        @if(in_array($penugasan->status, ['aktif', 'revisi_bukti']))
-                                            <button type="button"
-                                                class="btn btn-{{ $penugasan->status == 'revisi_bukti' ? 'danger' : 'success' }} btn-sm btn-upload"
-                                                data-id="{{ $penugasan->id }}" title="Upload Bukti Selesai">
-                                                <i class="fas fa-upload"></i>
-                                                {{ $penugasan->status == 'revisi_bukti' ? 'Upload Ulang' : 'Upload' }}
-                                            </button>
-                                        @elseif($penugasan->status == 'menunggu_konfirmasi_selesai')
-                                            <span class="badge badge-warning p-2 d-inline-block mt-1">
-                                                <i class="fas fa-hourglass-half"></i> Validasi
-                                            </span>
-                                        @elseif($penugasan->status == 'selesai')
-                                            <span class="badge badge-success p-2 d-inline-block mt-1">
-                                                <i class="fas fa-check-circle"></i> Selesai
-                                            </span>
-                                        @endif
+                                            {{-- Tombol Cetak (Hanya jika menunggu pelunasan) --}}
+                                            @if($penugasan->penyewaan && $penugasan->penyewaan->pembayaran && $penugasan->penyewaan->pembayaran->status == 'menunggu_pelunasan')
+                                            <a href="{{ route('penugasan.invoice', $penugasan->id) }}" class="btn btn-secondary btn-sm" title="Cetak Invoice Penagihan">
+                                                Cetak
+                                            </a>
+                                            @endif
+
+                                            {{-- Tombol Upload (hanya jika bisa diupload) --}}
+                                            @if(in_array($penugasan->status, ['aktif', 'revisi_bukti']))
+                                                <button type="button"
+                                                    class="btn btn-{{ $penugasan->status == 'revisi_bukti' ? 'danger' : 'success' }} btn-sm btn-upload"
+                                                    data-id="{{ $penugasan->id }}" 
+                                                    data-status="{{ $penugasan->status }}"
+                                                    data-alasan="{{ $penugasan->penugasan->catatan_penugasan ?? $penugasan->catatan_penugasan ?? '' }}"
+                                                    title="Upload Bukti Selesai">
+                                                    {{ $penugasan->status == 'revisi_bukti' ? 'Upload Ulang' : 'Upload' }}
+                                                </button>
+                                            @endif
+
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -154,17 +158,14 @@
                         </button>
                     </div>
                     <div class="modal-body p-4">
-                        <!-- Info Alert -->
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Informasi:</strong> Upload foto bukti pengiriman/pekerjaan telah selesai
+                        <!-- Alasan Penolakan dari Admin (Hanya tampil jika status revisi_bukti) -->
+                        <div id="rejectionReasonContainer" class="alert alert-danger border-left-danger shadow-sm mb-4" style="display: none;">
+                            <h6 class="font-weight-bold">Alasan Penolakan dari Admin:</h6>
+                            <p id="rejectionReasonText" class="mb-0 font-italic"></p>
                         </div>
 
                         <div class="form-group">
-                            <label class="font-weight-bold h5 mb-3">
-                                <i class="fas fa-image"></i> Bukti Selesai <span class="text-danger">*</span>
-                            </label>
-
+ 
                             <div class="custom-file mb-3">
                                 <input type="file" class="custom-file-input" id="bukti_selesai" name="bukti_selesai"
                                     accept="image/jpeg,image/png,image/jpg" onchange="previewImage(event)" required>
@@ -236,11 +237,21 @@
             // Handle upload button click
             $('.btn-upload').on('click', function () {
                 const penugasanId = $(this).data('id');
+                const status = $(this).data('status');
+                const alasan = $(this).data('alasan');
                 const uploadForm = $('#uploadForm');
                 uploadForm.attr('action', '/dashboard/penugasan/' + penugasanId + '/upload-bukti');
 
                 console.log('Button clicked, Penugasan ID:', penugasanId); // Debug
                 console.log('Form action set to:', uploadForm.attr('action')); // Debug
+
+                // Tampilkan alasan penolakan jika statusnya revisi_bukti dan ada alasannya
+                if (status === 'revisi_bukti' && alasan) {
+                    $('#rejectionReasonText').text('"' + alasan + '"');
+                    $('#rejectionReasonContainer').show();
+                } else {
+                    $('#rejectionReasonContainer').hide();
+                }
 
                 $('#uploadModal').modal('show');
             });

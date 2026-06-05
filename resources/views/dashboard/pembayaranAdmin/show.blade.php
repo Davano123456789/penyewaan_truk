@@ -44,7 +44,7 @@
 
                     <div class="form-group">
                         <label class="font-weight-bold">Jenis</label>
-                        <input type="text" class="form-control" value="{{ $pembayaran->jenis ?? '-' }}" readonly>
+                        <input type="text" class="form-control" value="{{ $pembayaran->jenis == 'tunai' ? 'Tunai' : (ucfirst($pembayaran->jenis) ?? '-') }}" readonly>
                     </div>
 
                     <div class="form-group">

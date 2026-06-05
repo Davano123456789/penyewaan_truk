@@ -13,14 +13,27 @@
             <h6 class="m-0 font-weight-bold text-primary">Daftar Semua Penugasan Sopir</h6>
         </div>
         <div class="card-body">
+            <!-- Search Bar -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Cari penugasan..." id="searchInput">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-responsive">
-                <table class="table table-bordered" width="100%" cellspacing="0">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Kode Transaksi</th>
+                            <th>Kode Keranjang</th>
                             <th>Sopir</th>
                             <th>Armada</th>
-                            <th>Tujuan</th>
                             <th>Bukti Selesai</th>
                             <th>Status</th>
                             <th>Aksi</th>
@@ -30,13 +43,10 @@
                         @forelse($penugasans as $p)
                             <tr>
                                 <td>
-                                    <strong>#{{ $p->penyewaan->kode_transaksi ?? 'TIDAK DITEMUKAN' }}</strong><br>
-                                    <span class="badge badge-info">{{ $p->kode_keranjang }}</span><br>
-                                    <small class="text-muted">{{ $p->updated_at->format('d M Y, H:i') }}</small>
+                                    <span class="badge badge-info">{{ $p->kode_keranjang ?? '-' }}</span>
                                 </td>
                                 <td>{{ $p->sopir->nama ?? 'Sopir Tidak Ada' }}</td>
                                 <td>{{ $p->armada->merek ?? 'Armada Dihapus' }} ({{ $p->armada->no_polisi ?? '-' }})</td>
-                                <td>{{ $p->tempat_antar }}</td>
                                 <td class="text-center">
                                     @if(($p->penugasan->bukti_selesai ?? $p->bukti_selesai))
                                         <a href="{{ $p->penugasan->bukti_selesai ?? $p->bukti_selesai }}" target="_blank">
@@ -85,11 +95,6 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <!-- Info Ringkas -->
-                                            <div class="alert alert-info small mb-3">
-                                                <strong>Sopir:</strong> {{ $p->sopir->nama ?? '-' }}<br>
-                                                <strong>Armada:</strong> {{ $p->armada->no_polisi ?? '-' }} ({{ $p->armada->jenis ?? '-' }})
-                                            </div>
  
                                             <div class="form-group">
                                                 <label class="font-weight-bold text-dark">Keputusan Admin <span class="text-danger">*</span></label>
@@ -140,7 +145,7 @@
                                 <div class="modal-dialog modal-lg" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title">Bukti Selesai Penugasan #{{ $p->penyewaan->kode_transaksi ?? $p->kode_keranjang }}</h5>
+                                            <h5 class="modal-title">Bukti Selesai Penugasan #{{ $p->kode_keranjang ?? $p->penyewaan->kode_transaksi }}</h5>
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
@@ -153,7 +158,7 @@
                             </div>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4">
+                                <td colspan="6" class="text-center py-4">
                                     <i class="fas fa-clipboard-check fa-3x text-gray-300 mb-3"></i>
                                     <p class="text-gray-500 mb-0">Belum ada data penugasan.</p>
                                 </td>
@@ -217,6 +222,29 @@
                 document.getElementById('formReject' + id).submit();
             }
         });
+    });
+
+    // Fungsi pencarian
+    document.getElementById('searchInput')?.addEventListener('keyup', function() {
+        var input, filter, table, tr, td, i, j, txtValue;
+        input = document.getElementById('searchInput');
+        filter = input.value.toUpperCase();
+        table = document.getElementById('dataTable');
+        tr = table.getElementsByTagName('tr');
+
+        for (i = 1; i < tr.length; i++) {
+            tr[i].style.display = 'none';
+            td = tr[i].getElementsByTagName('td');
+            for (j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                        break;
+                    }
+                }
+            }
+        }
     });
 </script>
 @endsection

@@ -18,11 +18,13 @@ class DashboardController extends Controller
 
         $totalArmadaTersedia = Armada::where('status', 'aktif')->count();
         $totalArmadaDisewa = Armada::where('status', 'tidak_tersedia')->count();
+        $totalArmada = Armada::count();
 
         $now = Carbon::now();
         $totalPenyewaanBulanIni = Penyewaan::whereYear('created_at', $now->year)
             ->whereMonth('created_at', $now->month)
             ->count();
+        $totalPenyewaan = Penyewaan::count();
 
         // Omset: total pemasukan per bulan dari pembayaran yang sudah 'lunas'
         $months = [
@@ -47,6 +49,8 @@ class DashboardController extends Controller
             'totalArmadaTersedia',
             'totalArmadaDisewa',
             'totalPenyewaanBulanIni',
+            'totalPenyewaan',
+            'totalArmada',
             'months',
             'omsetData'
         ));

@@ -190,5 +190,5 @@ Route::get('/dashboard/notifikasi', [NotifikasiController::class , 'listAll'])->
 Route::get('/api/notifikasi', [NotifikasiController::class , 'index'])->name('notifikasi.index');
 Route::post('/api/notifikasi/{id}/read', [NotifikasiController::class , 'read'])->name('notifikasi.read');
 Route::post('/api/notifikasi/read-all', [NotifikasiController::class , 'readAll'])->name('notifikasi.readAll');
-Route::delete('/api/notifikasi/{id}', [NotifikasiController::class , 'destroy'])->name('notifikasi.destroy');
 Route::delete('/api/notifikasi/delete-all', [NotifikasiController::class , 'destroyAll'])->name('notifikasi.destroyAll');
+Route::delete('/api/notifikasi/{id}', [NotifikasiController::class , 'destroy'])->name('notifikasi.destroy');

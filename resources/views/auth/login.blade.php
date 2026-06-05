@@ -87,6 +87,30 @@
                                     </div>
                                 @endif
 
+                                @if (session('error'))
+                                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                        <div class="flex items-start">
+                                            <i class="fas fa-exclamation-circle text-red-500 mt-1 mr-3"></i>
+                                            <div>
+                                                <h3 class="text-red-800 font-semibold text-sm mb-2">Terjadi kesalahan:</h3>
+                                                <p class="text-red-700 text-sm">{{ session('error') }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if (session('success'))
+                                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                        <div class="flex items-start">
+                                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                            <div>
+                                                <h3 class="text-green-800 font-semibold text-sm mb-2">Berhasil:</h3>
+                                                <p class="text-green-700 text-sm">{{ session('success') }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <!-- Email -->
                                 <div>
                                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
@@ -94,7 +118,7 @@
                                     </label>
                                     <input type="email" id="email" name="email"
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                        placeholder="contoh@email.com" required>
+                                        placeholder="contoh@email.com">
                                 </div>
 
                                 <!-- Password -->
@@ -105,7 +129,7 @@
                                     <div class="relative">
                                         <input type="password" id="kata_sandi" name="kata_sandi"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
-                                            placeholder="Masukkan kata sandi" required>
+                                            placeholder="Masukkan kata sandi">
                                         <button type="button" onclick="togglePassword()"
                                             class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-blue-600 transition">
                                             <i id="eyeIcon" class="fas fa-eye"></i>

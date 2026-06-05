@@ -18,7 +18,7 @@
                 <a href="{{ route('pemesanan') }}" class="{{ Request::is('pemesanan*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Penyewaan</a>
                 @endauth
                 @auth
-                    @if(Auth::user()->peran_id == 1)
+                    @if(Auth::user()->peran_id == 1 || Auth::user()->peran_id == 4)
                         <a href="{{ route('dashboard') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Dashboard</a>
                     @elseif(Auth::user()->peran_id == 2)
                         <a href="{{ route('penyewaan.index') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Dashboard</a>
@@ -30,23 +30,20 @@
                 @auth
                     <!-- Kalau Sudah Login -->
                     <div class="flex items-center space-x-4">
-                        <span class="text-gray-700">
-                            <i class="fas fa-user-circle mr-2"></i>{{ Auth::user()->nama }}
-                        </span>
                         
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
-                            <button type="submit" onclick="confirmLogout(event)" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
+                            <button type="submit" onclick="confirmLogout(event)" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-red-100 active:scale-95 flex items-center">
                                 <i class="fas fa-sign-out-alt mr-2"></i>Logout
                             </button>
                         </form>
                     </div>
                 @else
                     <!-- Kalau Belum Login -->
-                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-600 transition font-semibold">
+                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-600 transition font-semibold flex items-center">
                         <i class="fas fa-sign-in-alt mr-2"></i>Login
                     </a>
-                    <a href="{{ route('register') }}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                    <a href="{{ route('register') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-blue-100 active:scale-95 flex items-center">
                         <i class="fas fa-user-plus mr-2"></i>Daftar
                     </a>
                 @endauth
@@ -71,7 +68,7 @@
                 <a href="{{ route('pemesanan') }}" class="{{ Request::is('pemesanan*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Penyewaan</a>
                 @endauth
                 @auth
-                    @if(Auth::user()->peran_id == 1)
+                    @if(Auth::user()->peran_id == 1 || Auth::user()->peran_id == 4)
                         <a href="{{ route('dashboard') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Dashboard</a>
                     @elseif(Auth::user()->peran_id == 2)
                         <a href="{{ route('penyewaan.index') }}" class="{{ Request::is('dashboard*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Dashboard</a>
@@ -81,20 +78,17 @@
                 @endauth
                 
                 @auth
-                    <span class="text-gray-700 font-semibold">
-                        <i class="fas fa-user-circle mr-2"></i>{{ Auth::user()->nama }}
-                    </span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" onclick="confirmLogout(event)" class="w-full bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition text-left">
+                        <button type="submit" onclick="confirmLogout(event)" class="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-red-100 active:scale-95 flex items-center justify-center">
                             <i class="fas fa-sign-out-alt mr-2"></i>Logout
                         </button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-600 transition font-semibold">
+                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-600 transition font-semibold flex items-center justify-center py-2">
                         <i class="fas fa-sign-in-alt mr-2"></i>Login
                     </a>
-                    <a href="{{ route('register') }}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition text-center">
+                    <a href="{{ route('register') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-blue-100 active:scale-95 flex items-center justify-center">
                         <i class="fas fa-user-plus mr-2"></i>Daftar
                     </a>
                 @endauth

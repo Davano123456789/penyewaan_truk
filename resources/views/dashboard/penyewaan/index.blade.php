@@ -34,7 +34,8 @@
                         <option value="">Semua Status</option>
                         <option value="pending">Pending</option>
                         <option value="menunggu_pembayaran">Menunggu Pembayaran</option>
-                        <option value="dibayar">Dibayar</option>
+                        <option value="menunggu_konfirmasi_pembayaran">Menunggu Konfirmasi Pembayaran</option>
+                        <option value="aktif">Aktif</option>
                         <option value="selesai">Selesai</option>
                         <option value="dibatalkan">Dibatalkan</option>
                     </select>
@@ -119,7 +120,7 @@
                                      
                                  @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
                                      <!-- Lanjutkan Menunggu -->
-                                 @elseif($penyewaan->status == 'aktif' && $penyewaan->pembayaran && $penyewaan->pembayaran->jenis == 'talangan' && $penyewaan->pembayaran->status == 'menunggu_pelunasan')
+                                 @elseif(in_array($penyewaan->status, ['aktif', 'selesai']) && $penyewaan->pembayaran && $penyewaan->pembayaran->jenis == 'talangan' && $penyewaan->pembayaran->status == 'menunggu_pelunasan')
                                      <a href="{{ route('pembayaran.show', $penyewaan->id) }}" 
                                         class="btn btn-warning btn-sm" 
                                         title="Bayar Sisa">
@@ -136,7 +137,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted">Belum ada data penyewaan</td>
+                            <td colspan="7" class="text-center text-muted">Belum ada data penyewaan</td>
                         </tr>
                         @endforelse
                     </tbody>

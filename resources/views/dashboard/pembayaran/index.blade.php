@@ -27,22 +27,8 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="border rounded p-3 text-center">
-                                <h6 class="font-weight-bold text-warning">Bank Mandiri</h6>
-                                <p class="h5 mb-1">9876543210</p>
-                                <small class="text-muted">PT Truck Rental Indonesia</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="border rounded p-3 text-center">
                                 <h6 class="font-weight-bold text-info">Bank BRI</h6>
                                 <p class="h5 mb-1">5555666677</p>
-                                <small class="text-muted">PT Truck Rental Indonesia</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="border rounded p-3 text-center">
-                                <h6 class="font-weight-bold text-success">Bank BNI</h6>
-                                <p class="h5 mb-1">8888999900</p>
                                 <small class="text-muted">PT Truck Rental Indonesia</small>
                             </div>
                         </div>
@@ -53,21 +39,31 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 bg-primary">
                     <h6 class="m-0 font-weight-bold text-white">
-                        <i class="fas fa-upload"></i> Form Upload Bukti Transfer - Pesanan #{{ $penyewaan->id }}
+                        <i class="fas fa-upload"></i> Form Upload Bukti Transfer - Pesanan #{{ $penyewaan->kode_transaksi }}
                     </h6>
                 </div>
                 <div class="card-body">
                     <!-- Info Pembayaran -->
+                    @if($penyewaan->pembayaran && $penyewaan->pembayaran->status == 'ditolak')
+                    <!-- NOTIFIKASI PENOLAKAN -->
+                    <div class="alert alert-danger border-left-danger shadow-sm mb-4">
+                        <h5 class="alert-heading font-weight-bold"><i class="fas fa-exclamation-triangle"></i> Pembayaran Ditolak Admin</h5>
+                        <hr>
+                        <p class="mb-1"><strong>Catatan Penolakan:</strong></p>
+                        <p class="mb-3 font-italic">"{{ $penyewaan->pembayaran->catatan ?? 'Tidak ada catatan' }}"</p>
+                        <p class="mb-0">Silakan unggah ulang bukti transfer pembayaran yang valid.</p>
+                    </div>
+                    @endif
+
                     @if($penyewaan->status == 'menunggu_pembayaran')
                     <!-- PEMBAYARAN PERTAMA -->
                     <div class="alert alert-info">
                         <h5 class="alert-heading"><i class="fas fa-info-circle"></i> Pembayaran Pertama</h5>
                         <hr>
                         <p class="mb-1"><strong>Total Pesanan:</strong></p>
-                        <h3 class="text-primary mb-3">Rp {{ number_format($penyewaan->harga_total, 0, ',', '.') }}</h3>
-                        <p class="mb-0"><i class="fas fa-clock"></i> Tanggal Pesanan: {{ $penyewaan->created_at->format('d M Y H:i') }}</p>
+                        <h3 class="text-primary mb-0">Rp {{ number_format($penyewaan->harga_total, 0, ',', '.') }}</h3>
                     </div>
-                    @elseif($penyewaan->status == 'aktif' && $penyewaan->pembayaran && $penyewaan->pembayaran->jenis == 'talangan' && $penyewaan->pembayaran->status == 'menunggu_pelunasan')
+                    @elseif($penyewaan->status == 'aktif' && $penyewaan->pembayaran && $penyewaan->pembayaran->jenis == 'talangan' && in_array($penyewaan->pembayaran->status, ['menunggu_pelunasan', 'ditolak']))
                     <!-- PEMBAYARAN SISA (TALANGAN) -->
                     <div class="alert alert-warning">
                         <h5 class="alert-heading"><i class="fas fa-money-bill-wave"></i> Pembayaran Sisa - Melunasi</h5>
@@ -88,7 +84,7 @@
                         <h3 class="text-danger mb-2" id="jumlahBayarDisplay">Rp 0</h3>
                         <p class="mb-0 text-muted" id="keteranganJenis"></p>
                     </div>
-                    @elseif($penyewaan->status == 'aktif' && $penyewaan->pembayaran && $penyewaan->pembayaran->jenis == 'talangan' && $penyewaan->pembayaran->status == 'menunggu_pelunasan')
+                    @elseif($penyewaan->status == 'aktif' && $penyewaan->pembayaran && $penyewaan->pembayaran->jenis == 'talangan' && in_array($penyewaan->pembayaran->status, ['menunggu_pelunasan', 'ditolak']))
                     <div class="alert alert-info">
                         <h5 class="alert-heading"><i class="fas fa-money-bill-wave"></i> Jumlah Pembayaran Sisa yang Harus Dibayar</h5>
                         <hr>
@@ -114,12 +110,12 @@
                                        class="custom-control-input jenis-pembayaran" 
                                        id="jenisCash" 
                                        name="jenis" 
-                                       value="cash" 
-                                       {{ old('jenis') == 'cash' ? 'checked' : '' }}
+                                       value="tunai" 
+                                       {{ old('jenis') == 'tunai' ? 'checked' : '' }}
                                        onchange="hitungJumlahBayar()" 
                                        required>
                                 <label class="custom-control-label" for="jenisCash">
-                                    <strong>Cash (100% - Langsung Lunas)</strong>
+                                    <strong>Tunai (100% - Langsung Lunas)</strong>
                                     <br>
                                     <small class="text-muted">Bayar penuh sekarang = Rp <span id="cashAmount">{{ number_format($penyewaan->harga_total, 0, ',', '.') }}</span></small>
                                 </label>
@@ -158,14 +154,8 @@
                                 <option value="transfer_bca" {{ old('metode') == 'transfer_bca' ? 'selected' : '' }}>
                                     Transfer Bank BCA (1234567890)
                                 </option>
-                                <option value="transfer_mandiri" {{ old('metode') == 'transfer_mandiri' ? 'selected' : '' }}>
-                                    Transfer Bank Mandiri (9876543210)
-                                </option>
                                 <option value="transfer_bri" {{ old('metode') == 'transfer_bri' ? 'selected' : '' }}>
                                     Transfer Bank BRI (5555666677)
-                                </option>
-                                <option value="transfer_bni" {{ old('metode') == 'transfer_bni' ? 'selected' : '' }}>
-                                    Transfer Bank BNI (8888999900)
                                 </option>
                             </select>
                             @error('metode')
@@ -272,9 +262,9 @@
         let jumlahBayar = 0;
         let keterangan = '';
 
-        if (jenisPembayaran === 'cash') {
+        if (jenisPembayaran === 'tunai') {
             jumlahBayar = totalHarga;
-            keterangan = '✓ Pembayaran cash - Status otomatis: <strong>LUNAS</strong>';
+            keterangan = '✓ Pembayaran tunai - Status otomatis: <strong>LUNAS</strong>';
         } else if (jenisPembayaran === 'talangan') {
             jumlahBayar = totalHarga / 2;
             keterangan = '⏳ Pembayaran talangan - Bayar 50% sekarang, status: <strong>Menunggu Konfirmasi Pembayaran</strong> (sisanya setelah pengiriman)';

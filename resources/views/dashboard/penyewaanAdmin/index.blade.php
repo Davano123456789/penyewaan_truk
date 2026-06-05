@@ -96,6 +96,8 @@
                             <option value="menunggu_pembayaran" {{ request('status') == 'menunggu_pembayaran' ? 'selected' : '' }}>Menunggu Pembayaran</option>
                             <option value="menunggu_konfirmasi_pembayaran" {{ request('status') == 'menunggu_konfirmasi_pembayaran' ? 'selected' : '' }}>Menunggu Konfirmasi Pembayaran</option>
                             <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                            <option value="menunggu_pelunasan" {{ request('status') == 'menunggu_pelunasan' ? 'selected' : '' }}>Menunggu Pelunasan</option>
+                            <option value="menunggu_konfirmasi_pelunasan" {{ request('status') == 'menunggu_konfirmasi_pelunasan' ? 'selected' : '' }}>Menunggu Konfirmasi Pelunasan</option>
                             <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
                             <option value="dibatalkan" {{ request('status') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
                         </select>
@@ -112,16 +114,17 @@
 
             <!-- Table -->
             <div class="table-responsive">
-                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                <table class="table table-bordered table-hover" id="dataTable" style="min-width: 1000px;" cellspacing="0">
                     <thead class="thead-light">
                         <tr>
-                            <th class="text-center" width="5%">No</th>
-                            <th width="15%">Customer</th>
-                            <th width="12%">Tanggal</th>
-                            <th width="15%">Total Harga</th>
-                            <th width="12%">Status</th>
-                            <th width="12%">Status Pembayaran</th>
-                            <th class="text-center" width="25%">Aksi</th>
+                            <th class="text-center" style="min-width: 50px;">No</th>
+                            <th style="min-width: 140px;">Kode Transaksi</th>
+                            <th style="min-width: 140px;">Customer</th>
+                            <th style="min-width: 130px;">Tanggal</th>
+                            <th style="min-width: 130px;">Total Harga</th>
+                            <th style="min-width: 120px;">Status</th>
+                            <th style="min-width: 150px;">Status Pembayaran</th>
+                            <th class="text-center" style="min-width: 150px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -129,7 +132,10 @@
                         <tr>
                             <td class="text-center">{{ $penyewaans->firstItem() + $index }}</td>
                             <td>
-                                <strong>{{ $penyewaan->client ? $penyewaan->client->nama : 'User Tidak Ditemukan' }}</strong><br>
+                                <span class="badge badge-info">{{ $penyewaan->kode_transaksi ?? '-' }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ $penyewaan->client ? $penyewaan->client->nama : 'User Tidak Ditemukan' }}</strong>
                             </td>
                             <td>{{ $penyewaan->created_at->format('d M Y H:i') }}</td>
                             <td><strong class="text-primary">Rp {{ number_format($penyewaan->harga_total, 0, ',', '.') }}</strong></td>
@@ -168,24 +174,25 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <!-- Tombol Detail -->
-                                <a href="{{ route('penyewaanAdmin.show', $penyewaan->id) }}" 
-                                   class="btn btn-info btn-sm" 
-                                   title="Lihat Detail">
-                                    <i class="fas fa-eye"></i> Detail
-                                </a>
+                                <div class="d-flex justify-content-center flex-nowrap" style="gap: 4px;">
+                                    <!-- Tombol Detail -->
+                                    <a href="{{ route('penyewaanAdmin.show', $penyewaan->id) }}" 
+                                       class="btn btn-info btn-sm text-nowrap" 
+                                       title="Lihat Detail">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </a>
 
-                                <!-- Tombol Hapus -->
-                                <form action="{{ route('penyewaanAdmin.destroy', $penyewaan->id) }}" 
-                                      method="POST" 
-                                      class="d-inline delete-form">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" class="btn btn-danger btn-sm btn-delete" title="Hapus Penyewaan">
-                                        <i class="fas fa-trash"></i> Hapus
-                                    </button>
-                                </form>
-
+                                    <!-- Tombol Hapus -->
+                                    <form action="{{ route('penyewaanAdmin.destroy', $penyewaan->id) }}" 
+                                          method="POST" 
+                                          class="d-inline delete-form">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" class="btn btn-danger btn-sm btn-delete text-nowrap" title="Hapus Penyewaan">
+                                            <i class="fas fa-trash"></i> Hapus
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
 

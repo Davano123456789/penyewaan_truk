@@ -20,7 +20,19 @@ class PenyewaanAdminController extends Controller
 
         // Filter berdasarkan status jika ada
         if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
+            if ($request->status == 'menunggu_pelunasan') {
+                $query->where('status', 'aktif')
+                      ->whereHas('pembayaran', function($q) {
+                          $q->where('status', 'menunggu_pelunasan');
+                      });
+            } elseif ($request->status == 'menunggu_konfirmasi_pelunasan') {
+                $query->where('status', 'aktif')
+                      ->whereHas('pembayaran', function($q) {
+                          $q->where('status', 'menunggu_konfirmasi_pelunasan');
+                      });
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         // Search
@@ -30,7 +42,8 @@ class PenyewaanAdminController extends Controller
                 $q->whereHas('client', function($q) use ($search) {
                     $q->where('nama', 'like', '%' . $search . '%')
                       ->orWhere('email', 'like', '%' . $search . '%');
-                })->orWhere('id', 'like', '%' . $search . '%');
+                })->orWhere('id', 'like', '%' . $search . '%')
+                  ->orWhere('kode_transaksi', 'like', '%' . $search . '%');
             });
         }
 
@@ -57,7 +70,7 @@ class PenyewaanAdminController extends Controller
 
         $pdf = Pdf::loadView('dashboard.penyewaanAdmin.invoice', compact('penyewaan'));
         
-        return $pdf->download('invoice-penyewaan-' . $penyewaan->id . '.pdf');
+        return $pdf->download('invoice-penyewaan-' . $penyewaan->kode_transaksi . '.pdf');
     }
 
     /**
@@ -82,7 +95,7 @@ class PenyewaanAdminController extends Controller
 
                 // Update status pembayaran sesuai jenisnya
                 if ($penyewaan->pembayaran) {
-                    $pembayaranStatus = ($penyewaan->pembayaran->jenis == 'cash') ? 'lunas' : 'menunggu_pelunasan';
+                    $pembayaranStatus = ($penyewaan->pembayaran->jenis == 'tunai') ? 'lunas' : 'menunggu_pelunasan';
                     $penyewaan->pembayaran->update(['status' => $pembayaranStatus]);
                 }
 
@@ -121,6 +134,19 @@ class PenyewaanAdminController extends Controller
                             continue;
                         }
 
+                        // --- KIRIM NOTIFIKASI DASHBOARD ---
+                        try {
+                            \App\Services\NotifikasiService::kirim(
+                                $sopirId,
+                                "Penugasan Baru",
+                                "Anda ditugaskan untuk pengiriman pesanan #" . $penyewaan->kode_transaksi . " (" . $items->count() . " item).",
+                                route('penugasan.index'),
+                                $penyewaan->id
+                            );
+                        } catch (\Throwable $e) {
+                            \Log::error('✗ Gagal mengirim Notifikasi Dashboard ke sopir id ' . $sopirId . ': ' . $e->getMessage());
+                        }
+
                         $email = $sopir->email ?? null;
                         \Log::info('Sopir: ' . ($sopir->nama ?? $sopir->name ?? 'Unknown') . ', Email: ' . ($email ?? 'KOSONG'));
 
@@ -149,20 +175,27 @@ class PenyewaanAdminController extends Controller
                                 \Log::info('Akan mengirim WhatsApp ke: ' . $telepon);
 
                                 // Buat pesan WhatsApp
-                                $pesanWA = "Halo *" . ($sopir->nama ?? $sopir->name) . "*,\n\n";
-                                $pesanWA .= "Anda mendapat *TUGAS BARU* dari penyewaan #{$penyewaan->id}.\n";
-                                $pesanWA .= "--------------------------------\n";
-                                
+                                $pesanWA = "Halo " . ($sopir->nama ?? $sopir->name) . ",\n\n";
+                                $pesanWA .= "Anda mendapat TUGAS BARU.\n";
+                                $pesanWA .= "================================\n";
+
                                 foreach ($items as $index => $item) {
-                                    $num = $items->count() > 1 ? ($index + 1) . ". " : "";
-                                    $pesanWA .= "{$num}*Tanggal*: " . date('d-m-Y', strtotime($item->tanggal_mulai)) . "\n";
-                                    $pesanWA .= "   *Rute*: " . ($item->rute->tempat_jemput ?? '-') . " -> " . ($item->rute->tempat_antar ?? '-') . "\n";
-                                    $pesanWA .= "   *Muatan*: {$item->barang_muatan}\n";
-                                    $pesanWA .= "   *Armada*: {$item->armada->no_polisi} ({$item->armada->merek})\n\n";
+                                    if ($items->count() > 1) {
+                                        $pesanWA .= "[ Item " . ($index + 1) . " ]\n";
+                                    }
+                                    $pesanWA .= "Kode Item : " . $item->kode_keranjang . "\n";
+                                    $pesanWA .= "Tanggal   : " . date('d-m-Y', strtotime($item->tanggal_mulai)) . "\n";
+                                    $pesanWA .= "Rute      : " . ($item->rute->tempat_jemput ?? '-') . "\n";
+                                    $pesanWA .= "            -> " . ($item->rute->tempat_antar ?? '-') . "\n";
+                                    $pesanWA .= "Muatan    : " . $item->barang_muatan . "\n";
+                                    $pesanWA .= "Armada    : " . $item->armada->no_polisi . " (" . $item->armada->merek . ")\n";
+                                    if ($index < $items->count() - 1) {
+                                        $pesanWA .= "--------------------------------\n";
+                                    }
                                 }
-                                
-                                $pesanWA .= "--------------------------------\n";
-                                $pesanWA .= "Silakan cek email atau dashboard sopir untuk detail lengkapnya.\n\n";
+
+                                $pesanWA .= "================================\n";
+                                $pesanWA .= "Silakan cek dashboard sopir untuk detail lengkapnya.\n\n";
                                 $pesanWA .= "Terima kasih,\nAdmin Penyewaan Truk";
 
                                 // Panggil service (Instantiate on the fly or inject)
@@ -366,12 +399,26 @@ class PenyewaanAdminController extends Controller
 
     public function prosesPembatalan(Request $request, $id)
     {
-        $request->validate([
+        $rules = [
             'action' => 'required|in:approve,reject',
             'nominal_refund' => 'nullable|numeric',
             'bukti_refund' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'catatan' => 'required_if:action,reject|nullable|string'
-        ]);
+            'catatan' => 'nullable|string'
+        ];
+
+        $messages = [];
+
+        if ($request->action === 'approve' && $request->nominal_refund > 0) {
+            $rules['bukti_refund'] = 'required|image|mimes:jpeg,png,jpg|max:2048';
+            $messages['bukti_refund.required'] = 'Bukti refund harus diisi';
+        }
+
+        if ($request->action === 'reject') {
+            $rules['catatan'] = 'required|string';
+            $messages['catatan.required'] = 'Catatan harus diisi';
+        }
+
+        $request->validate($rules, $messages);
 
         try {
             DB::beginTransaction();

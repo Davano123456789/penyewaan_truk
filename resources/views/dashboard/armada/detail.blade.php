@@ -75,9 +75,9 @@
 
             <!-- Tombol Kembali -->
             <div class="row mt-4">
-                <div class="col-12 text-center">
+                <div class="col-12">
                     <a href="{{ route('armada.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Kembali ke Daftar Armada
+                        <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                 </div>
             </div>

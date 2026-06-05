@@ -72,7 +72,7 @@
             <div class="row mt-4">
                 <div class="col-12">
                     <a href="{{ route('client.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Kembali ke Daftar Client
+                        <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                   
                 </div>

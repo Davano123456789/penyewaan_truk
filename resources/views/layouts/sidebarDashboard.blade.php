@@ -16,7 +16,7 @@
     <!-- MENU ADMIN (Peran = 1) -->
     <!-- ============================================================== -->
     @if(Auth::user()->peran_id == 1)
-    
+
     <!-- Nav Item - Dashboard -->
     <li class="nav-item {{ Request::is('dashboard') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('dashboard') }}">
@@ -104,7 +104,22 @@
             <span>Validasi Penugasan</span>
         </a>
     </li>
-    
+
+    @endif
+
+    <!-- ============================================================== -->
+    <!-- MENU OWNER (Peran = 4) - Hanya Dashboard -->
+    <!-- ============================================================== -->
+    @if(Auth::user()->peran_id == 4)
+
+    <!-- Nav Item - Dashboard -->
+    <li class="nav-item {{ Request::is('dashboard') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('dashboard') }}">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+
     @endif
 
     <!-- ============================================================== -->

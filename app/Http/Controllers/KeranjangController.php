@@ -72,10 +72,12 @@ class KeranjangController extends Controller
 
     public function store(Request $request)
     {
+        $minDate = now()->addDay()->toDateString();
+        $maxDate = now()->addDays(8)->toDateString();
         $validated = $request->validate([
             'armada_id' => 'required|exists:armadas,id',
             'sopir_id' => 'required|exists:sopirs,id',
-            'tanggal_mulai' => 'required|date',
+            'tanggal_mulai' => 'required|date|after_or_equal:' . $minDate . '|before_or_equal:' . $maxDate,
             'estimasi_hari' => 'required|integer|min:1',
             'tempat_jemput' => 'required|string',
             'tempat_antar' => 'required|string',
@@ -134,9 +136,11 @@ class KeranjangController extends Controller
                 return redirect()->back()->with('error', 'Tidak dapat mengubah item dari pesanan yang sudah diproses!');
             }
 
+            $minDate = now()->addDay()->toDateString();
+            $maxDate = now()->addDays(8)->toDateString();
             $validated = $request->validate([
                 'armada_id' => 'required|exists:armadas,id',
-                'tanggal_mulai' => 'required|date',
+                'tanggal_mulai' => 'required|date|after_or_equal:' . $minDate . '|before_or_equal:' . $maxDate,
                 'estimasi_hari' => 'required|integer|min:1',
                 'tempat_jemput' => 'required|string',
                 'tempat_antar' => 'required|string',

@@ -46,7 +46,7 @@
                                     $refund = 0;
                                     if($item->penyewaan && $item->penyewaan->pembayaran) {
                                         $bayar = 0;
-                                        if($item->penyewaan->pembayaran->jenis == 'cash' && $item->penyewaan->pembayaran->status == 'lunas') {
+                                        if($item->penyewaan->pembayaran->jenis == 'tunai' && $item->penyewaan->pembayaran->status == 'lunas') {
                                             $bayar = $item->harga_sewa;
                                         } elseif($item->penyewaan->pembayaran->jenis == 'talangan') {
                                             $bayar = $item->harga_sewa / 2;

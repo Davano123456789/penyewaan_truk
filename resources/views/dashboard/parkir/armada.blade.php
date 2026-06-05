@@ -39,10 +39,10 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Armada Aktif
+                                Armada Tersedia
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ $parkir->armadas->where('status', 'aktif')->count() }}
+                                {{ $parkir->armadas->where('status', 'tersedia')->count() }}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -59,10 +59,10 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Armada Nonaktif
+                                Armada Disewa
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ $parkir->armadas->where('status', 'nonaktif')->count() }}
+                                {{ $parkir->armadas->where('status', 'tidak_tersedia')->count() }}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -122,10 +122,12 @@
                                 <td>{{ $armada->kapasitas }} Ton</td>
                                 <td>{{ $armada->sopir->nama ?? 'Belum Ada' }}</td>
                                 <td class="text-center">
-                                    @if($armada->status == 'aktif')
-                                        <span class="badge badge-success">Aktif</span>
+                                    @if($armada->status == 'tersedia')
+                                        <span class="badge badge-success">Tersedia</span>
+                                    @elseif($armada->status == 'tidak_tersedia')
+                                        <span class="badge badge-warning">Disewa</span>
                                     @else
-                                        <span class="badge badge-secondary">Nonaktif</span>
+                                        <span class="badge badge-secondary">{{ ucfirst($armada->status) }}</span>
                                     @endif
                                 </td>
                                 <td>{{ Str::limit($armada->deskripsi, 50) ?? '-' }}</td>

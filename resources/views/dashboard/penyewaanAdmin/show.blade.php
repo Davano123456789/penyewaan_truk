@@ -5,7 +5,7 @@
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Detail Penyewaan #{{ $penyewaan->id }}</h1>
+        <h1 class="h3 mb-0 text-gray-800">Detail Penyewaan</h1>
         <div>
             <a href="{{ route('penyewaanAdmin.invoice', $penyewaan->id) }}" class="btn btn-primary btn-sm shadow-sm">
                 <i class="fas fa-file-pdf"></i> Cetak Invoice
@@ -70,7 +70,7 @@
                                 @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
                                     <span class="badge badge-warning">Menunggu Konfirmasi Pembayaran</span>
                                 @elseif($penyewaan->status == 'aktif')
-                                    <span class="badge badge-success">Aktif / Berjalan</span>
+                                    <span class="badge badge-success">Aktif</span>
                                 @elseif($penyewaan->status == 'selesai')
                                     <span class="badge badge-primary">Selesai</span>
                                 @elseif($penyewaan->status == 'dibatalkan')
@@ -94,23 +94,27 @@
         <div class="card-body">
             @if($penyewaan->keranjangs->count() > 0)
             <div class="table-responsive">
-                <table class="table table-hover table-bordered">
+                <table class="table table-hover table-bordered" style="min-width: 1000px;">
                     <thead class="thead-light">
                         <tr>
-                            <th width="5%">No</th>
-                            <th width="15%">Armada</th>
-                            <th width="15%">Sopir</th>
-                            <th width="12%">Tanggal Mulai</th>
-                            <th width="10%">Estimasi</th>
-                            <th width="18%">Rute (Jemput & Antar)</th>
-                            <th width="15%">Status Item</th>
-                            <th width="10%">Subtotal</th>
+                            <th style="min-width:50px;">No</th>
+                            <th style="min-width:160px;">Kode Item</th>
+                            <th style="min-width:160px;">Armada</th>
+                            <th style="min-width:160px;">Sopir</th>
+                            <th style="min-width:130px;">Tanggal Mulai</th>
+                            <th style="min-width:120px;">Estimasi</th>
+                            <th style="min-width:220px;">Rute (Jemput & Antar)</th>
+                            <th style="min-width:140px;">Status Item</th>
+                            <th style="min-width:120px;">Subtotal</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($penyewaan->keranjangs as $index => $item)
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
+                            <td>
+                                <span class="badge badge-light border text-secondary font-weight-bold">{{ $item->kode_keranjang }}</span>
+                            </td>
                             <td>
                                 <strong>{{ $item->armada->jenis ?? 'N/A' }}</strong><br>
                                 <small class="badge badge-secondary">{{ $item->armada->no_polisi ?? 'N/A' }}</small>
@@ -158,7 +162,7 @@
                     </tbody>
                     <tfoot class="font-weight-bold">
                         <tr class="bg-light">
-                            <td colspan="7" class="text-right">TOTAL:</td>
+                            <td colspan="8" class="text-right">TOTAL:</td>
                             <td class="text-right"><h5 class="mb-0 text-primary">Rp {{ number_format($penyewaan->harga_total, 0, ',', '.') }}</h5></td>
                         </tr>
                     </tfoot>
@@ -203,20 +207,19 @@
                             <td><strong class="text-success h5">Rp {{ number_format($penyewaan->pembayaran->jumlah_bayar, 0, ',', '.') }}</strong></td>
                         </tr>
                         <tr>
-                            <td><strong>Tanggal Transfer</strong></td>
-                            <td>{{ \Carbon\Carbon::parse($penyewaan->pembayaran->tanggal_bayar)->format('d M Y') }}</td>
+                            <td><strong>Tanggal Pembayaran</strong></td>
+                            <td>{{ $penyewaan->pembayaran->created_at->format('d M Y') }}</td>
                         </tr>
+
                         <tr>
-                            <td><strong>Tanggal Upload</strong></td>
-                            <td>{{ $penyewaan->pembayaran->created_at->format('d M Y H:i') }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Jenis Pembayaran</strong></td>
+                            <td><strong>Tipe Pembayaran</strong></td>
                             <td>
-                                @if($penyewaan->pembayaran->jenis == 'cash')
-                                    <span class="badge badge-success">Cash (100% - Lunas)</span>
+                                @if($penyewaan->pembayaran->jenis == 'tunai')
+                                    <span class="badge badge-success">Tunai</span>
                                 @elseif($penyewaan->pembayaran->jenis == 'talangan')
-                                    <span class="badge badge-warning">Talangan (50% - Belum Lunas)</span>
+                                    <span class="badge badge-warning">Talangan</span>
+                                @else
+                                    <span class="badge badge-secondary">{{ ucfirst($penyewaan->pembayaran->jenis) }}</span>
                                 @endif
                             </td>
                         </tr>

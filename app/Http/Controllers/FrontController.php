@@ -145,9 +145,11 @@ public function getArmadaTersedia(Request $request)
 public function storePemesanan(Request $request)
 {
     try {
+        $minDate = now()->addDay()->toDateString();
+        $maxDate = now()->addDays(8)->toDateString();
         $validated = $request->validate([
             'armada_id' => 'required|exists:armadas,id',
-            'tanggal_mulai' => 'required|date',
+            'tanggal_mulai' => 'required|date|after_or_equal:' . $minDate . '|before_or_equal:' . $maxDate,
             'estimasi_hari' => 'required|integer|min:1',
             'tempat_jemput' => 'required|string',
             'tempat_antar' => 'required|string',
@@ -274,12 +276,12 @@ public function storePemesanan(Request $request)
             $query->where('jenis', $request->jenis);
         }
 
-        // Search berdasarkan merek, no polisi, atau deskripsi
+        // Search berdasarkan merek, kapasitas/bobot, atau deskripsi
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('merek', 'like', '%' . $search . '%')
-                  ->orWhere('no_polisi', 'like', '%' . $search . '%')
+                  ->orWhere('kapasitas', 'like', '%' . $search . '%')
                   ->orWhere('deskripsi', 'like', '%' . $search . '%');
             });
         }
@@ -350,9 +352,16 @@ public function storePemesanan(Request $request)
 
 public function loginStore(Request $request)
 {
+    if (empty($request->email) || empty($request->kata_sandi)) {
+        return back()->withErrors(['email' => 'Email/Password wajib diisi'])->withInput();
+    }
+
     $request->validate([
         'email' => 'required|email',
         'kata_sandi' => 'required|min:8',
+    ], [
+        'email.email' => 'Format email tidak valid',
+        'kata_sandi.min' => 'Kata sandi minimal 8 karakter',
     ]);
 
     // ambil user

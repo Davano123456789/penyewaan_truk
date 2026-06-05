@@ -169,9 +169,6 @@
                         <a href="{{ route('armada.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
-                        <button type="reset" class="btn btn-warning" onclick="resetForm()">
-                            <i class="fas fa-redo"></i> Reset
-                        </button>
                     </div>
                 </div>
             </form>
@@ -204,10 +201,6 @@
         }
     }
 
-    // Reset form
-    function resetForm() {
-        document.getElementById('preview-container').style.display = 'none';
-        document.querySelector('.custom-file-label').textContent = 'Pilih file...';
-    }
+
 </script>
 @endsection

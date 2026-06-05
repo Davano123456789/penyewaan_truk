@@ -43,11 +43,11 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if($p->jenis == 'cash')
-                                        <span class="badge badge-success">Cash (Lunas)</span>
-                                    @else
-                                        <span class="badge badge-warning">Talangan</span>
-                                    @endif
+                                     @if($p->jenis == 'tunai')
+                                         <span class="badge badge-success">Tunai</span>
+                                     @else
+                                         <span class="badge badge-warning">Talangan</span>
+                                     @endif
                                 </td>
                                 <td>
                                     @if($p->status == 'lunas')

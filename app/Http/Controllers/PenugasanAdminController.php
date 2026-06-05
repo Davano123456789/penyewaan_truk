@@ -28,10 +28,15 @@ class PenugasanAdminController extends Controller
      */
     public function validasi($id)
     {
-        $keranjang = Keranjang::with('penyewaan')->findOrFail($id);
+        $keranjang = Keranjang::with(['penyewaan', 'armada'])->findOrFail($id);
 
         // Update status keranjang menjadi SELESAI
         $keranjang->update(['status' => 'selesai']);
+
+        // Kembalikan armada menjadi tersedia kembali
+        if ($keranjang->armada) {
+            $keranjang->armada->update(['status' => 'tersedia']);
+        }
 
         // Kirim Notifikasi ke Client
         NotifikasiService::kirim(

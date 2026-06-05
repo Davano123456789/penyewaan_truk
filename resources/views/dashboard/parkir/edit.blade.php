@@ -110,9 +110,6 @@
                         <a href="{{ route('parkir.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
-                        <button type="reset" class="btn btn-warning" id="resetBtn">
-                            <i class="fas fa-redo"></i> Reset
-                        </button>
                     </div>
                 </div>
             </form>
@@ -335,62 +332,7 @@
             });
         });
 
-        // Konfirmasi sebelum reset dengan SweetAlert
-        document.getElementById('resetBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            Swal.fire({
-                title: 'Yakin ingin reset?',
-                text: "Data akan dikembalikan ke data awal!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, Reset!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Reset form ke data awal
-                    document.getElementById('nama').value = '{{ $parkir->nama }}';
-                    document.getElementById('alamat').value = '{{ $parkir->alamat }}';
-                    document.getElementById('latitude').value = '{{ $parkir->latitude }}';
-                    document.getElementById('longitude').value = '{{ $parkir->longitude }}';
-                    
-                    // Reset marker ke posisi awal
-                    if (marker) {
-                        map.removeLayer(marker);
-                    }
-                    
-                    @if($parkir->latitude && $parkir->longitude)
-                        marker = L.marker([{{ $parkir->latitude }}, {{ $parkir->longitude }}], {
-                            draggable: true
-                        }).addTo(map);
-                        marker.bindPopup("<b>{{ $parkir->nama }}</b><br>Lokasi Saat Ini").openPopup();
-                        map.setView([{{ $parkir->latitude }}, {{ $parkir->longitude }}], 15);
-                        
-                        document.getElementById('koordinat-info').innerHTML = 
-                            '<strong>Latitude:</strong> {{ $parkir->latitude }}<br><strong>Longitude:</strong> {{ $parkir->longitude }}';
 
-                        marker.on('dragend', function(e) {
-                            var position = marker.getLatLng();
-                            document.getElementById('latitude').value = position.lat.toFixed(6);
-                            document.getElementById('longitude').value = position.lng.toFixed(6);
-                            document.getElementById('koordinat-info').innerHTML = 
-                                '<strong>Latitude:</strong> ' + position.lat.toFixed(6) + '<br><strong>Longitude:</strong> ' + position.lng.toFixed(6);
-                            getAddress(position.lat, position.lng);
-                        });
-                    @endif
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: 'Data telah direset ke data awal',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                }
-            });
-        });
     });
 </script>
 @endsection
