@@ -85,10 +85,9 @@
     <label for="jenis" class="font-weight-bold">Jenis</label>
     <select class="form-control @error('jenis') is-invalid @enderror" id="jenis" name="jenis">
         <option value="">-- Pilih Jenis --</option>
-        <option value="CDD" {{ old('jenis') == 'CDD' ? 'selected' : '' }}>CDD</option>
-        <option value="BOX" {{ old('jenis') == 'BOX' ? 'selected' : '' }}>BOX</option>
-        <option value="WINGBOX" {{ old('jenis') == 'WINGBOX' ? 'selected' : '' }}>WINGBOX</option>
-        <option value="TERBUKA" {{ old('jenis') == 'TERBUKA' ? 'selected' : '' }}>TERBUKA</option>
+        <option value="CDD" {{ old('jenis', $armada->jenis) == 'CDD' ? 'selected' : '' }}>CDD</option>
+        <option value="BOX" {{ old('jenis', $armada->jenis) == 'BOX' ? 'selected' : '' }}>BOX</option>
+        <option value="WINGBOX" {{ old('jenis', $armada->jenis) == 'WINGBOX' ? 'selected' : '' }}>WINGBOX</option>
     </select>
     @error('jenis')
         <div class="invalid-feedback">{{ $message }}</div>

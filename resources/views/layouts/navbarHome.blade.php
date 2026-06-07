@@ -15,7 +15,9 @@
                 <a href="{{ url('/#tentang') }}" class="text-gray-700 hover:text-blue-600 transition">Tentang Kami</a>
                 <a href="{{ url('/#client') }}" class="text-gray-700 hover:text-blue-600 transition">Client</a>
                 @auth
-                <a href="{{ route('pemesanan') }}" class="{{ Request::is('pemesanan*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Penyewaan</a>
+                    @if(Auth::user()->peran_id == 2)
+                        <a href="{{ route('pemesanan') }}" class="{{ Request::is('pemesanan*') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600 transition' }}">Penyewaan</a>
+                    @endif
                 @endauth
                 @auth
                     @if(Auth::user()->peran_id == 1 || Auth::user()->peran_id == 4)
@@ -65,7 +67,9 @@
                 <a href="{{ url('/#tentang') }}" class="text-gray-700 hover:text-blue-600 transition text-left">Tentang Kami</a>
                 <a href="{{ url('/#client') }}" class="text-gray-700 hover:text-blue-600 transition text-left">Client</a>
                 @auth
-                <a href="{{ route('pemesanan') }}" class="{{ Request::is('pemesanan*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Penyewaan</a>
+                    @if(Auth::user()->peran_id == 2)
+                        <a href="{{ route('pemesanan') }}" class="{{ Request::is('pemesanan*') ? 'text-blue-600 font-semibold text-left' : 'text-gray-700 hover:text-blue-600 transition text-left' }}">Penyewaan</a>
+                    @endif
                 @endauth
                 @auth
                     @if(Auth::user()->peran_id == 1 || Auth::user()->peran_id == 4)

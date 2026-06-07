@@ -373,6 +373,7 @@
 
 <script>
 let map, markerJemput, markerAntar, markerParkir, routeLayer;
+let markerSkippedParkirs = [];
 let currentMode = 'jemput';
 let jemputCoords = null;
 let antarCoords = null;
@@ -768,10 +769,14 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
     }
 }
 
-function updateParkirSelection(parkir) {
+function updateParkirSelection(parkir, hasSkipped = false) {
     nearestParkir = parkir;
     
     if (markerParkir) map.removeLayer(markerParkir);
+    
+    const popupContent = hasSkipped
+        ? `<b>Parkir Terpilih (Terdekat dengan Armada Tersedia)</b><br>${parkir.nama}`
+        : `<b>Parkir Terdekat</b><br>${parkir.nama}`;
     
     markerParkir = L.marker([parkir.latitude, parkir.longitude], {
         icon: L.icon({
@@ -782,7 +787,7 @@ function updateParkirSelection(parkir) {
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
         })
-    }).addTo(map).bindPopup(`<b>Parkir Terdekat</b><br>${parkir.nama}`);
+    }).addTo(map).bindPopup(popupContent);
 
     document.getElementById('parkirInfo').style.display = 'block';
     document.getElementById('parkirNama').textContent = parkir.nama;
@@ -919,9 +924,36 @@ async function loadArmada(lat, lng) {
         const response = await fetch(`/api/armada-tersedia?lat=${lat}&lng=${lng}&jenis=${selectedJenisTruk}${currentArmadaId ? '&current_armada_id='+currentArmadaId : ''}`);
         const result = await response.json();
 
+        // Clear previous skipped parkir markers
+        markerSkippedParkirs.forEach(m => map.removeLayer(m));
+        markerSkippedParkirs = [];
+
         // Update parkir selection dynamically if the backend recommended a different parking lot
         if (result.parkir) {
-            updateParkirSelection(result.parkir);
+            const hasSkipped = !!(result.skipped_parkirs && result.skipped_parkirs.length > 0);
+            updateParkirSelection(result.parkir, hasSkipped);
+        }
+
+        // Draw skipped parking markers
+        if (result.skipped_parkirs && result.skipped_parkirs.length > 0) {
+            result.skipped_parkirs.forEach(sp => {
+                const marker = L.marker([sp.latitude, sp.longitude], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map).bindPopup(`
+                    <b>${sp.nama} (Dilewati)</b><br>
+                    <span class="text-xs text-gray-500">${sp.alamat}</span><br>
+                    <span class="text-red-600 font-bold"><i class="fas fa-exclamation-triangle"></i> Armada ${selectedJenisTruk} Kosong!</span><br>
+                    <span class="text-xs text-gray-600">Sistem mengalihkan ke parkiran terdekat berikutnya.</span>
+                `);
+                markerSkippedParkirs.push(marker);
+            });
         }
 
         const armadaList = document.getElementById('armadaList');
@@ -1001,7 +1033,7 @@ async function calculateRouteWithParkir(parkirLat, parkirLng) {
             const route = data.routes[0];
             const distance = (route.distance / 1000).toFixed(2);
             const duration = (route.duration / 3600).toFixed(1);
-            const harga = Math.round(distance * 100000);
+            const harga = Math.round(distance * 10000);
             const estimasiHari = Math.ceil(distance / 50);
 
             // Set harga asli untuk validasi

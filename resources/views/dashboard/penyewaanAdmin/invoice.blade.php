@@ -144,8 +144,8 @@
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>
-                        <strong>{{ $item->armada->merek ?? $item->armada->jenis }}</strong><br>
-                        <small>No Pol: {{ $item->armada->no_polisi }}</small>
+                        <strong>{{ optional($item->armada)->merek ?? optional($item->armada)->jenis ?? 'Armada Dihapus' }}</strong><br>
+                        <small>No Pol: {{ optional($item->armada)->no_polisi ?? '-' }}</small>
                     </td>
                     <td>{{ $item->rute->tempat_jemput ?? '-' }}</td>
                     <td>{{ $item->rute->tempat_antar ?? '-' }}</td>

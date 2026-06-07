@@ -23,17 +23,17 @@
 
                     <div class="form-group">
                         <label class="font-weight-bold">No Polisi</label>
-                        <input type="text" class="form-control" value="{{ $penugasan->armada->no_polisi }}" readonly>
+                        <input type="text" class="form-control" value="{{ optional($penugasan->armada)->no_polisi ?? '-' }}" readonly>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold">Merek & Jenis</label>
-                        <input type="text" class="form-control" value="{{ $penugasan->armada->merek }} - {{ $penugasan->armada->jenis }}" readonly>
+                        <input type="text" class="form-control" value="{{ $penugasan->armada ? ($penugasan->armada->merek . ' - ' . $penugasan->armada->jenis) : '-' }}" readonly>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold">Kapasitas</label>
-                        <input type="text" class="form-control" value="{{ $penugasan->armada->kapasitas }} Ton" readonly>
+                        <input type="text" class="form-control" value="{{ $penugasan->armada ? ($penugasan->armada->kapasitas . ' Ton') : '-' }}" readonly>
                     </div>
 
                     <h5 class="font-weight-bold text-success mb-3 mt-4">

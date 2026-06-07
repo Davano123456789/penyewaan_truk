@@ -143,6 +143,22 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <div class="row mt-3">
+                <div class="col-sm-12 col-md-5">
+                    <div class="dataTables_info" id="paginationInfo">
+                        Menampilkan 0 sampai 0 dari 0 data
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-7">
+                    <div class="dataTables_paginate float-right">
+                        <ul class="pagination" id="paginationControls">
+                            <!-- Pagination buttons dynamically rendered via JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -151,6 +167,123 @@
 
 @section('scripts')
 <script>
+    var currentPage = 1;
+    var rowsPerPage = 10;
+
+    // Filter, Search, dan Paginasi Real-time
+    function filterTable() {
+        var searchValue = document.getElementById('searchInput').value.toUpperCase();
+        var statusValue = document.getElementById('filterStatus').value;
+        var table = document.getElementById('dataTable');
+        var tr = table.getElementsByTagName('tr');
+        
+        var matchingRows = [];
+
+        for (var i = 1; i < tr.length; i++) {
+            var row = tr[i];
+            
+            // Lewati jika baris kosong
+            var cells = row.getElementsByTagName('td');
+            if (cells.length < 5) continue; 
+
+            var textMatch = false;
+            var statusMatch = false;
+
+            // 1. Filter berdasarkan pencarian kata
+            for (var j = 0; j < cells.length; j++) {
+                if (cells[j]) {
+                    var cellText = cells[j].textContent || cells[j].innerText;
+                    if (cellText.toUpperCase().indexOf(searchValue) > -1) {
+                        textMatch = true;
+                        break;
+                    }
+                }
+            }
+
+            // 2. Filter berdasarkan status pesanan (menggunakan attribute data-status pada tr)
+            var rowStatus = row.getAttribute('data-status');
+            if (statusValue === '' || rowStatus === statusValue) {
+                statusMatch = true;
+            }
+
+            if (textMatch && statusMatch) {
+                matchingRows.push(row);
+            } else {
+                row.style.display = 'none';
+            }
+        }
+
+        // Paginasi
+        var totalRows = matchingRows.length;
+        var totalPages = Math.ceil(totalRows / rowsPerPage);
+        if (totalPages < 1) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        var startIdx = (currentPage - 1) * rowsPerPage;
+        var endIdx = startIdx + rowsPerPage;
+
+        for (var k = 0; k < totalRows; k++) {
+            if (k >= startIdx && k < endIdx) {
+                matchingRows[k].style.display = '';
+            } else {
+                matchingRows[k].style.display = 'none';
+            }
+        }
+
+        // Info data
+        var infoStart = totalRows > 0 ? startIdx + 1 : 0;
+        var infoEnd = endIdx > totalRows ? totalRows : endIdx;
+        document.getElementById('paginationInfo').innerText = "Menampilkan " + infoStart + " sampai " + infoEnd + " dari " + totalRows + " data";
+
+        // Render tombol paginasi
+        var controlsHtml = '';
+        
+        // Tombol Previous
+        if (currentPage === 1) {
+            controlsHtml += '<li class="paginate_button page-item previous disabled"><a href="#" class="page-link">Previous</a></li>';
+        } else {
+            controlsHtml += '<li class="paginate_button page-item previous"><a href="#" class="page-link" onclick="changePage(' + (currentPage - 1) + '); return false;">Previous</a></li>';
+        }
+
+        // Nomor Halaman
+        for (var p = 1; p <= totalPages; p++) {
+            if (p === currentPage) {
+                controlsHtml += '<li class="paginate_button page-item active"><a href="#" class="page-link">' + p + '</a></li>';
+            } else {
+                controlsHtml += '<li class="paginate_button page-item"><a href="#" class="page-link" onclick="changePage(' + p + '); return false;">' + p + '</a></li>';
+            }
+        }
+
+        // Tombol Next
+        if (currentPage === totalPages) {
+            controlsHtml += '<li class="paginate_button page-item next disabled"><a href="#" class="page-link">Next</a></li>';
+        } else {
+            controlsHtml += '<li class="paginate_button page-item next"><a href="#" class="page-link" onclick="changePage(' + (currentPage + 1) + '); return false;">Next</a></li>';
+        }
+
+        document.getElementById('paginationControls').innerHTML = controlsHtml;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        filterTable();
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        currentPage = 1;
+        filterTable();
+    });
+
+    document.getElementById('filterStatus').addEventListener('change', function() {
+        currentPage = 1;
+        filterTable();
+    });
+
+    // Jalankan filter/paginasi pertama kali saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        filterTable();
+    });
+
     // SweetAlert Konfirmasi Bayar
     document.querySelectorAll('.btn-bayar').forEach(button => {
         button.addEventListener('click', function(e) {
@@ -173,45 +306,5 @@
             });
         });
     });
-
-    
-    // Fungsi pencarian
-    document.getElementById('searchInput').addEventListener('keyup', function() {
-        var input, filter, table, tr, td, i, j, txtValue;
-        input = document.getElementById('searchInput');
-        filter = input.value.toUpperCase();
-        table = document.getElementById('dataTable');
-        tr = table.getElementsByTagName('tr');
-
-        for (i = 1; i < tr.length; i++) {
-            tr[i].style.display = 'none';
-            td = tr[i].getElementsByTagName('td');
-            for (j = 0; j < td.length; j++) {
-                if (td[j]) {
-                    txtValue = td[j].textContent || td[j].innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        tr[i].style.display = '';
-                        break;
-                    }
-                }
-            }
-        }
-    });
-
-    // Filter Status
-    document.getElementById('filterStatus').addEventListener('change', function() {
-        var filter = this.value;
-        var table = document.getElementById('dataTable');
-        var tr = table.getElementsByTagName('tr');
-
-        for (var i = 1; i < tr.length; i++) {
-            if (filter === '' || tr[i].getAttribute('data-status') === filter) {
-                tr[i].style.display = '';
-            } else {
-                tr[i].style.display = 'none';
-            }
-        }
-    });
 </script>
-
 @endsection

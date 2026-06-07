@@ -89,6 +89,7 @@ public function getArmadaTersedia(Request $request)
 
     $chosenParkir = null;
     $armadas = [];
+    $skippedParkirs = [];
 
     foreach ($parkirs as $parkir) {
         // Ambil armada yang AKTIF saja, sesuai jenis, dan di parkir ini
@@ -122,12 +123,28 @@ public function getArmadaTersedia(Request $request)
                 ];
             })->toArray();
             break; // Berhenti mencari karena sudah menemukan parkir terdekat yang memiliki armada tersedia
+        } else {
+            // Parkir terdekat tapi kosong (tidak memiliki jenis truk terpilih yang berstatus tersedia)
+            $skippedParkirs[] = [
+                'id' => $parkir->id,
+                'nama' => $parkir->nama,
+                'alamat' => $parkir->alamat,
+                'latitude' => $parkir->latitude,
+                'longitude' => $parkir->longitude
+            ];
         }
     }
 
     // Fallback: Jika tidak ada parkir yang memiliki armada dari jenis terpilih, gunakan parkir terdekat pertama
     if (!$chosenParkir && $parkirs->isNotEmpty()) {
         $chosenParkir = $parkirs->first();
+    }
+
+    // Filter agar chosenParkir tidak masuk ke dalam list skippedParkirs
+    if ($chosenParkir) {
+        $skippedParkirs = array_values(array_filter($skippedParkirs, function($p) use ($chosenParkir) {
+            return $p['id'] !== $chosenParkir->id;
+        }));
     }
 
     return response()->json([
@@ -138,7 +155,8 @@ public function getArmadaTersedia(Request $request)
             'alamat' => $chosenParkir->alamat,
             'latitude' => $chosenParkir->latitude,
             'longitude' => $chosenParkir->longitude
-        ] : null
+        ] : null,
+        'skipped_parkirs' => $skippedParkirs
     ]);
 }
 

@@ -10,7 +10,7 @@ use App\Models\Pembayaran;
 
 class DashboardController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $totalAktif = Penyewaan::where('status', 'aktif')->count();
         $totalMenungguPembayaran = Penyewaan::where('status', 'menunggu_pembayaran')->count();
@@ -26,20 +26,50 @@ class DashboardController extends Controller
             ->count();
         $totalPenyewaan = Penyewaan::count();
 
-        // Omset: total pemasukan per bulan dari pembayaran yang sudah 'lunas'
-        $months = [
-            'Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'
-        ];
+        // Laporan Keuangan Interaktif (Owner saja)
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+        $jenisTruk = $request->query('jenis_truk');
+        $statusPembayaran = $request->query('status_pembayaran');
+        $jenisPembayaran = $request->query('jenis_pembayaran');
 
-        $omsetData = [];
-        for ($m = 1; $m <= 12; $m++) {
-            $sum = Pembayaran::where('status', 'lunas')
-                ->whereYear('tanggal_bayar', $now->year)
-                ->whereMonth('tanggal_bayar', $m)
-                ->sum('jumlah_bayar');
+        $laporanPenyewaans = collect();
+        $filteredOmset = 0;
+        $jenisTrukList = collect();
 
-            // convert to float (or integer) for chart
-            $omsetData[] = (float) $sum;
+        if (auth()->check() && auth()->user()->peran_id == 4) {
+            $jenisTrukList = Armada::distinct()->pluck('jenis');
+
+            $query = Penyewaan::with(['client', 'pembayaran', 'keranjangs.armada']);
+
+            if ($startDate) {
+                $query->whereDate('created_at', '>=', $startDate);
+            }
+            if ($endDate) {
+                $query->whereDate('created_at', '<=', $endDate);
+            }
+            if ($jenisTruk) {
+                $query->whereHas('keranjangs.armada', function($q) use ($jenisTruk) {
+                    $q->where('jenis', $jenisTruk);
+                });
+            }
+            if ($statusPembayaran) {
+                $query->whereHas('pembayaran', function($q) use ($statusPembayaran) {
+                    $q->where('status', $statusPembayaran);
+                });
+            }
+            if ($jenisPembayaran) {
+                $query->whereHas('pembayaran', function($q) use ($jenisPembayaran) {
+                    $q->where('jenis', $jenisPembayaran);
+                });
+            }
+
+            $laporanPenyewaans = $query->orderBy('created_at', 'desc')->get();
+
+            // Hitung total omset dari data terfilter (hanya pembayaran yang lunas)
+            $filteredOmset = $laporanPenyewaans->sum(function($p) {
+                return ($p->pembayaran && $p->pembayaran->status === 'lunas') ? (float)$p->pembayaran->jumlah_bayar : 0;
+            });
         }
 
         return view('dashboard.dashboard', compact(
@@ -51,8 +81,9 @@ class DashboardController extends Controller
             'totalPenyewaanBulanIni',
             'totalPenyewaan',
             'totalArmada',
-            'months',
-            'omsetData'
+            'laporanPenyewaans',
+            'filteredOmset',
+            'jenisTrukList'
         ));
     }
 }

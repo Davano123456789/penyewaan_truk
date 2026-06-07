@@ -15,10 +15,10 @@ class PenugasanAdminController extends Controller
      */
     public function index()
     {
-        $penugasans = Keranjang::with(['penyewaan', 'armada', 'sopir', 'penugasan'])
+        $penugasans = Keranjang::has('penyewaan')->with(['penyewaan', 'armada', 'sopir', 'penugasan'])
             ->whereIn('status', ['aktif', 'revisi_bukti', 'menunggu_konfirmasi_selesai', 'selesai'])
             ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+            ->get();
 
         return view('dashboard.penugasanAdmin.index', compact('penugasans'));
     }

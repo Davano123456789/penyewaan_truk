@@ -47,7 +47,7 @@ class PenyewaanAdminController extends Controller
             });
         }
 
-        $penyewaans = $query->paginate(15);
+        $penyewaans = $query->get();
 
         return view('dashboard.penyewaanAdmin.index', compact('penyewaans'));
     }
@@ -392,7 +392,7 @@ class PenyewaanAdminController extends Controller
             ->whereHas('penyewaan')
             ->whereIn('status', ['menunggu_konfirmasi_batal', 'dibatalkan'])
             ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+            ->get();
 
         return view('dashboard.penyewaanAdmin.pembatalan', compact('keranjangs'));
     }

@@ -111,8 +111,8 @@
                         <a href="https://instagram.com" target="_blank" class="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300 text-blue-600">
                             <i class="fab fa-instagram text-xl"></i>
                         </a>
-                        <a href="https://linkedin.com" target="_blank" class="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300 text-blue-600">
-                            <i class="fab fa-linkedin-in text-xl"></i>
+                        <a href="https://wa.me/6282211167667" target="_blank" class="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300 text-blue-600">
+                            <i class="fab fa-whatsapp text-xl"></i>
                         </a>
                     </div>
                 </div>
@@ -458,10 +458,6 @@
                                     <i class="fas fa-check-circle text-blue-500"></i>
                                     <span>BALI</span>
                                 </div>
-                                <div class="flex items-center gap-3 text-gray-300">
-                                    <i class="fas fa-check-circle text-blue-500"></i>
-                                    <span>SUMATERA</span>
-                                </div>
                             </div>
                         </div>
 
@@ -470,20 +466,16 @@
                             <h3 class="text-xl font-bold text-white mb-4">Jenis Truk Tersedia:</h3>
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="flex items-center gap-3 text-gray-300">
+                                    <i class="fas fa-trailer text-blue-500"></i>
+                                    <span>CDD</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-gray-300">
                                     <i class="fas fa-cube text-blue-500"></i>
                                     <span>BOX</span>
                                 </div>
                                 <div class="flex items-center gap-3 text-gray-300">
-                                    <i class="fas fa-wind text-blue-500"></i>
-                                    <span>ENGKEL</span>
-                                </div>
-                                <div class="flex items-center gap-3 text-gray-300">
-                                    <i class="fas fa-truck-loading text-blue-500"></i>
-                                    <span>BAK TERBUKA</span>
-                                </div>
-                                <div class="flex items-center gap-3 text-gray-300">
-                                    <i class="fas fa-trailer text-blue-500"></i>
-                                    <span>CDD</span>
+                                    <i class="fas fa-truck-moving text-blue-500"></i>
+                                    <span>WINGBOX</span>
                                 </div>
                             </div>
                         </div>

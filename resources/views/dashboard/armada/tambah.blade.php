@@ -88,7 +88,6 @@
         <option value="CDD" {{ old('jenis') == 'CDD' ? 'selected' : '' }}>CDD</option>
         <option value="BOX" {{ old('jenis') == 'BOX' ? 'selected' : '' }}>BOX</option>
         <option value="WINGBOX" {{ old('jenis') == 'WINGBOX' ? 'selected' : '' }}>WINGBOX</option>
-        <option value="TERBUKA" {{ old('jenis') == 'TERBUKA' ? 'selected' : '' }}>TERBUKA</option>
     </select>
     @error('jenis')
         <div class="invalid-feedback">{{ $message }}</div>

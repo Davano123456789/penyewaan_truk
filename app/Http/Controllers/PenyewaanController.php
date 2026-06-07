@@ -121,7 +121,7 @@ class PenyewaanController extends Controller
     {
         try {
             $validated = $request->validate([
-                'jenis' => 'required|in:cash,talangan',
+                'jenis' => 'required|in:tunai,talangan',
                 'metode' => 'required|in:transfer_bca,transfer_bri',
                 'tanggal_bayar' => 'required|date',
                 'bukti_transfer' => 'required|image|mimes:jpeg,png,jpg|max:2048',
@@ -261,7 +261,7 @@ class PenyewaanController extends Controller
     {
         $pembayarans = Pembayaran::whereHas('penyewaan', function($q) {
             $q->where('client_id', Auth::id());
-        })->with('penyewaan')->orderBy('created_at', 'desc')->paginate(10);
+        })->with('penyewaan')->orderBy('created_at', 'desc')->get();
 
         return view('dashboard.pembayaran.riwayat', compact('pembayarans'));
     }

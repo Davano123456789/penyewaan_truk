@@ -62,7 +62,7 @@
 
                 <div class="form-group mb-0">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Simpan Perubahan
+                        <i class="fas fa-save"></i> Update
                     </button>
                     <a href="{{ route('mitra.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Kembali

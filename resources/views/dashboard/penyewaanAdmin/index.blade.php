@@ -73,44 +73,41 @@
         </div>
         <div class="card-body">
             <!-- Filter & Search -->
-            <form method="GET" action="{{ route('penyewaanAdmin.index') }}" class="mb-4">
+            <div class="mb-4">
                 <div class="row">
                     <div class="col-md-5">
                         <div class="input-group">
                             <input type="text" 
-                                   name="search" 
+                                   id="searchInput" 
                                    class="form-control" 
-                                   placeholder="Cari ID Pesanan, Nama, atau Email Customer..." 
-                                   value="{{ request('search') }}">
+                                   placeholder="Cari ID Pesanan, Nama, atau Email Customer...">
                             <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit">
+                                <button class="btn btn-primary" type="button">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <select name="status" class="form-control" onchange="this.form.submit()">
+                        <select id="filterStatus" class="form-control">
                             <option value="">Semua Status</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="menunggu_pembayaran" {{ request('status') == 'menunggu_pembayaran' ? 'selected' : '' }}>Menunggu Pembayaran</option>
-                            <option value="menunggu_konfirmasi_pembayaran" {{ request('status') == 'menunggu_konfirmasi_pembayaran' ? 'selected' : '' }}>Menunggu Konfirmasi Pembayaran</option>
-                            <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="menunggu_pelunasan" {{ request('status') == 'menunggu_pelunasan' ? 'selected' : '' }}>Menunggu Pelunasan</option>
-                            <option value="menunggu_konfirmasi_pelunasan" {{ request('status') == 'menunggu_konfirmasi_pelunasan' ? 'selected' : '' }}>Menunggu Konfirmasi Pelunasan</option>
-                            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                            <option value="dibatalkan" {{ request('status') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="MENUNGGU PEMBAYARAN">Menunggu Pembayaran</option>
+                            <option value="MENUNGGU KONFIRMASI PEMBAYARAN">Menunggu Konfirmasi Pembayaran</option>
+                            <option value="AKTIF">Aktif</option>
+                            <option value="MENUNGGU PELUNASAN">Menunggu Pelunasan</option>
+                            <option value="MENUNGGU KONFIRMASI PELUNASAN">Menunggu Konfirmasi Pelunasan</option>
+                            <option value="SELESAI">Selesai</option>
+                            <option value="DIBATALKAN">Dibatalkan</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        @if(request('search') || request('status'))
-                        <a href="{{ route('penyewaanAdmin.index') }}" class="btn btn-secondary btn-block">
+                        <button type="button" id="btnResetFilter" class="btn btn-secondary btn-block">
                             <i class="fas fa-redo"></i> Reset Filter
-                        </a>
-                        @endif
+                        </button>
                     </div>
                 </div>
-            </form>
+            </div>
 
             <!-- Table -->
             <div class="table-responsive">
@@ -130,9 +127,9 @@
                     <tbody>
                         @forelse ($penyewaans as $index => $penyewaan)
                         <tr>
-                            <td class="text-center">{{ $penyewaans->firstItem() + $index }}</td>
+                             <td class="text-center">{{ $index + 1 }}</td>
                             <td>
-                                <span class="badge badge-info">{{ $penyewaan->kode_transaksi ?? '-' }}</span>
+                                {{ $penyewaan->kode_transaksi ?? '-' }}
                             </td>
                             <td>
                                 <strong>{{ $penyewaan->client ? $penyewaan->client->nama : 'User Tidak Ditemukan' }}</strong>
@@ -179,7 +176,7 @@
                                     <a href="{{ route('penyewaanAdmin.show', $penyewaan->id) }}" 
                                        class="btn btn-info btn-sm text-nowrap" 
                                        title="Lihat Detail">
-                                        <i class="fas fa-eye"></i> Detail
+                                        <i class="fas fa-eye"></i>
                                     </a>
 
                                     <!-- Tombol Hapus -->
@@ -189,7 +186,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" class="btn btn-danger btn-sm btn-delete text-nowrap" title="Hapus Penyewaan">
-                                            <i class="fas fa-trash"></i> Hapus
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -208,14 +205,19 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div>
-                    Menampilkan {{ $penyewaans->firstItem() ?? 0 }} sampai {{ $penyewaans->lastItem() ?? 0 }} 
-                    dari {{ $penyewaans->total() }} data
+             <!-- Pagination -->
+            <div class="row mt-3">
+                <div class="col-sm-12 col-md-5">
+                    <div class="dataTables_info" id="paginationInfo">
+                        Menampilkan 0 sampai 0 dari 0 data
+                    </div>
                 </div>
-                <div>
-                    {{ $penyewaans->links() }}
+                <div class="col-sm-12 col-md-7">
+                    <div class="dataTables_paginate float-right">
+                        <ul class="pagination" id="paginationControls">
+                            <!-- Pagination buttons dynamically rendered via JS -->
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -227,6 +229,134 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    var currentPage = 1;
+    var rowsPerPage = 10;
+
+    function filterTable() {
+        var searchValue = document.getElementById('searchInput').value.toUpperCase();
+        var statusValue = document.getElementById('filterStatus').value.toUpperCase();
+        var table = document.getElementById('dataTable');
+        var tr = table.getElementsByTagName('tr');
+        
+        var matchingRows = [];
+
+        for (var i = 1; i < tr.length; i++) {
+            var row = tr[i];
+            
+            // Lewati jika baris kosong
+            var cells = row.getElementsByTagName('td');
+            if (cells.length < 5) continue; 
+
+            var textMatch = false;
+            var statusMatch = false;
+
+            // 1. Filter pencarian
+            for (var j = 0; j < cells.length; j++) {
+                if (cells[j]) {
+                    var cellText = cells[j].textContent || cells[j].innerText;
+                    if (cellText.toUpperCase().indexOf(searchValue) > -1) {
+                        textMatch = true;
+                        break;
+                    }
+                }
+            }
+
+            // 2. Filter Status (kolom ke-6, index 5)
+            var statusCell = cells[5];
+            if (statusCell) {
+                var statusText = (statusCell.textContent || statusCell.innerText).trim().toUpperCase();
+                if (statusValue === '' || statusText === statusValue) {
+                    statusMatch = true;
+                }
+            } else {
+                statusMatch = (statusValue === '');
+            }
+
+            if (textMatch && statusMatch) {
+                matchingRows.push(row);
+            } else {
+                row.style.display = 'none';
+            }
+        }
+
+        // Paginasi
+        var totalRows = matchingRows.length;
+        var totalPages = Math.ceil(totalRows / rowsPerPage);
+        if (totalPages < 1) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        var startIdx = (currentPage - 1) * rowsPerPage;
+        var endIdx = startIdx + rowsPerPage;
+
+        for (var k = 0; k < totalRows; k++) {
+            if (k >= startIdx && k < endIdx) {
+                matchingRows[k].style.display = '';
+            } else {
+                matchingRows[k].style.display = 'none';
+            }
+        }
+
+        // Info data
+        var infoStart = totalRows > 0 ? startIdx + 1 : 0;
+        var infoEnd = endIdx > totalRows ? totalRows : endIdx;
+        document.getElementById('paginationInfo').innerText = "Menampilkan " + infoStart + " sampai " + infoEnd + " dari " + totalRows + " data";
+
+        // Render tombol paginasi
+        var controlsHtml = '';
+        
+        // Previous
+        if (currentPage === 1) {
+            controlsHtml += '<li class="paginate_button page-item previous disabled"><a href="#" class="page-link">Previous</a></li>';
+        } else {
+            controlsHtml += '<li class="paginate_button page-item previous"><a href="#" class="page-link" onclick="changePage(' + (currentPage - 1) + '); return false;">Previous</a></li>';
+        }
+
+        // Nomor Halaman
+        for (var p = 1; p <= totalPages; p++) {
+            if (p === currentPage) {
+                controlsHtml += '<li class="paginate_button page-item active"><a href="#" class="page-link">' + p + '</a></li>';
+            } else {
+                controlsHtml += '<li class="paginate_button page-item"><a href="#" class="page-link" onclick="changePage(' + p + '); return false;">' + p + '</a></li>';
+            }
+        }
+
+        // Next
+        if (currentPage === totalPages) {
+            controlsHtml += '<li class="paginate_button page-item next disabled"><a href="#" class="page-link">Next</a></li>';
+        } else {
+            controlsHtml += '<li class="paginate_button page-item next"><a href="#" class="page-link" onclick="changePage(' + (currentPage + 1) + '); return false;">Next</a></li>';
+        }
+
+        document.getElementById('paginationControls').innerHTML = controlsHtml;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        filterTable();
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        currentPage = 1;
+        filterTable();
+    });
+
+    document.getElementById('filterStatus').addEventListener('change', function() {
+        currentPage = 1;
+        filterTable();
+    });
+
+    document.getElementById('btnResetFilter').addEventListener('click', function() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('filterStatus').value = '';
+        currentPage = 1;
+        filterTable();
+    });
+
+    // Jalankan filter saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        filterTable();
+    });
+
     // SweetAlert Konfirmasi Pembayaran
     document.querySelectorAll('.btn-konfirmasi').forEach(button => {
         button.addEventListener('click', function(e) {
@@ -273,5 +403,4 @@
         });
     });
 </script>
-
 @endsection

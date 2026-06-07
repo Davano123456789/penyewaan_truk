@@ -10,7 +10,7 @@ class PembayaranAdminController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pembayaran::with(['penyewaan.client'])->orderBy('tanggal_bayar', 'desc');
+        $query = Pembayaran::with(['penyewaan.client'])->orderBy('created_at', 'desc');
 
         if ($request->has('search') && $request->search != '') {
             $s = $request->search;
@@ -28,7 +28,7 @@ class PembayaranAdminController extends Controller
             });
         }
 
-        $pembayarans = $query->paginate(15);
+        $pembayarans = $query->get();
 
         return view('dashboard.pembayaranAdmin.index', compact('pembayarans'));
     }
