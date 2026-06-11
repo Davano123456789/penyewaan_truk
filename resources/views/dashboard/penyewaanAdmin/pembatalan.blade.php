@@ -103,78 +103,78 @@
                                                     </button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <div class="form-group">
-                                                        <label class="font-weight-bold">Alasan Pembatalan (User)</label>
-                                                        <textarea class="form-control" rows="3" readonly>{{ $item->pembatalan->alasan_batal }}</textarea>
-                                                    </div>
+                                                     <div class="form-group">
+                                                         <label class="font-weight-bold">Alasan Pembatalan (User)</label>
+                                                         <textarea class="form-control" rows="3" readonly>{{ $item->pembatalan?->alasan_batal ?? '-' }}</textarea>
+                                                     </div>
 
-                                                    <hr>
-                                                    
-                                                    <div class="alert alert-info">
-                                                        <strong>Rincian Refund:</strong><br>
-                                                        Harga Sewa: Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}<br>
-                                                        Potongan (30%): Rp {{ number_format($denda, 0, ',', '.') }}<br>
-                                                        <strong>Total Refund: Rp {{ number_format($refund, 0, ',', '.') }}</strong>
-                                                    </div>
-                                                    
-                                                    @if($item->status == 'menunggu_konfirmasi_batal')
-                                                        <div class="form-group">
-                                                            <label class="font-weight-bold text-dark">Keputusan Admin <span class="text-danger">*</span></label>
-                                                            <div class="d-flex border rounded p-3 bg-light">
-                                                                <div class="custom-control custom-radio mr-4">
-                                                                    <input type="radio" id="radioApprove{{ $item->id }}" name="action" value="approve" class="custom-control-input action-selector" data-id="{{ $item->id }}" required>
-                                                                    <label class="custom-control-label font-weight-bold text-success" for="radioApprove{{ $item->id }}">Setujui</label>
-                                                                </div>
-                                                                <div class="custom-control custom-radio">
-                                                                    <input type="radio" id="radioReject{{ $item->id }}" name="action" value="reject" class="custom-control-input action-selector" data-id="{{ $item->id }}" required>
-                                                                    <label class="custom-control-label font-weight-bold text-danger" for="radioReject{{ $item->id }}">Tolak</label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                     <hr>
+                                                     
+                                                     <div class="alert alert-info">
+                                                         <strong>Rincian Refund:</strong><br>
+                                                         Harga Sewa: Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}<br>
+                                                         Potongan (30%): Rp {{ number_format($denda, 0, ',', '.') }}<br>
+                                                         <strong>Total Refund: Rp {{ number_format($refund, 0, ',', '.') }}</strong>
+                                                     </div>
+                                                     
+                                                     @if($item->status == 'menunggu_konfirmasi_batal')
+                                                         <div class="form-group">
+                                                             <label class="font-weight-bold text-dark">Keputusan Admin <span class="text-danger">*</span></label>
+                                                             <div class="d-flex border rounded p-3 bg-light">
+                                                                 <div class="custom-control custom-radio mr-4">
+                                                                     <input type="radio" id="radioApprove{{ $item->id }}" name="action" value="approve" class="custom-control-input action-selector" data-id="{{ $item->id }}" required>
+                                                                     <label class="custom-control-label font-weight-bold text-success" for="radioApprove{{ $item->id }}">Setujui</label>
+                                                                 </div>
+                                                                 <div class="custom-control custom-radio">
+                                                                     <input type="radio" id="radioReject{{ $item->id }}" name="action" value="reject" class="custom-control-input action-selector" data-id="{{ $item->id }}" required>
+                                                                     <label class="custom-control-label font-weight-bold text-danger" for="radioReject{{ $item->id }}">Tolak</label>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
 
-                                                        <!-- Bagian Setuju: Refund -->
-                                                        <div id="sectionApprove{{ $item->id }}" class="action-section" style="display: none;">
-                                                            @if($refund > 0)
-                                                            <div class="form-group mt-3">
-                                                                <label class="font-weight-bold">Upload Bukti Transfer Refund <span class="text-danger">*</span></label>
-                                                                <div class="custom-file">
-                                                                    <input type="file" name="bukti_refund" class="custom-file-input input-refund-{{ $item->id }}" id="bukti_refund{{ $item->id }}" accept="image/*">
-                                                                    <label class="custom-file-label" for="bukti_refund{{ $item->id }}">Pilih gambar...</label>
-                                                                </div>
-                                                                <small class="text-muted">Bukti transfer dana ke client sebesar Rp {{ number_format($refund, 0, ',', '.') }}</small>
-                                                            </div>
-                                                            @else
-                                                            <div class="alert alert-warning mt-3">
-                                                                <i class="fas fa-exclamation-circle"></i> Tidak ada dana yang perlu dikembalikan untuk item ini.
-                                                            </div>
-                                                            @endif
-                                                        </div>
+                                                         <!-- Bagian Setuju: Refund -->
+                                                         <div id="sectionApprove{{ $item->id }}" class="action-section" style="display: none;">
+                                                             @if($refund > 0)
+                                                             <div class="form-group mt-3">
+                                                                 <label class="font-weight-bold">Upload Bukti Transfer Refund <span class="text-danger">*</span></label>
+                                                                 <div class="custom-file">
+                                                                     <input type="file" name="bukti_refund" class="custom-file-input input-refund-{{ $item->id }}" id="bukti_refund{{ $item->id }}" accept="image/*">
+                                                                     <label class="custom-file-label" for="bukti_refund{{ $item->id }}">Pilih gambar...</label>
+                                                                 </div>
+                                                                 <small class="text-muted">Bukti transfer dana ke client sebesar Rp {{ number_format($refund, 0, ',', '.') }}</small>
+                                                             </div>
+                                                             @else
+                                                             <div class="alert alert-warning mt-3">
+                                                                 <i class="fas fa-exclamation-circle"></i> Tidak ada dana yang perlu dikembalikan untuk item ini.
+                                                             </div>
+                                                             @endif
+                                                         </div>
 
-                                                        <!-- Bagian Tolak: Catatan -->
-                                                        <div id="sectionReject{{ $item->id }}" class="action-section" style="display: none;">
-                                                            <div class="form-group mt-3">
-                                                                <label class="font-weight-bold">Alasan Penolakan <span class="text-danger">*</span></label>
-                                                                <textarea name="catatan" class="form-control input-reject-{{ $item->id }}" rows="3" placeholder="Contoh: Silakan selesaikan pengiriman terlebih dahulu..."></textarea>
-                                                            </div>
-                                                        </div>
+                                                         <!-- Bagian Tolak: Catatan -->
+                                                         <div id="sectionReject{{ $item->id }}" class="action-section" style="display: none;">
+                                                             <div class="form-group mt-3">
+                                                                 <label class="font-weight-bold">Alasan Penolakan <span class="text-danger">*</span></label>
+                                                                 <textarea name="catatan" class="form-control input-reject-{{ $item->id }}" rows="3" placeholder="Contoh: Silakan selesaikan pengiriman terlebih dahulu..."></textarea>
+                                                             </div>
+                                                         </div>
 
-                                                    @elseif($item->status == 'dibatalkan')
-                                                        @php
-                                                            $buktiRefund = $item->pembatalan->bukti_refund;
-                                                            $nominalRefund = $item->pembatalan->nominal_refund;
-                                                        @endphp
-                                                        @if($buktiRefund)
-                                                            <div class="form-group">
-                                                                <label class="font-weight-bold text-dark">Bukti Refund Terupload</label><br>
-                                                                <a href="{{ $buktiRefund }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                                                                    <i class="fas fa-image"></i> Lihat Bukti Refund
-                                                                </a>
-                                                                <div class="mt-2 p-2 bg-light border rounded">
-                                                                    <small>Nominal: <strong>Rp {{ number_format($nominalRefund, 0, ',', '.') }}</strong></small>
-                                                                </div>
-                                                            </div>
-                                                        @endif
-                                                    @endif
+                                                     @elseif($item->status == 'dibatalkan')
+                                                         @php
+                                                             $buktiRefund = $item->pembatalan?->bukti_refund;
+                                                             $nominalRefund = $item->pembatalan?->nominal_refund;
+                                                         @endphp
+                                                         @if($buktiRefund)
+                                                             <div class="form-group">
+                                                                 <label class="font-weight-bold text-dark">Bukti Refund Terupload</label><br>
+                                                                 <a href="{{ $buktiRefund }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                                     <i class="fas fa-image"></i> Lihat Bukti Refund
+                                                                 </a>
+                                                                 <div class="mt-2 p-2 bg-light border rounded">
+                                                                     <small>Nominal: <strong>Rp {{ number_format($nominalRefund, 0, ',', '.') }}</strong></small>
+                                                                 </div>
+                                                             </div>
+                                                         @endif
+                                                     @endif
                                                 </div>
                                                 <div class="modal-footer">
                                                     @if($item->status == 'menunggu_konfirmasi_batal')

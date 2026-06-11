@@ -53,15 +53,15 @@ class PenyewaanController extends Controller
         return view('dashboard.penyewaan.keranjang', compact('penyewaan'));
     }
     
-    // Hapus Penyewaan (Jika masih pending)
+    // Hapus Penyewaan (Jika masih menunggu pembayaran)
     public function destroy($id)
     {
         try {
             $penyewaan = Penyewaan::findOrFail($id);
             
-            // Cek apakah masih pending atau menunggu pembayaran
-            if (!in_array($penyewaan->status, ['pending', 'menunggu_pembayaran'])) {
-                return redirect()->back()->with('error', 'Hanya pesanan dengan status pending atau menunggu pembayaran yang dapat dihapus!');
+            // Cek apakah masih menunggu pembayaran
+            if ($penyewaan->status !== 'menunggu_pembayaran') {
+                return redirect()->back()->with('error', 'Hanya pesanan dengan status menunggu pembayaran yang dapat dihapus!');
             }
 
             // Kembalikan status semua armada terkait menjadi tersedia

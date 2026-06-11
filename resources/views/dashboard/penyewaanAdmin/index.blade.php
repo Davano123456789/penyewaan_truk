@@ -91,7 +91,6 @@
                     <div class="col-md-4">
                         <select id="filterStatus" class="form-control">
                             <option value="">Semua Status</option>
-                            <option value="PENDING">Pending</option>
                             <option value="MENUNGGU PEMBAYARAN">Menunggu Pembayaran</option>
                             <option value="MENUNGGU KONFIRMASI PEMBAYARAN">Menunggu Konfirmasi Pembayaran</option>
                             <option value="AKTIF">Aktif</option>
@@ -137,9 +136,7 @@
                             <td>{{ $penyewaan->created_at->format('d M Y H:i') }}</td>
                             <td><strong class="text-primary">Rp {{ number_format($penyewaan->harga_total, 0, ',', '.') }}</strong></td>
                             <td>
-                                @if($penyewaan->status == 'pending')
-                                    <span class="badge badge-secondary">Pending</span>
-                                @elseif($penyewaan->status == 'menunggu_pembayaran')
+                                @if($penyewaan->status == 'menunggu_pembayaran')
                                     <span class="badge badge-info">Menunggu Pembayaran</span>
                                 @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
                                     <span class="badge badge-warning">Menunggu Konfirmasi Pembayaran</span>

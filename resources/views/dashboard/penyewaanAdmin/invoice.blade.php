@@ -95,13 +95,40 @@
             <div style="position: absolute; top: 250px; left: 150px; font-size: 80px; color: rgba(46, 125, 50, 0.12); transform: rotate(-30deg); font-weight: bold; z-index: -100; font-family: sans-serif; border: 8px double rgba(46, 125, 50, 0.12); padding: 10px 30px; border-radius: 10px;">LUNAS</div>
         @endif
         
+        @php
+            $possiblePaths = [
+                public_path('logo-sutra-jaya.png'),
+                base_path('public_html/logo-sutra-jaya.png'),
+                base_path('../public_html/logo-sutra-jaya.png'),
+                base_path('public/logo-sutra-jaya.png'),
+                base_path('logo-sutra-jaya.png'),
+                isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] . '/logo-sutra-jaya.png' : null,
+            ];
+            
+            $logoBase64 = null;
+            foreach ($possiblePaths as $path) {
+                if ($path && file_exists($path)) {
+                    try {
+                        $logoData = base64_encode(file_get_contents($path));
+                        $logoBase64 = 'data:image/' . pathinfo($path, PATHINFO_EXTENSION) . ';base64,' . $logoData;
+                        break;
+                    } catch (\Exception $e) {
+                        // Skip if reading failed
+                    }
+                }
+            }
+        @endphp
         <table style="width: 100%; margin-bottom: 20px;">
             <tr>
                 <td class="logo" style="vertical-align: middle;">
-                    <img src="{{ public_path('logo-sutra-jaya.png') }}" style="height: 50px; vertical-align: middle;">
+                    @if($logoBase64)
+                        <img src="{{ $logoBase64 }}" style="height: 50px; vertical-align: middle;">
+                    @else
+                        <span style="font-size: 24px; font-weight: bold; color: #4e73df;">SUTRA JAYA</span>
+                    @endif
                 </td>
                 <td class="text-right" style="font-size: 24px; font-weight: bold; color: #555; vertical-align: middle;">
-                    @if(in_array($penyewaan->status, ['pending', 'menunggu_pembayaran']))
+                    @if($penyewaan->status == 'menunggu_pembayaran')
                         PROFORMA INVOICE
                     @else
                         INVOICE RESMI

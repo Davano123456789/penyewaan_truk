@@ -131,8 +131,8 @@ class KeranjangController extends Controller
             $keranjang = Keranjang::findOrFail($id);
             $penyewaan = $keranjang->penyewaan;
 
-            // Cek apakah penyewaan masih pending atau menunggu_pembayaran
-            if (!in_array($penyewaan->status, ['pending', 'menunggu_pembayaran'])) {
+            // Cek apakah penyewaan masih menunggu pembayaran
+            if ($penyewaan->status !== 'menunggu_pembayaran') {
                 return redirect()->back()->with('error', 'Tidak dapat mengubah item dari pesanan yang sudah diproses!');
             }
 
@@ -234,8 +234,8 @@ class KeranjangController extends Controller
             $keranjang = Keranjang::findOrFail($id);
             $penyewaan = $keranjang->penyewaan;
             
-            // Cek apakah penyewaan masih pending atau menunggu_pembayaran
-            if (!in_array($penyewaan->status, ['pending', 'menunggu_pembayaran'])) {
+            // Cek apakah penyewaan masih menunggu pembayaran
+            if ($penyewaan->status !== 'menunggu_pembayaran') {
                 return redirect()->back()->with('error', 'Tidak dapat menghapus item dari pesanan yang sudah diproses!');
             }            // Kembalikan status armada ke tersedia
             $armada = Armada::find($keranjang->armada_id);
@@ -286,6 +286,18 @@ class KeranjangController extends Controller
             $keranjang->pembatalan()->updateOrCreate([], [
                 'alasan_batal' => $request->alasan_batal
             ]);
+
+            // Kirim notifikasi ke admin
+            $penyewaan = $keranjang->penyewaan;
+            $clientNama = $penyewaan && $penyewaan->client ? $penyewaan->client->nama : 'Client';
+            $kodeTransaksi = $penyewaan ? $penyewaan->kode_transaksi : '-';
+
+            \App\Services\NotifikasiService::kirimKeAdmin(
+                "Pengajuan Pembatalan Baru",
+                "Ada pengajuan pembatalan baru untuk pesanan #{$kodeTransaksi} dari client {$clientNama}.",
+                route('penyewaanAdmin.pembatalan'),
+                $keranjang->penyewaan_id
+            );
 
             return back()->with('success', 'Pengajuan pembatalan berhasil dikirim. Menunggu konfirmasi admin.');
 

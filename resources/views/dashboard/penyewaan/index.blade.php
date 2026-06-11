@@ -32,7 +32,6 @@
                 <div class="col-md-6 text-right">
                     <select class="form-control w-auto d-inline-block" id="filterStatus">
                         <option value="">Semua Status</option>
-                        <option value="pending">Pending</option>
                         <option value="menunggu_pembayaran">Menunggu Pembayaran</option>
                         <option value="menunggu_konfirmasi_pembayaran">Menunggu Konfirmasi Pembayaran</option>
                         <option value="aktif">Aktif</option>
@@ -65,9 +64,7 @@
                             
                             <!-- Status Pesanan -->
                             <td>
-                                @if($penyewaan->status == 'pending')
-                                    <span class="badge badge-warning">Pending</span>
-                                @elseif($penyewaan->status == 'menunggu_pembayaran')
+                                @if($penyewaan->status == 'menunggu_pembayaran')
                                     <span class="badge badge-info">Menunggu Pembayaran</span>
                                 @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
                                     <span class="badge badge-primary">Menunggu Konfirmasi Pembayaran</span>

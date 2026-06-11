@@ -66,9 +66,18 @@ class DashboardController extends Controller
 
             $laporanPenyewaans = $query->orderBy('created_at', 'desc')->get();
 
-            // Hitung total omset dari data terfilter (hanya pembayaran yang lunas)
+            // Hitung total omset bersih dari data terfilter (pembayaran lunas dikurangi total refund)
             $filteredOmset = $laporanPenyewaans->sum(function($p) {
-                return ($p->pembayaran && $p->pembayaran->status === 'lunas') ? (float)$p->pembayaran->jumlah_bayar : 0;
+                if ($p->pembayaran && $p->pembayaran->status === 'lunas') {
+                    $totalRefund = 0;
+                    foreach ($p->keranjangs as $item) {
+                        if ($item->status === 'dibatalkan' && $item->pembatalan) {
+                            $totalRefund += (float)$item->pembatalan->nominal_refund;
+                        }
+                    }
+                    return max(0.0, (float)$p->pembayaran->jumlah_bayar - $totalRefund);
+                }
+                return 0.0;
             });
         }
 

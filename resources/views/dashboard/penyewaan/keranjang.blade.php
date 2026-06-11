@@ -32,9 +32,7 @@
                     <div class="col-md-3">
                         <p class="mb-1 text-muted">Status</p>
                         <h5>
-                            @if($penyewaan->status == 'pending')
-                                <span class="badge badge-warning">Pending</span>
-                            @elseif($penyewaan->status == 'menunggu_pembayaran')
+                            @if($penyewaan->status == 'menunggu_pembayaran')
                                 <span class="badge badge-info">Menunggu Pembayaran</span>
                             @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
                                 <span class="badge badge-primary">Menunggu Konfirmasi Pembayaran</span>
@@ -231,7 +229,7 @@
                                         <strong>Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}</strong>
                                     </h4>
                                     <div class="mb-2">
-                                        @if(in_array($penyewaan->status, ['pending', 'menunggu_pembayaran']))
+                                        @if($penyewaan->status == 'menunggu_pembayaran')
                                             <a href="{{ route('keranjang.edit', $item->id) }}" class="btn btn-primary btn-sm">
                                                 <i class="fas fa-edit"></i> Ubah
                                             </a>
@@ -289,8 +287,8 @@
                                         @elseif($item->status == 'dibatalkan')
                                             <span class="badge badge-danger mb-2">Dibatalkan</span>
                                             @php
-                                                $nominalRefund = $item->pembatalan->nominal_refund ?? 0;
-                                                $buktiRefund = $item->pembatalan->bukti_refund ?? null;
+                                                $nominalRefund = $item->pembatalan?->nominal_refund ?? 0;
+                                                $buktiRefund = $item->pembatalan?->bukti_refund ?? null;
                                             @endphp
                                             @if($nominalRefund > 0)
                                                 <br>

@@ -63,9 +63,7 @@
                             <hr class="my-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Status Pesanan</div>
                             <div class="h6 mb-0">
-                                @if($penyewaan->status == 'pending')
-                                    <span class="badge badge-secondary">Pending</span>
-                                @elseif($penyewaan->status == 'menunggu_pembayaran')
+                                @if($penyewaan->status == 'menunggu_pembayaran')
                                     <span class="badge badge-info">Menunggu Pembayaran</span>
                                 @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
                                     <span class="badge badge-warning">Menunggu Konfirmasi Pembayaran</span>

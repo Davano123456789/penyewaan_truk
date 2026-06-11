@@ -240,9 +240,33 @@
                                         <span class="badge badge-secondary px-2 py-1">Belum Bayar</span>
                                     @endif
                                 </td>
-                                <td class="text-right text-primary font-weight-bold">
-                                    Rp {{ number_format($penyewaan->pembayaran->jumlah_bayar ?? $penyewaan->harga_total ?? 0, 0, ',', '.') }}
-                                </td>
+                                 <td class="text-right font-weight-bold">
+                                     @php
+                                         $totalRefund = 0;
+                                         foreach ($penyewaan->keranjangs as $item) {
+                                             if ($item->status === 'dibatalkan' && $item->pembatalan) {
+                                                 $totalRefund += (float)$item->pembatalan->nominal_refund;
+                                             }
+                                         }
+                                         $jumlahBayar = (float)($penyewaan->pembayaran->jumlah_bayar ?? $penyewaan->harga_total ?? 0);
+                                         $netBayar = max(0.0, $jumlahBayar - $totalRefund);
+                                     @endphp
+                                     @if($totalRefund > 0)
+                                         <span class="text-xs text-muted d-block" style="text-decoration: line-through;">
+                                             Rp {{ number_format($jumlahBayar, 0, ',', '.') }}
+                                         </span>
+                                         <span class="text-xs text-danger d-block">
+                                             Refund: Rp -{{ number_format($totalRefund, 0, ',', '.') }}
+                                         </span>
+                                         <span class="text-success d-block">
+                                             Rp {{ number_format($netBayar, 0, ',', '.') }}
+                                         </span>
+                                     @else
+                                         <span class="text-primary">
+                                             Rp {{ number_format($jumlahBayar, 0, ',', '.') }}
+                                         </span>
+                                     @endif
+                                 </td>
                             </tr>
                         @empty
                             <tr>
@@ -293,7 +317,7 @@
             </div>
         </div>
 
-        <!-- Total Penyewaan Pending -->
+        <!-- Total Penyewaan Menunggu Pembayaran -->
         <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">

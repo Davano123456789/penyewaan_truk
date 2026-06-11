@@ -716,7 +716,6 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
             document.getElementById('longitude_penjemputan').value = lng;
 
             if (selectedJenisTruk) {
-                findNearestParkir(lat, lng);
                 loadArmada(lat, lng);
             } else {
                 Swal.fire({
@@ -794,42 +793,11 @@ function updateParkirSelection(parkir, hasSkipped = false) {
     document.getElementById('parkirAlamat').textContent = parkir.alamat;
     
     let distance = parseFloat(parkir.distance);
-    if (isNaN(distance) && jemputCoords) {
-        distance = calculateDistance(jemputCoords.lat, jemputCoords.lng, parkir.latitude, parkir.longitude);
-    }
     
     document.getElementById('parkirJarak').textContent = !isNaN(distance) ? distance.toFixed(2) : '-';
     
     document.getElementById('parkir_latitude').value = parkir.latitude;
     document.getElementById('parkir_longitude').value = parkir.longitude;
-}
-
-function findNearestParkir(lat, lng) {
-    let minDistance = Infinity;
-    let nearest = null;
-
-    parkirs.forEach(parkir => {
-        const distance = calculateDistance(lat, lng, parkir.latitude, parkir.longitude);
-        if (distance < minDistance) {
-            minDistance = distance;
-            nearest = parkir;
-        }
-    });
-
-    if (nearest) {
-        updateParkirSelection(nearest);
-    }
-}
-
-function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
 }
 
 async function showSearchSuggestions(query) {

@@ -11,6 +11,7 @@ use App\Models\Penyewaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Auth\Events\Registered;
 
 use App\Models\Keunggulan;
@@ -74,14 +75,24 @@ public function getArmadaTersedia(Request $request)
     $jenis = $request->query('jenis');
     $currentArmadaId = $request->query('current_armada_id');
 
-    // Ambil semua tempat parkir yang diurutkan dari terdekat ke terluar
-    $parkirs = Parkir::selectRaw(
-        "*, 
-        (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance",
-        [$lat, $lng, $lat]
-    )
-    ->orderBy('distance', 'asc')
-    ->get();
+    // Ambil semua tempat parkir lalu urutkan berdasarkan jarak rute jalan OSRM.
+    $parkirs = Parkir::whereNotNull('latitude')
+        ->whereNotNull('longitude')
+        ->get()
+        ->map(function ($parkir) use ($lat, $lng) {
+            $parkir->distance = $this->getOsrmDistanceKm(
+                $parkir->latitude,
+                $parkir->longitude,
+                $lat,
+                $lng
+            );
+
+            return $parkir;
+        })
+        ->sortBy(function ($parkir) {
+            return $parkir->distance ?? INF;
+        })
+        ->values();
 
     if ($parkirs->isEmpty()) {
         return response()->json(['data' => [], 'parkir' => null]);
@@ -130,7 +141,8 @@ public function getArmadaTersedia(Request $request)
                 'nama' => $parkir->nama,
                 'alamat' => $parkir->alamat,
                 'latitude' => $parkir->latitude,
-                'longitude' => $parkir->longitude
+                'longitude' => $parkir->longitude,
+                'distance' => $parkir->distance
             ];
         }
     }
@@ -154,10 +166,36 @@ public function getArmadaTersedia(Request $request)
             'nama' => $chosenParkir->nama,
             'alamat' => $chosenParkir->alamat,
             'latitude' => $chosenParkir->latitude,
-            'longitude' => $chosenParkir->longitude
+            'longitude' => $chosenParkir->longitude,
+            'distance' => $chosenParkir->distance
         ] : null,
         'skipped_parkirs' => $skippedParkirs
     ]);
+}
+
+private function getOsrmDistanceKm($fromLat, $fromLng, $toLat, $toLng): ?float
+{
+    try {
+        $response = Http::timeout(8)->get(
+            "https://router.project-osrm.org/route/v1/driving/{$fromLng},{$fromLat};{$toLng},{$toLat}",
+            [
+                'overview' => 'false',
+                'alternatives' => 'false',
+                'steps' => 'false',
+            ]
+        );
+
+        if (!$response->successful()) {
+            return null;
+        }
+
+        $distanceMeters = data_get($response->json(), 'routes.0.distance');
+
+        return $distanceMeters !== null ? round($distanceMeters / 1000, 2) : null;
+    } catch (\Exception $e) {
+        \Log::warning('OSRM distance error: ' . $e->getMessage());
+        return null;
+    }
 }
 
 public function storePemesanan(Request $request)

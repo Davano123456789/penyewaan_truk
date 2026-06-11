@@ -457,12 +457,24 @@ class PenyewaanAdminController extends Controller
 
                 // Recalculate Total Price for Penyewaan
                 $penyewaan = $keranjang->penyewaan;
+                $message = 'Pembatalan disetujui. Status keranjang dibatalkan, armada kembali tersedia, dan total harga diperbarui.';
                 if ($penyewaan) {
                     $newTotal = $penyewaan->keranjangs()
                         ->where('status', '!=', 'dibatalkan')
                         ->sum('harga_sewa');
                     
-                    $penyewaan->update(['harga_total' => $newTotal]);
+                    $updateDataPenyewaan = ['harga_total' => $newTotal];
+                    
+                    // Cek apakah seluruh item dalam transaksi ini sudah dibatalkan
+                    $totalItems = $penyewaan->keranjangs()->count();
+                    $canceledItems = $penyewaan->keranjangs()->where('status', 'dibatalkan')->count();
+                    
+                    if ($totalItems === $canceledItems) {
+                        $updateDataPenyewaan['status'] = 'dibatalkan';
+                        $message = 'Pembatalan disetujui. Semua item telah dibatalkan, sehingga status transaksi penyewaan otomatis menjadi dibatalkan. Armada kembali tersedia.';
+                    }
+                    
+                    $penyewaan->update($updateDataPenyewaan);
                 }
 
                 // Kirim Notifikasi ke Client
@@ -473,8 +485,6 @@ class PenyewaanAdminController extends Controller
                     route('penyewaan.keranjang', $penyewaan->id),
                     $penyewaan->id
                 );
-
-                $message = 'Pembatalan disetujui. Status keranjang dibatalkan, armada kembali tersedia, dan total harga diperbarui.';
             } else {
                 // Tolak pembatalan, kembalikan ke aktif
                 $keranjang->update([
