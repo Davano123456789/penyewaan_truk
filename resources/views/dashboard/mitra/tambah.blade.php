@@ -4,11 +4,8 @@
 <div class="container-fluid">
 
     <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div class="mb-4">
         <h1 class="h3 mb-0 text-gray-800">Tambah Mitra Kerja</h1>
-        <a href="{{ route('mitra.index') }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left"></i> Kembali
-        </a>
     </div>
 
     <!-- Form Card -->
@@ -69,7 +66,7 @@
                         <i class="fas fa-save"></i> Simpan
                     </button>
                     <a href="{{ route('mitra.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Batal
+                        <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                 </div>
             </form>

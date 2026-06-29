@@ -26,5 +26,12 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        $this->renderable(function (\Illuminate\Routing\Exceptions\InvalidSignatureException $e) {
+            if (auth()->check()) {
+                return redirect()->route('verification.notice')->with('error', 'Link verifikasi telah kadaluarsa');
+            }
+            return redirect()->route('login')->with('error', 'Link verifikasi telah kadaluarsa');
+        });
     }
 }

@@ -15,9 +15,9 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Menunggu Konfirmasi</div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Menunggu Konfirmasi Pembayaran</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ \App\Models\Penyewaan::where('status', 'menunggu_konfirmasi')->count() }}
+                                {{ \App\Models\Penyewaan::where('status', 'menunggu_konfirmasi_pembayaran')->count() }}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -73,73 +73,73 @@
         </div>
         <div class="card-body">
             <!-- Filter & Search -->
-            <form method="GET" action="{{ route('penyewaanAdmin.index') }}" class="mb-4">
+            <div class="mb-4">
                 <div class="row">
                     <div class="col-md-5">
                         <div class="input-group">
                             <input type="text" 
-                                   name="search" 
+                                   id="searchInput" 
                                    class="form-control" 
-                                   placeholder="Cari ID Pesanan, Nama, atau Email Customer..." 
-                                   value="{{ request('search') }}">
+                                   placeholder="Cari ID Pesanan, Nama, atau Email Customer...">
                             <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit">
+                                <button class="btn btn-primary" type="button">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <select name="status" class="form-control" onchange="this.form.submit()">
+                        <select id="filterStatus" class="form-control">
                             <option value="">Semua Status</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="menunggu_pembayaran" {{ request('status') == 'menunggu_pembayaran' ? 'selected' : '' }}>Menunggu Pembayaran</option>
-                            <option value="menunggu_konfirmasi" {{ request('status') == 'menunggu_konfirmasi' ? 'selected' : '' }}>Menunggu Konfirmasi</option>
-                            <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                            <option value="dibatalkan" {{ request('status') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+                            <option value="MENUNGGU PEMBAYARAN">Menunggu Pembayaran</option>
+                            <option value="MENUNGGU KONFIRMASI PEMBAYARAN">Menunggu Konfirmasi Pembayaran</option>
+                            <option value="AKTIF">Aktif</option>
+                            <option value="MENUNGGU PELUNASAN">Menunggu Pelunasan</option>
+                            <option value="MENUNGGU KONFIRMASI PELUNASAN">Menunggu Konfirmasi Pelunasan</option>
+                            <option value="SELESAI">Selesai</option>
+                            <option value="DIBATALKAN">Dibatalkan</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        @if(request('search') || request('status'))
-                        <a href="{{ route('penyewaanAdmin.index') }}" class="btn btn-secondary btn-block">
+                        <button type="button" id="btnResetFilter" class="btn btn-secondary btn-block">
                             <i class="fas fa-redo"></i> Reset Filter
-                        </a>
-                        @endif
+                        </button>
                     </div>
                 </div>
-            </form>
+            </div>
 
             <!-- Table -->
             <div class="table-responsive">
-                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                <table class="table table-bordered table-hover" id="dataTable" style="min-width: 1000px;" cellspacing="0">
                     <thead class="thead-light">
                         <tr>
-                            <th class="text-center" width="5%">No</th>
-                            <th width="15%">Customer</th>
-                            <th width="12%">Tanggal</th>
-                            <th width="15%">Total Harga</th>
-                            <th width="12%">Status</th>
-                            <th width="12%">Status Pembayaran</th>
-                            <th class="text-center" width="25%">Aksi</th>
+                            <th class="text-center" style="min-width: 50px;">No</th>
+                            <th style="min-width: 140px;">Kode Transaksi</th>
+                            <th style="min-width: 140px;">Customer</th>
+                            <th style="min-width: 130px;">Tanggal</th>
+                            <th style="min-width: 130px;">Total Harga</th>
+                            <th style="min-width: 120px;">Status</th>
+                            <th style="min-width: 150px;">Status Pembayaran</th>
+                            <th class="text-center" style="min-width: 150px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($penyewaans as $index => $penyewaan)
                         <tr>
-                            <td class="text-center">{{ $penyewaans->firstItem() + $index }}</td>
+                             <td class="text-center">{{ $index + 1 }}</td>
                             <td>
-                                <strong>{{ $penyewaan->client ? $penyewaan->client->nama : 'User Tidak Ditemukan' }}</strong><br>
+                                {{ $penyewaan->kode_transaksi ?? '-' }}
+                            </td>
+                            <td>
+                                <strong>{{ $penyewaan->client ? $penyewaan->client->nama : 'User Tidak Ditemukan' }}</strong>
                             </td>
                             <td>{{ $penyewaan->created_at->format('d M Y H:i') }}</td>
                             <td><strong class="text-primary">Rp {{ number_format($penyewaan->harga_total, 0, ',', '.') }}</strong></td>
                             <td>
-                                @if($penyewaan->status == 'pending')
-                                    <span class="badge badge-secondary">Pending</span>
-                                @elseif($penyewaan->status == 'menunggu_pembayaran')
+                                @if($penyewaan->status == 'menunggu_pembayaran')
                                     <span class="badge badge-info">Menunggu Pembayaran</span>
-                                @elseif($penyewaan->status == 'menunggu_konfirmasi')
-                                    <span class="badge badge-warning">Menunggu Konfirmasi</span>
+                                @elseif($penyewaan->status == 'menunggu_konfirmasi_pembayaran')
+                                    <span class="badge badge-warning">Menunggu Konfirmasi Pembayaran</span>
                                 @elseif($penyewaan->status == 'aktif')
                                     <span class="badge badge-success">Aktif</span>
                                 @elseif($penyewaan->status == 'selesai')
@@ -152,10 +152,14 @@
                                 @if($penyewaan->pembayaran)
                                     @if($penyewaan->pembayaran->status == 'lunas')
                                         <span class="badge badge-success"><i class="fas fa-check-circle"></i> Lunas</span>
+                                    @elseif($penyewaan->pembayaran->status == 'menunggu_konfirmasi')
+                                        <span class="badge badge-info"><i class="fas fa-hourglass-start"></i> Menunggu Konfirmasi</span>
                                     @elseif($penyewaan->pembayaran->status == 'menunggu_pelunasan')
                                         <span class="badge badge-warning"><i class="fas fa-clock"></i> Menunggu Pelunasan</span>
                                     @elseif($penyewaan->pembayaran->status == 'menunggu_konfirmasi_pelunasan')
-                                        <span class="badge badge-danger"><i class="fas fa-hourglass-half"></i> Menunggu Konfirmasi Pelunasan</span>
+                                        <span class="badge badge-info"><i class="fas fa-hourglass-half"></i> Menunggu Konfirmasi Pelunasan</span>
+                                    @elseif($penyewaan->pembayaran->status == 'ditolak')
+                                        <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Ditolak</span>
                                     @else
                                         <span class="badge badge-secondary">{{ ucfirst($penyewaan->pembayaran->status) }}</span>
                                     @endif
@@ -164,24 +168,25 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <!-- Tombol Detail -->
-                                <a href="{{ route('penyewaanAdmin.show', $penyewaan->id) }}" 
-                                   class="btn btn-info btn-sm" 
-                                   title="Lihat Detail">
-                                    <i class="fas fa-eye"></i> Detail
-                                </a>
+                                <div class="d-flex justify-content-center flex-nowrap" style="gap: 4px;">
+                                    <!-- Tombol Detail -->
+                                    <a href="{{ route('penyewaanAdmin.show', $penyewaan->id) }}" 
+                                       class="btn btn-info btn-sm text-nowrap" 
+                                       title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
 
-                                <!-- Tombol Hapus -->
-                                <form action="{{ route('penyewaanAdmin.destroy', $penyewaan->id) }}" 
-                                      method="POST" 
-                                      class="d-inline delete-form">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" class="btn btn-danger btn-sm btn-delete" title="Hapus Penyewaan">
-                                        <i class="fas fa-trash"></i> Hapus
-                                    </button>
-                                </form>
-
+                                    <!-- Tombol Hapus -->
+                                    <form action="{{ route('penyewaanAdmin.destroy', $penyewaan->id) }}" 
+                                          method="POST" 
+                                          class="d-inline delete-form">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" class="btn btn-danger btn-sm btn-delete text-nowrap" title="Hapus Penyewaan">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
 
@@ -197,14 +202,19 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div>
-                    Menampilkan {{ $penyewaans->firstItem() ?? 0 }} sampai {{ $penyewaans->lastItem() ?? 0 }} 
-                    dari {{ $penyewaans->total() }} data
+             <!-- Pagination -->
+            <div class="row mt-3">
+                <div class="col-sm-12 col-md-5">
+                    <div class="dataTables_info" id="paginationInfo">
+                        Menampilkan 0 sampai 0 dari 0 data
+                    </div>
                 </div>
-                <div>
-                    {{ $penyewaans->links() }}
+                <div class="col-sm-12 col-md-7">
+                    <div class="dataTables_paginate float-right">
+                        <ul class="pagination" id="paginationControls">
+                            <!-- Pagination buttons dynamically rendered via JS -->
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -216,6 +226,134 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    var currentPage = 1;
+    var rowsPerPage = 10;
+
+    function filterTable() {
+        var searchValue = document.getElementById('searchInput').value.toUpperCase();
+        var statusValue = document.getElementById('filterStatus').value.toUpperCase();
+        var table = document.getElementById('dataTable');
+        var tr = table.getElementsByTagName('tr');
+        
+        var matchingRows = [];
+
+        for (var i = 1; i < tr.length; i++) {
+            var row = tr[i];
+            
+            // Lewati jika baris kosong
+            var cells = row.getElementsByTagName('td');
+            if (cells.length < 5) continue; 
+
+            var textMatch = false;
+            var statusMatch = false;
+
+            // 1. Filter pencarian
+            for (var j = 0; j < cells.length; j++) {
+                if (cells[j]) {
+                    var cellText = cells[j].textContent || cells[j].innerText;
+                    if (cellText.toUpperCase().indexOf(searchValue) > -1) {
+                        textMatch = true;
+                        break;
+                    }
+                }
+            }
+
+            // 2. Filter Status (kolom ke-6, index 5)
+            var statusCell = cells[5];
+            if (statusCell) {
+                var statusText = (statusCell.textContent || statusCell.innerText).trim().toUpperCase();
+                if (statusValue === '' || statusText === statusValue) {
+                    statusMatch = true;
+                }
+            } else {
+                statusMatch = (statusValue === '');
+            }
+
+            if (textMatch && statusMatch) {
+                matchingRows.push(row);
+            } else {
+                row.style.display = 'none';
+            }
+        }
+
+        // Paginasi
+        var totalRows = matchingRows.length;
+        var totalPages = Math.ceil(totalRows / rowsPerPage);
+        if (totalPages < 1) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        var startIdx = (currentPage - 1) * rowsPerPage;
+        var endIdx = startIdx + rowsPerPage;
+
+        for (var k = 0; k < totalRows; k++) {
+            if (k >= startIdx && k < endIdx) {
+                matchingRows[k].style.display = '';
+            } else {
+                matchingRows[k].style.display = 'none';
+            }
+        }
+
+        // Info data
+        var infoStart = totalRows > 0 ? startIdx + 1 : 0;
+        var infoEnd = endIdx > totalRows ? totalRows : endIdx;
+        document.getElementById('paginationInfo').innerText = "Menampilkan " + infoStart + " sampai " + infoEnd + " dari " + totalRows + " data";
+
+        // Render tombol paginasi
+        var controlsHtml = '';
+        
+        // Previous
+        if (currentPage === 1) {
+            controlsHtml += '<li class="paginate_button page-item previous disabled"><a href="#" class="page-link">Previous</a></li>';
+        } else {
+            controlsHtml += '<li class="paginate_button page-item previous"><a href="#" class="page-link" onclick="changePage(' + (currentPage - 1) + '); return false;">Previous</a></li>';
+        }
+
+        // Nomor Halaman
+        for (var p = 1; p <= totalPages; p++) {
+            if (p === currentPage) {
+                controlsHtml += '<li class="paginate_button page-item active"><a href="#" class="page-link">' + p + '</a></li>';
+            } else {
+                controlsHtml += '<li class="paginate_button page-item"><a href="#" class="page-link" onclick="changePage(' + p + '); return false;">' + p + '</a></li>';
+            }
+        }
+
+        // Next
+        if (currentPage === totalPages) {
+            controlsHtml += '<li class="paginate_button page-item next disabled"><a href="#" class="page-link">Next</a></li>';
+        } else {
+            controlsHtml += '<li class="paginate_button page-item next"><a href="#" class="page-link" onclick="changePage(' + (currentPage + 1) + '); return false;">Next</a></li>';
+        }
+
+        document.getElementById('paginationControls').innerHTML = controlsHtml;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        filterTable();
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        currentPage = 1;
+        filterTable();
+    });
+
+    document.getElementById('filterStatus').addEventListener('change', function() {
+        currentPage = 1;
+        filterTable();
+    });
+
+    document.getElementById('btnResetFilter').addEventListener('click', function() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('filterStatus').value = '';
+        currentPage = 1;
+        filterTable();
+    });
+
+    // Jalankan filter saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        filterTable();
+    });
+
     // SweetAlert Konfirmasi Pembayaran
     document.querySelectorAll('.btn-konfirmasi').forEach(button => {
         button.addEventListener('click', function(e) {
@@ -262,27 +400,4 @@
         });
     });
 </script>
-
-@if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: "{{ session('success') }}",
-        timer: 2000,
-        showConfirmButton: false
-    });
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "{{ session('error') }}",
-        confirmButtonColor: '#ef4444'
-    });
-</script>
-@endif
 @endsection

@@ -27,6 +27,7 @@ class PeranMiddleware
             'admin' => 1,
             'client' => 2,
             'sopir' => 3,
+            'owner' => 4,
         ];
 
         // Cek apakah peran valid
@@ -37,7 +38,7 @@ class PeranMiddleware
         // Cek apakah user memiliki peran yang sesuai
         if ($user->peran_id !== $peranIds[$peran]) {
             // Jika tidak sesuai, arahkan ke halaman yang sesuai dengan perannya atau 403
-            if ($user->peran_id == 1) {
+            if ($user->peran_id == 1 || $user->peran_id == 4) {
                 return redirect()->route('dashboard');
             } elseif ($user->peran_id == 2) {
                 return redirect()->route('penyewaan.index');

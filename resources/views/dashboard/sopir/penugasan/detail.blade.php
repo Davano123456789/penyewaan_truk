@@ -23,17 +23,17 @@
 
                     <div class="form-group">
                         <label class="font-weight-bold">No Polisi</label>
-                        <input type="text" class="form-control" value="{{ $penugasan->armada->no_polisi }}" readonly>
+                        <input type="text" class="form-control" value="{{ optional($penugasan->armada)->no_polisi ?? '-' }}" readonly>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold">Merek & Jenis</label>
-                        <input type="text" class="form-control" value="{{ $penugasan->armada->merek }} - {{ $penugasan->armada->jenis }}" readonly>
+                        <input type="text" class="form-control" value="{{ $penugasan->armada ? ($penugasan->armada->merek . ' - ' . $penugasan->armada->jenis) : '-' }}" readonly>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold">Kapasitas</label>
-                        <input type="text" class="form-control" value="{{ $penugasan->armada->kapasitas }} Ton" readonly>
+                        <input type="text" class="form-control" value="{{ $penugasan->armada ? ($penugasan->armada->kapasitas . ' Ton') : '-' }}" readonly>
                     </div>
 
                     <h5 class="font-weight-bold text-success mb-3 mt-4">
@@ -59,17 +59,17 @@
 
                     <div class="form-group">
                         <label class="font-weight-bold">Tempat Jemput</label>
-                        <textarea class="form-control" rows="2" readonly>{{ $penugasan->tempat_jemput }}</textarea>
+                        <textarea class="form-control" rows="2" readonly>{{ $penugasan->rute->tempat_jemput ?? $penugasan->tempat_jemput }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold">Tempat Antar</label>
-                        <textarea class="form-control" rows="2" readonly>{{ $penugasan->tempat_antar }}</textarea>
+                        <textarea class="form-control" rows="2" readonly>{{ $penugasan->rute->tempat_antar ?? $penugasan->tempat_antar }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold">Total Jarak</label>
-                        <input type="text" class="form-control" value="{{ $penugasan->total_jarak }} km" readonly>
+                        <input type="text" class="form-control" value="{{ $penugasan->rute->total_jarak ?? $penugasan->total_jarak }} km" readonly>
                     </div>
 
                     <div class="form-group">
@@ -77,36 +77,57 @@
                         <textarea class="form-control" rows="2" readonly>{{ $penugasan->barang_muatan }}</textarea>
                     </div>
 
+                    @if($penugasan->bobot)
+                    <div class="form-group">
+                        <label class="font-weight-bold">Bobot Muatan</label>
+                        <input type="text" class="form-control" value="{{ $penugasan->bobot }} Ton" readonly>
+                    </div>
+                    @endif
+
                     <div class="form-group">
                         <label class="font-weight-bold">Status</label>
                         <div>
                             @if($penugasan->status == 'pending')
-                                <span class="badge badge-warning p-2">Pending</span>
+                                <span class="badge badge-secondary p-2">Pending (Menunggu Pembayaran)</span>
+                            @elseif($penugasan->status == 'aktif')
+                                <span class="badge badge-success p-2">Aktif / Berjalan</span>
+                            @elseif($penugasan->status == 'truk_sampai')
+                                <span class="badge badge-info p-2">Truk Sampai (Siap Upload Bukti)</span>
+                            @elseif($penugasan->status == 'revisi_bukti')
+                                <span class="badge badge-danger p-2">Revisi Bukti Selesai</span>
                             @elseif($penugasan->status == 'selesai')
-                                <span class="badge badge-success p-2">Selesai</span>
+                                <span class="badge badge-primary p-2">Selesai</span>
+                            @elseif($penugasan->status == 'menunggu_konfirmasi_selesai')
+                                <span class="badge badge-warning p-2">Menunggu Validasi Admin</span>
                             @else
                                 <span class="badge badge-info p-2">{{ ucfirst($penugasan->status) }}</span>
                             @endif
                         </div>
                     </div>
 
+                    @if(($penugasan->penugasan->catatan_penugasan ?? $penugasan->catatan_penugasan))
+                    <div class="alert alert-warning border-left-warning shadow-sm">
+                        <h6 class="font-weight-bold"><i class="fas fa-exclamation-triangle"></i> Catatan dari Admin:</h6>
+                        <p class="mb-0 italic">"{{ $penugasan->penugasan->catatan_penugasan ?? $penugasan->catatan_penugasan }}"</p>
+                        <hr class="my-2">
+                        <small class="text-dark">Silakan periksa kembali bukti yang Anda unggah dan lakukan upload ulang jika diperlukan.</small>
+                    </div>
+                    @endif
+ 
                     <!-- Tambahan Bukti Selesai -->
                     <div class="form-group">
                         <label class="font-weight-bold">Bukti Selesai</label>
                         <div>
-                            @if($penugasan->bukti_selesai)
-                                <img src="{{ $penugasan->bukti_selesai }}" 
+                            @if(($penugasan->penugasan->bukti_selesai ?? $penugasan->bukti_selesai))
+                                <img src="{{ $penugasan->penugasan->bukti_selesai ?? $penugasan->bukti_selesai }}" 
                                      alt="Bukti Selesai" 
                                      class="img-thumbnail" 
                                      style="max-width: 300px;">
                             @else
-                                <img src="https://res.cloudinary.com/dch7lqtxa/image/upload/v1761441410/bukti_selesai/njbd8c3odtkewy2kenkc.jpg"
-                                     alt="Belum ada bukti"
-                                     class="img-thumbnail mb-2"
-                                     style="max-width: 300px;">
-                                <p class="text-muted mt-2">
-                                    Belum ada bukti selesai yang diunggah.
-                                </p>
+                                <div class="bg-light border rounded p-4 text-center">
+                                    <i class="fas fa-image fa-3x text-gray-300 mb-2"></i>
+                                    <p class="text-muted small mb-0">Belum ada bukti selesai yang diunggah.</p>
+                                </div>
                             @endif
                         </div>
                     </div>

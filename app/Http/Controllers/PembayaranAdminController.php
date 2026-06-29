@@ -10,7 +10,7 @@ class PembayaranAdminController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pembayaran::with(['penyewaan.client'])->orderBy('tanggal_bayar', 'desc');
+        $query = Pembayaran::with(['penyewaan.client'])->orderBy('created_at', 'desc');
 
         if ($request->has('search') && $request->search != '') {
             $s = $request->search;
@@ -19,12 +19,16 @@ class PembayaranAdminController extends Controller
                   ->orWhere('jenis', 'like', '%' . $s . '%')
                   ->orWhere('status', 'like', '%' . $s . '%')
                   ->orWhereHas('penyewaan', function($q2) use ($s) {
-                      $q2->where('id', 'like', '%' . $s . '%');
+                      $q2->where('id', 'like', '%' . $s . '%')
+                        ->orWhere('kode_transaksi', 'like', '%' . $s . '%')
+                        ->orWhereHas('client', function($q3) use ($s) {
+                            $q3->where('nama', 'like', '%' . $s . '%');
+                        });
                   });
             });
         }
 
-        $pembayarans = $query->paginate(15);
+        $pembayarans = $query->get();
 
         return view('dashboard.pembayaranAdmin.index', compact('pembayarans'));
     }
@@ -39,32 +43,6 @@ class PembayaranAdminController extends Controller
 
     public function destroy($id)
     {
-        try {
-            DB::beginTransaction();
-
-            $p = Pembayaran::findOrFail($id);
-
-            if ($p->status != 'lunas') {
-                return back()->with('error', 'Hanya pembayaran dengan status lunas yang dapat dihapus!');
-            }
-
-            // Hapus file bukti jika disimpan di public
-            if ($p->bukti_transfer) {
-                $filePath = public_path($p->bukti_transfer);
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                }
-            }
-
-            $p->delete();
-
-            DB::commit();
-
-            return redirect()->route('pembayaranAdmin.index')->with('success', 'Pembayaran berhasil dihapus!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Error hapus pembayaran admin: ' . $e->getMessage());
-            return back()->with('error', 'Gagal menghapus pembayaran: ' . $e->getMessage());
-        }
+        abort(403, 'Penghapusan pembayaran tidak diizinkan sistem.');
     }
 }

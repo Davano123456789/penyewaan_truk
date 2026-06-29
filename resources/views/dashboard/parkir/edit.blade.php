@@ -12,6 +12,29 @@
     #map {
         z-index: 1;
     }
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #d1d3e2;
+        border-radius: 0 0 8px 8px;
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 1050;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+    }
+    .search-result-item {
+        padding: 10px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #eaecf4;
+        transition: background-color 0.2s;
+    }
+    .search-result-item:hover {
+        background-color: #f8f9fc;
+        color: #4e73df;
+    }
 </style>
 
 <!-- Begin Page Content -->
@@ -49,18 +72,21 @@
                         <!-- Alamat -->
                         <div class="form-group">
                             <label for="alamat" class="font-weight-bold">Alamat</label>
-                            <div class="input-group">
-                                <textarea class="form-control @error('alamat') is-invalid @enderror" 
-                                          id="alamat" name="alamat" rows="3" 
-                                          placeholder="Ketik alamat lengkap atau klik di peta" required>{{ old('alamat', $parkir->alamat) }}</textarea>
-                                <div class="input-group-append">
-                                    <button type="button" class="btn btn-info" id="searchBtn" title="Cari lokasi berdasarkan alamat">
-                                        <i class="fas fa-search"></i>
-                                    </button>
+                            <div class="position-relative">
+                                <div class="input-group">
+                                    <textarea class="form-control @error('alamat') is-invalid @enderror" 
+                                              id="alamat" name="alamat" rows="3" 
+                                              placeholder="Ketik alamat lengkap atau klik di peta" autocomplete="off" required>{{ old('alamat', $parkir->alamat) }}</textarea>
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-info" id="searchBtn" title="Cari lokasi berdasarkan alamat">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
                                 </div>
+                                <div id="searchResults" class="search-results" style="display: none;"></div>
                             </div>
                             <small class="form-text text-muted">
-                                <i class="fas fa-lightbulb"></i> Ketik alamat lengkap lalu klik tombol <strong>Cari</strong>, atau langsung klik di peta
+                                <i class="fas fa-lightbulb"></i> Ketik alamat untuk saran otomatis, atau langsung klik/geser di peta
                             </small>
                             @error('alamat')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -73,20 +99,8 @@
                         <!-- Longitude (Hidden) -->
                         <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $parkir->longitude) }}">
 
-                        <!-- Koordinat Info -->
-                        <div class="alert alert-info">
-                            <small>
-                                <strong><i class="fas fa-map-pin"></i> Koordinat:</strong><br>
-                                <span id="koordinat-info">
-                                    @if($parkir->latitude && $parkir->longitude)
-                                        <strong>Latitude:</strong> {{ $parkir->latitude }}<br>
-                                        <strong>Longitude:</strong> {{ $parkir->longitude }}
-                                    @else
-                                        Belum ada lokasi yang dipilih
-                                    @endif
-                                </span>
-                            </small>
-                        </div>
+                        <!-- Koordinat Info (hidden, used by JS) -->
+                        <span id="koordinat-info" class="d-none"></span>
                     </div>
 
                     <!-- Kolom Kanan - Map -->
@@ -110,9 +124,6 @@
                         <a href="{{ route('parkir.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
-                        <button type="reset" class="btn btn-warning" id="resetBtn">
-                            <i class="fas fa-redo"></i> Reset
-                        </button>
                     </div>
                 </div>
             </form>
@@ -153,6 +164,61 @@
 
         // Variabel untuk menyimpan marker
         var marker = null;
+        var searchTimeout;
+        var currentSearchResults = [];
+
+        function showSearchSuggestions(query) {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('searchResults');
+                    currentSearchResults = data;
+                    
+                    if (data.length > 0) {
+                        resultsDiv.innerHTML = data.map((item, index) => `
+                            <div class="search-result-item" data-index="${index}">
+                                <div class="font-weight-bold small text-dark">${item.display_name.split(',')[0]}</div>
+                                <div class="text-xs text-gray-500">${item.display_name}</div>
+                            </div>
+                        `).join('');
+                        resultsDiv.style.display = 'block';
+                    } else {
+                        resultsDiv.innerHTML = '<div class="search-result-item text-gray-500 small">Tidak ada hasil ditemukan</div>';
+                        resultsDiv.style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error searching:', error));
+        }
+
+        function hideSearchResults() {
+            document.getElementById('searchResults').style.display = 'none';
+        }
+
+        function selectSearchResult(lat, lng, address) {
+            map.setView([lat, lng], 16);
+
+            if (marker) map.removeLayer(marker);
+
+            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            marker.bindPopup("<b>Lokasi Ditemukan</b><br>" + address).openPopup();
+
+            document.getElementById('latitude').value = lat.toFixed(6);
+            document.getElementById('longitude').value = lng.toFixed(6);
+            document.getElementById('koordinat-info').innerHTML = 
+                '<strong>Latitude:</strong> ' + lat.toFixed(6) + '<br><strong>Longitude:</strong> ' + lng.toFixed(6);
+            document.getElementById('alamat').value = address;
+
+            hideSearchResults();
+
+            marker.on('dragend', function(e) {
+                var pos = marker.getLatLng();
+                document.getElementById('latitude').value = pos.lat.toFixed(6);
+                document.getElementById('longitude').value = pos.lng.toFixed(6);
+                document.getElementById('koordinat-info').innerHTML = 
+                    '<strong>Latitude:</strong> ' + pos.lat.toFixed(6) + '<br><strong>Longitude:</strong> ' + pos.lng.toFixed(6);
+                getAddress(pos.lat, pos.lng);
+            });
+        }
 
         // Tampilkan marker awal jika ada koordinat
         @if($parkir->latitude && $parkir->longitude)
@@ -284,16 +350,50 @@
 
         // Event listener untuk tombol Cari
         document.getElementById('searchBtn').addEventListener('click', function() {
-            var alamat = document.getElementById('alamat').value.trim();
-            searchLocation(alamat);
+            searchLocation(document.getElementById('alamat').value.trim());
         });
 
-        // Event listener untuk Enter di textarea alamat
-        document.getElementById('alamat').addEventListener('keydown', function(e) {
+        // Event listener keyup/keydown di Textarea untuk realtime search
+        const searchInput = document.getElementById('alamat');
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchLocation(this.value.trim());
+            } else {
+                clearTimeout(searchTimeout);
+                var val = this.value.trim();
+                searchTimeout = setTimeout(() => {
+                    if (val.length > 2) {
+                        showSearchSuggestions(val);
+                    } else {
+                        hideSearchResults();
+                    }
+                }, 300);
+            }
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                var alamat = this.value.trim();
-                searchLocation(alamat);
+            }
+        });
+
+        // Event click pada search results suggestions
+        document.getElementById('searchResults').addEventListener('click', function(e) {
+            const itemEl = e.target.closest('.search-result-item');
+            if (itemEl && itemEl.hasAttribute('data-index')) {
+                const index = parseInt(itemEl.getAttribute('data-index'));
+                const item = currentSearchResults[index];
+                if (item) {
+                    selectSearchResult(parseFloat(item.lat), parseFloat(item.lon), item.display_name);
+                }
+            }
+        });
+
+        // Sembunyikan search results saat klik di luar
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#alamat') && !e.target.closest('#searchResults')) {
+                hideSearchResults();
             }
         });
 
@@ -335,62 +435,7 @@
             });
         });
 
-        // Konfirmasi sebelum reset dengan SweetAlert
-        document.getElementById('resetBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            Swal.fire({
-                title: 'Yakin ingin reset?',
-                text: "Data akan dikembalikan ke data awal!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, Reset!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Reset form ke data awal
-                    document.getElementById('nama').value = '{{ $parkir->nama }}';
-                    document.getElementById('alamat').value = '{{ $parkir->alamat }}';
-                    document.getElementById('latitude').value = '{{ $parkir->latitude }}';
-                    document.getElementById('longitude').value = '{{ $parkir->longitude }}';
-                    
-                    // Reset marker ke posisi awal
-                    if (marker) {
-                        map.removeLayer(marker);
-                    }
-                    
-                    @if($parkir->latitude && $parkir->longitude)
-                        marker = L.marker([{{ $parkir->latitude }}, {{ $parkir->longitude }}], {
-                            draggable: true
-                        }).addTo(map);
-                        marker.bindPopup("<b>{{ $parkir->nama }}</b><br>Lokasi Saat Ini").openPopup();
-                        map.setView([{{ $parkir->latitude }}, {{ $parkir->longitude }}], 15);
-                        
-                        document.getElementById('koordinat-info').innerHTML = 
-                            '<strong>Latitude:</strong> {{ $parkir->latitude }}<br><strong>Longitude:</strong> {{ $parkir->longitude }}';
 
-                        marker.on('dragend', function(e) {
-                            var position = marker.getLatLng();
-                            document.getElementById('latitude').value = position.lat.toFixed(6);
-                            document.getElementById('longitude').value = position.lng.toFixed(6);
-                            document.getElementById('koordinat-info').innerHTML = 
-                                '<strong>Latitude:</strong> ' + position.lat.toFixed(6) + '<br><strong>Longitude:</strong> ' + position.lng.toFixed(6);
-                            getAddress(position.lat, position.lng);
-                        });
-                    @endif
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: 'Data telah direset ke data awal',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                }
-            });
-        });
     });
 </script>
 @endsection

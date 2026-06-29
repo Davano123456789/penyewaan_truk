@@ -88,7 +88,6 @@
         <option value="CDD" {{ old('jenis') == 'CDD' ? 'selected' : '' }}>CDD</option>
         <option value="BOX" {{ old('jenis') == 'BOX' ? 'selected' : '' }}>BOX</option>
         <option value="WINGBOX" {{ old('jenis') == 'WINGBOX' ? 'selected' : '' }}>WINGBOX</option>
-        <option value="TERBUKA" {{ old('jenis') == 'TERBUKA' ? 'selected' : '' }}>TERBUKA</option>
     </select>
     @error('jenis')
         <div class="invalid-feedback">{{ $message }}</div>
@@ -116,7 +115,8 @@
                             <select class="form-control @error('status') is-invalid @enderror" 
                                     id="status" name="status">
                                 <option value="tersedia" {{ old('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                            <option value="perawatan" {{ old('status') == 'perawatan' ? 'selected' : '' }}>Sedang Perawatan (Maintenance)</option>
+                                <option value="tidak_tersedia" {{ old('status') == 'tidak_tersedia' ? 'selected' : '' }}>Tidak Tersedia (Sedang Dipesan)</option>
+                                <option value="perawatan" {{ old('status') == 'perawatan' ? 'selected' : '' }}>Sedang Perawatan (Maintenance)</option>
                             </select>
                             @error('status')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -168,9 +168,6 @@
                         <a href="{{ route('armada.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
-                        <button type="reset" class="btn btn-warning" onclick="resetForm()">
-                            <i class="fas fa-redo"></i> Reset
-                        </button>
                     </div>
                 </div>
             </form>
@@ -203,10 +200,6 @@
         }
     }
 
-    // Reset form
-    function resetForm() {
-        document.getElementById('preview-container').style.display = 'none';
-        document.querySelector('.custom-file-label').textContent = 'Pilih file...';
-    }
+
 </script>
 @endsection

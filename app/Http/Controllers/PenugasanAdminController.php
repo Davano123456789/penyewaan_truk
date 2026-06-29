@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Keranjang;
+use App\Models\Penyewaan;
+use Illuminate\Http\Request;
+use App\Services\NotifikasiService;
+use Illuminate\Support\Facades\Auth;
+
+class PenugasanAdminController extends Controller
+{
+    /**
+     * Tampilkan daftar penugasan yang menunggu validasi
+     */
+    public function index()
+    {
+        $penugasans = Keranjang::has('penyewaan')->with(['penyewaan', 'armada', 'sopir', 'penugasan'])
+            ->whereIn('status', ['aktif', 'revisi_bukti', 'menunggu_konfirmasi_selesai', 'selesai'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return view('dashboard.penugasanAdmin.index', compact('penugasans'));
+    }
+
+    /**
+     * Validasi penugasan selesai
+     */
+    public function validasi($id)
+    {
+        $keranjang = Keranjang::with(['penyewaan', 'armada'])->findOrFail($id);
+
+        // Update status keranjang menjadi SELESAI
+        $keranjang->update(['status' => 'selesai']);
+
+        // Kembalikan armada menjadi tersedia kembali
+        if ($keranjang->armada) {
+            $keranjang->armada->update(['status' => 'tersedia']);
+        }
+
+        // Kirim Notifikasi ke Client
+        NotifikasiService::kirim(
+            $keranjang->penyewaan->client_id,
+            "Item Pesanan Selesai",
+            "Kode Keranjang #" . $keranjang->kode_keranjang . " dari pesanan " . $keranjang->penyewaan->kode_transaksi . " telah divalidasi dan dinyatakan selesai.",
+            route('penyewaan.keranjang', $keranjang->penyewaan_id),
+            $keranjang->penyewaan_id
+        );
+
+        // Kirim Notifikasi ke Sopir
+        NotifikasiService::kirim(
+            $keranjang->sopir_id,
+            "Bukti Selesai Disetujui",
+            "Bukti penyelesaian untuk Kode Keranjang #" . $keranjang->kode_keranjang . " telah disetujui oleh admin.",
+            route('penugasan.index'),
+            $keranjang->penyewaan_id
+        );
+
+        // Cek apakah semua item di penyewaan ini sudah selesai
+        $penyewaan = $keranjang->penyewaan;
+        $allSelesai = Keranjang::where('penyewaan_id', $penyewaan->id)
+            ->where('status', '!=', 'selesai')
+            ->count();
+
+        if ($allSelesai === 0) {
+            $penyewaan->update(['status' => 'selesai']);
+            
+            // Notifikasi ke Client
+            NotifikasiService::kirim(
+                $penyewaan->client_id,
+                "Pesanan Selesai",
+                "Semua penugasan untuk pesanan #" . $penyewaan->kode_transaksi . " telah selesai divalidasi. Terima kasih telah menggunakan jasa kami!",
+                route('penyewaan.keranjang', $penyewaan->id),
+                $penyewaan->id
+            );
+        }
+
+        return back()->with('success', 'Penugasan berhasil divalidasi sebagai Selesai!');
+    }
+
+    /**
+     * Tolak bukti penugasan
+     */
+    public function tolak(Request $request, $id)
+    {
+        $request->validate([
+            'alasan' => 'required|string|max:255'
+        ]);
+
+        $keranjang = Keranjang::with('penyewaan')->findOrFail($id);
+
+        // Ubah status menjadi REVISI_BUKTI agar sopir tahu ada masalah pada fotonya
+        $keranjang->update([
+            'status' => 'revisi_bukti',
+            'catatan_penugasan' => $request->alasan
+        ]);
+
+        $keranjang->penugasan()->updateOrCreate([], [
+            'catatan_penugasan' => $request->alasan,
+        ]);
+
+        // Kirim notifikasi ke Sopir bahwa buktinya ditolak
+        NotifikasiService::kirim(
+            $keranjang->sopir_id,
+            "Bukti Penugasan Ditolak",
+            "Bukti penyelesaian untuk pesanan #" . $keranjang->penyewaan->kode_transaksi . " ditolak oleh admin. Alasan: " . $request->alasan . ". Silakan periksa detail penugasan dan upload ulang.",
+            route('penugasan.index'),
+            $keranjang->penyewaan_id
+        );
+
+        return back()->with('warning', 'Bukti penugasan ditolak. Sopir diminta untuk upload ulang.');
+    }
+}

@@ -40,10 +40,29 @@ class User extends Authenticatable implements MustVerifyEmail
     {
        return $this->hasMany(Penyewaan::class, 'client_id');
     }
+    public function armada()
+    {
+        return $this->hasOne(Armada::class, 'sopir_id');
+    }
     // app/Models/User.php
 public function peran()
 {
     return $this->belongsTo(Peran::class);
+}
+
+public function notifikasis()
+{
+    return $this->hasMany(Notifikasi::class);
+}
+
+public function keunggulans()
+{
+    return $this->hasMany(Keunggulan::class);
+}
+
+public function mitras()
+{
+    return $this->hasMany(Mitra::class);
 }
 
 }

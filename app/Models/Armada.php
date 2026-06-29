@@ -49,9 +49,9 @@ class Armada extends Model
     public function getStatusBadgeAttribute()
     {
         $badges = [
-            'aktif' => 'success',
-            'maintenance' => 'warning',
-            'nonaktif' => 'danger'
+            'tersedia' => 'success',
+            'perawatan' => 'warning',
+            'tidak_tersedia' => 'danger'
         ];
 
         return $badges[$this->status] ?? 'secondary';
@@ -63,9 +63,9 @@ class Armada extends Model
     public function getStatusLabelAttribute()
     {
         $labels = [
-            'aktif' => 'Aktif',
-            'maintenance' => 'Maintenance',
-            'nonaktif' => 'Non-Aktif'
+            'tersedia' => 'Tersedia',
+            'perawatan' => 'Maintenance',
+            'tidak_tersedia' => 'Tidak Tersedia'
         ];
 
         return $labels[$this->status] ?? 'Unknown';

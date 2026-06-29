@@ -92,9 +92,6 @@
                         <a href="{{ route('sopir.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
-                        <button type="reset" class="btn btn-warning" onclick="resetForm()">
-                            <i class="fas fa-redo"></i> Reset
-                        </button>
                     </div>
                 </div>
             </form>
@@ -120,9 +117,6 @@
             label.textContent = input.files[0].name;
         }
     }
-    function resetForm() {
-        document.getElementById('preview-container').style.display = 'none';
-        document.querySelector('.custom-file-label').textContent = 'Pilih file...';
-    }
+
 </script>
 @endsection

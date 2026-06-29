@@ -3,22 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\Penyewaan;
+use App\Services\NotifikasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PenugasanNotification;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenyewaanAdminController extends Controller
 {
      public function index(Request $request)
     {
-        $query = Penyewaan::with(['client', 'keranjangs.armada', 'pembayaran'])
+        $query = Penyewaan::with(['client', 'keranjangs.armada', 'keranjangs.rute', 'keranjangs.penugasan', 'pembayaran'])
             ->withCount('keranjangs')
             ->orderBy('created_at', 'desc');
 
         // Filter berdasarkan status jika ada
         if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
+            if ($request->status == 'menunggu_pelunasan') {
+                $query->where('status', 'aktif')
+                      ->whereHas('pembayaran', function($q) {
+                          $q->where('status', 'menunggu_pelunasan');
+                      });
+            } elseif ($request->status == 'menunggu_konfirmasi_pelunasan') {
+                $query->where('status', 'aktif')
+                      ->whereHas('pembayaran', function($q) {
+                          $q->where('status', 'menunggu_konfirmasi_pelunasan');
+                      });
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         // Search
@@ -28,11 +42,12 @@ class PenyewaanAdminController extends Controller
                 $q->whereHas('client', function($q) use ($search) {
                     $q->where('nama', 'like', '%' . $search . '%')
                       ->orWhere('email', 'like', '%' . $search . '%');
-                })->orWhere('id', 'like', '%' . $search . '%');
+                })->orWhere('id', 'like', '%' . $search . '%')
+                  ->orWhere('kode_transaksi', 'like', '%' . $search . '%');
             });
         }
 
-        $penyewaans = $query->paginate(15);
+        $penyewaans = $query->get();
 
         return view('dashboard.penyewaanAdmin.index', compact('penyewaans'));
     }
@@ -42,10 +57,20 @@ class PenyewaanAdminController extends Controller
      */
     public function show($id)
     {
-        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'pembayaran'])
+        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'keranjangs.rute', 'keranjangs.penugasan', 'pembayaran'])
             ->findOrFail($id);
 
         return view('dashboard.penyewaanAdmin.show', compact('penyewaan'));
+    }
+
+    public function cetakInvoice($id)
+    {
+        $penyewaan = Penyewaan::with(['client', 'keranjangs.armada', 'keranjangs.rute', 'pembayaran'])
+            ->findOrFail($id);
+
+        $pdf = Pdf::loadView('dashboard.penyewaanAdmin.invoice', compact('penyewaan'));
+        
+        return $pdf->download('invoice-penyewaan-' . $penyewaan->kode_transaksi . '.pdf');
     }
 
     /**
@@ -58,8 +83,8 @@ class PenyewaanAdminController extends Controller
 
             $penyewaan = Penyewaan::with('pembayaran')->findOrFail($id);
 
-            // SKENARIO 1: Konfirmasi Pembayaran Pertama (status menunggu_konfirmasi)
-            if ($penyewaan->status == 'menunggu_konfirmasi') {
+            // SKENARIO 1: Konfirmasi Pembayaran Pertama (status menunggu_konfirmasi_pembayaran)
+            if ($penyewaan->status == 'menunggu_konfirmasi_pembayaran') {
                 
                 if (!$penyewaan->pembayaran) {
                     return back()->with('error', 'Belum ada bukti pembayaran yang diupload!');
@@ -67,6 +92,12 @@ class PenyewaanAdminController extends Controller
 
                 // Update status penyewaan menjadi AKTIF
                 $penyewaan->update(['status' => 'aktif']);
+
+                // Update status pembayaran sesuai jenisnya
+                if ($penyewaan->pembayaran) {
+                    $pembayaranStatus = ($penyewaan->pembayaran->jenis == 'tunai') ? 'lunas' : 'menunggu_pelunasan';
+                    $penyewaan->pembayaran->update(['status' => $pembayaranStatus]);
+                }
 
                 // Update semua keranjang terkait menjadi AKTIF
                 \App\Models\Keranjang::where('penyewaan_id', $penyewaan->id)
@@ -76,13 +107,15 @@ class PenyewaanAdminController extends Controller
                 try {
                     \Log::info('=== START Pengiriman Email Penugasan ===');
                     
-                    $keranjangs = \App\Models\Keranjang::with(['sopir', 'armada'])
+                    $keranjangs = \App\Models\Keranjang::with(['penugasan.sopir', 'armada', 'rute'])
                         ->where('penyewaan_id', $penyewaan->id)
                         ->get();
 
                     \Log::info('Total keranjang untuk penyewaan_id=' . $penyewaan->id . ': ' . $keranjangs->count());
                     
-                    $groupedBySopir = $keranjangs->groupBy('sopir_id');
+                    $groupedBySopir = $keranjangs->groupBy(function($item) {
+                        return $item->penugasan->sopir_id ?? null;
+                    });
                     \Log::info('Jumlah grup sopir: ' . $groupedBySopir->count());
 
                     foreach ($groupedBySopir as $sopirId => $items) {
@@ -94,11 +127,24 @@ class PenyewaanAdminController extends Controller
                         }
 
                         $first = $items->first();
-                        $sopir = $first->sopir;
+                        $sopir = $first->penugasan->sopir ?? null;
 
                         if (!$sopir) {
                             \Log::warning('Sopir tidak ditemukan untuk sopir_id=' . $sopirId . ' pada penyewaan ' . $penyewaan->id);
                             continue;
+                        }
+
+                        // --- KIRIM NOTIFIKASI DASHBOARD ---
+                        try {
+                            \App\Services\NotifikasiService::kirim(
+                                $sopirId,
+                                "Penugasan Baru",
+                                "Anda ditugaskan untuk pengiriman pesanan #" . $penyewaan->kode_transaksi . " (" . $items->count() . " item).",
+                                route('penugasan.index'),
+                                $penyewaan->id
+                            );
+                        } catch (\Throwable $e) {
+                            \Log::error('✗ Gagal mengirim Notifikasi Dashboard ke sopir id ' . $sopirId . ': ' . $e->getMessage());
                         }
 
                         $email = $sopir->email ?? null;
@@ -129,20 +175,27 @@ class PenyewaanAdminController extends Controller
                                 \Log::info('Akan mengirim WhatsApp ke: ' . $telepon);
 
                                 // Buat pesan WhatsApp
-                                $pesanWA = "Halo *" . ($sopir->nama ?? $sopir->name) . "*,\n\n";
-                                $pesanWA .= "Anda mendapat *TUGAS BARU* dari penyewaan #{$penyewaan->id}.\n";
-                                $pesanWA .= "--------------------------------\n";
-                                
+                                $pesanWA = "Halo " . ($sopir->nama ?? $sopir->name) . ",\n\n";
+                                $pesanWA .= "Anda mendapat TUGAS BARU.\n";
+                                $pesanWA .= "================================\n";
+
                                 foreach ($items as $index => $item) {
-                                    $num = $items->count() > 1 ? ($index + 1) . ". " : "";
-                                    $pesanWA .= "{$num}*Tanggal*: " . date('d-m-Y', strtotime($item->tanggal_mulai)) . "\n";
-                                    $pesanWA .= "   *Rute*: {$item->tempat_jemput} -> {$item->tempat_antar}\n";
-                                    $pesanWA .= "   *Muatan*: {$item->barang_muatan}\n";
-                                    $pesanWA .= "   *Armada*: {$item->armada->no_polisi} ({$item->armada->merek})\n\n";
+                                    if ($items->count() > 1) {
+                                        $pesanWA .= "[ Item " . ($index + 1) . " ]\n";
+                                    }
+                                    $pesanWA .= "Kode Item : " . $item->kode_keranjang . "\n";
+                                    $pesanWA .= "Tanggal   : " . date('d-m-Y', strtotime($item->tanggal_mulai)) . "\n";
+                                    $pesanWA .= "Rute      : " . ($item->rute->tempat_jemput ?? '-') . "\n";
+                                    $pesanWA .= "            -> " . ($item->rute->tempat_antar ?? '-') . "\n";
+                                    $pesanWA .= "Muatan    : " . $item->barang_muatan . "\n";
+                                    $pesanWA .= "Armada    : " . $item->armada->no_polisi . " (" . $item->armada->merek . ")\n";
+                                    if ($index < $items->count() - 1) {
+                                        $pesanWA .= "--------------------------------\n";
+                                    }
                                 }
-                                
-                                $pesanWA .= "--------------------------------\n";
-                                $pesanWA .= "Silakan cek email atau dashboard sopir untuk detail lengkapnya.\n\n";
+
+                                $pesanWA .= "================================\n";
+                                $pesanWA .= "Silakan cek dashboard sopir untuk detail lengkapnya.\n\n";
                                 $pesanWA .= "Terima kasih,\nAdmin Penyewaan Truk";
 
                                 // Panggil service (Instantiate on the fly or inject)
@@ -169,6 +222,16 @@ class PenyewaanAdminController extends Controller
                 }
 
                 DB::commit();
+
+                // Kirim Notifikasi ke Client
+                NotifikasiService::kirim(
+                    $penyewaan->client_id,
+                    "Pembayaran Dikonfirmasi",
+                    "Pembayaran untuk pesanan #" . $penyewaan->kode_transaksi . " telah dikonfirmasi. Status pesanan sekarang AKTIF.",
+                    route('penyewaan.keranjang', $penyewaan->id),
+                    $penyewaan->id
+                );
+
                 return back()->with('success', 'Pembayaran berhasil dikonfirmasi! Penyewaan sekarang aktif. Sopir telah diberi tahu melalui email jika tersedia.');
             }
 
@@ -178,6 +241,15 @@ class PenyewaanAdminController extends Controller
                 
                 // Update status pembayaran menjadi LUNAS
                 $penyewaan->pembayaran->update(['status' => 'lunas']);
+
+                // Kirim Notifikasi ke Client
+                NotifikasiService::kirim(
+                    $penyewaan->client_id,
+                    "Pelunasan Dikonfirmasi",
+                    "Pelunasan untuk pesanan #" . $penyewaan->kode_transaksi . " telah dikonfirmasi. Terima kasih!",
+                    route('penyewaan.keranjang', $penyewaan->id),
+                    $penyewaan->id
+                );
 
                 DB::commit();
                 return back()->with('success', 'Pelunasan berhasil dikonfirmasi! Pembayaran sekarang LUNAS.');
@@ -199,6 +271,9 @@ class PenyewaanAdminController extends Controller
      */
     public function tolakPembayaran(Request $request, $id)
     {
+        $request->validate([
+            'catatan' => 'required|string'
+        ]);
         try {
             DB::beginTransaction();
 
@@ -211,20 +286,17 @@ class PenyewaanAdminController extends Controller
 
             // Jika ini adalah penolakan untuk pelunasan (pembayaran sisa)
             if ($penyewaan->status == 'aktif' && $penyewaan->pembayaran && $penyewaan->pembayaran->status == 'menunggu_konfirmasi_pelunasan') {
-                // Kembalikan status pembayaran menjadi menunggu_pelunasan dan hapus bukti_transfer agar customer upload ulang
-                $p = $penyewaan->pembayaran;
-                // hapus file bukti jika tersimpan di public
-                if ($p->bukti_transfer) {
-                    $filePath = public_path($p->bukti_transfer);
-                    if ($filePath && file_exists($filePath)) {
-                        @unlink($filePath);
-                    }
+                // Update status pembayaran menjadi ditolak dan simpan catatan
+                $p = \App\Models\Pembayaran::where('penyewaan_id', $penyewaan->id)
+                    ->where('status', 'menunggu_konfirmasi_pelunasan')
+                    ->first();
+
+                if ($p) {
+                    $p->update([
+                        'status' => 'ditolak',
+                        'catatan' => $request->catatan
+                    ]);
                 }
-                $p->update([
-                    'status' => 'menunggu_pelunasan',
-                    'bukti_transfer' => null,
-                    'tanggal_bayar' => null
-                ]);
 
                 // Pastikan penyewaan tetap aktif dan keranjang tetap aktif
                 $penyewaan->update(['status' => 'aktif']);
@@ -232,19 +304,17 @@ class PenyewaanAdminController extends Controller
                     ->update(['status' => 'aktif']);
 
             } else {
-                // Hapus bukti pembayaran dan record pembayaran jika ada (pembayaran pertama)
+                // Update status pembayaran menjadi ditolak
                 if ($penyewaan->pembayaran) {
-                    $filePath = public_path($penyewaan->pembayaran->bukti_transfer);
-                    if ($filePath && file_exists($filePath)) {
-                        @unlink($filePath);
-                    }
-                    $penyewaan->pembayaran->delete();
+                    $penyewaan->pembayaran->update([
+                        'status' => 'ditolak',
+                        'catatan' => $request->catatan
+                    ]);
                 }
 
                 // Update status penyewaan kembali ke menunggu_pembayaran
                 $penyewaan->update([
-                    'status' => 'menunggu_pembayaran',
-                    'catatan_admin' => null
+                    'status' => 'menunggu_pembayaran'
                 ]);
 
                 // Sync keranjang status kembali ke pending
@@ -253,6 +323,15 @@ class PenyewaanAdminController extends Controller
             }
 
             DB::commit();
+
+            // Kirim Notifikasi ke Client
+            NotifikasiService::kirim(
+                $penyewaan->client_id,
+                "Pembayaran Ditolak",
+                "Maaf, pembayaran untuk pesanan #" . $penyewaan->kode_transaksi . " ditolak oleh admin. Alasan: " . $request->catatan . ". Silakan periksa kembali bukti transfer Anda.",
+                route('penyewaan.keranjang', $penyewaan->id),
+                $penyewaan->id
+            );
 
             return back()->with('success', 'Pembayaran ditolak. Penyewaan kembali ke status menunggu pembayaran.');
 
@@ -283,8 +362,14 @@ class PenyewaanAdminController extends Controller
                 $penyewaan->pembayaran->delete();
             }
 
+            // Kembalikan status semua armada terkait menjadi tersedia
+            foreach ($penyewaan->keranjangs as $item) {
+                if ($item->armada) {
+                    $item->armada->update(['status' => 'tersedia']);
+                }
+            }
+
             // Hapus semua keranjang terkait
-            $penyewaan->keranjangs()->delete();
 
             // Hapus penyewaan
             $penyewaan->delete();
@@ -303,29 +388,46 @@ class PenyewaanAdminController extends Controller
 
     public function indexPembatalan()
     {
-        $keranjangs = \App\Models\Keranjang::with(['penyewaan.client', 'armada', 'sopir'])
+        $keranjangs = \App\Models\Keranjang::with(['penyewaan.client', 'armada', 'sopir', 'pembatalan'])
+            ->whereHas('penyewaan')
             ->whereIn('status', ['menunggu_konfirmasi_batal', 'dibatalkan'])
             ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+            ->get();
 
         return view('dashboard.penyewaanAdmin.pembatalan', compact('keranjangs'));
     }
 
     public function prosesPembatalan(Request $request, $id)
     {
-        $request->validate([
+        $rules = [
             'action' => 'required|in:approve,reject',
             'nominal_refund' => 'nullable|numeric',
-            'bukti_refund' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
-        ]);
+            'bukti_refund' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'catatan' => 'nullable|string'
+        ];
+
+        $messages = [];
+
+        if ($request->action === 'approve' && $request->nominal_refund > 0) {
+            $rules['bukti_refund'] = 'required|image|mimes:jpeg,png,jpg|max:2048';
+            $messages['bukti_refund.required'] = 'Bukti refund harus diisi';
+        }
+
+        if ($request->action === 'reject') {
+            $rules['catatan'] = 'required|string';
+            $messages['catatan.required'] = 'Catatan harus diisi';
+        }
+
+        $request->validate($rules, $messages);
 
         try {
             DB::beginTransaction();
             
-            $keranjang = \App\Models\Keranjang::with('armada')->findOrFail($id);
+            $keranjang = \App\Models\Keranjang::with('armada', 'penyewaan')->findOrFail($id);
 
             if ($request->action === 'approve') {
                 $updateData = ['status' => 'dibatalkan'];
+                $pembatalanData = [];
 
                 // Handle Refund
                 if ($request->hasFile('bukti_refund')) {
@@ -334,12 +436,19 @@ class PenyewaanAdminController extends Controller
                         'folder' => 'bukti_refund'
                     ]);
                     
-                    $updateData['bukti_refund'] = $upload->getSecurePath();
+                    $securePath = $upload->getSecurePath();
+                    $updateData['bukti_refund'] = $securePath;
                     $updateData['nominal_refund'] = $request->nominal_refund;
+
+                    $pembatalanData['bukti_refund'] = $securePath;
+                    $pembatalanData['nominal_refund'] = $request->nominal_refund;
                 }
 
                 // Setujui pembatalan
                 $keranjang->update($updateData);
+
+                // Simpan ke tabel pembatalan_sewas untuk normalisasi
+                $keranjang->pembatalan()->updateOrCreate([], $pembatalanData);
                 
                 // Kembalikan armada menjadi tersedia (aktif)
                 if ($keranjang->armada) {
@@ -348,21 +457,55 @@ class PenyewaanAdminController extends Controller
 
                 // Recalculate Total Price for Penyewaan
                 $penyewaan = $keranjang->penyewaan;
+                $message = 'Pembatalan disetujui. Status keranjang dibatalkan, armada kembali tersedia, dan total harga diperbarui.';
                 if ($penyewaan) {
                     $newTotal = $penyewaan->keranjangs()
                         ->where('status', '!=', 'dibatalkan')
                         ->sum('harga_sewa');
                     
-                    $penyewaan->update(['harga_total' => $newTotal]);
+                    $updateDataPenyewaan = ['harga_total' => $newTotal];
+                    
+                    // Cek apakah seluruh item dalam transaksi ini sudah dibatalkan
+                    $totalItems = $penyewaan->keranjangs()->count();
+                    $canceledItems = $penyewaan->keranjangs()->where('status', 'dibatalkan')->count();
+                    
+                    if ($totalItems === $canceledItems) {
+                        $updateDataPenyewaan['status'] = 'dibatalkan';
+                        $message = 'Pembatalan disetujui. Semua item telah dibatalkan, sehingga status transaksi penyewaan otomatis menjadi dibatalkan. Armada kembali tersedia.';
+                    }
+                    
+                    $penyewaan->update($updateDataPenyewaan);
                 }
 
-                $message = 'Pembatalan disetujui. Status keranjang dibatalkan, armada kembali tersedia, dan total harga diperbarui.';
+                // Kirim Notifikasi ke Client
+                NotifikasiService::kirim(
+                    $penyewaan->client_id,
+                    "Pembatalan Disetujui",
+                    "Permintaan pembatalan untuk item di pesanan #" . $penyewaan->kode_transaksi . " telah disetujui.",
+                    route('penyewaan.keranjang', $penyewaan->id),
+                    $penyewaan->id
+                );
             } else {
                 // Tolak pembatalan, kembalikan ke aktif
                 $keranjang->update([
                     'status' => 'aktif',
-                    'alasan_batal' => null // Reset alasan batal jika ditolak (opsional, atau biarkan history)
+                    'catatan' => $request->catatan
                 ]);
+
+                // Simpan ke tabel pembatalan_sewas untuk normalisasi
+                $keranjang->pembatalan()->updateOrCreate([], [
+                    'catatan' => $request->catatan
+                ]);
+
+                // Kirim Notifikasi ke Client
+                NotifikasiService::kirim(
+                    $keranjang->penyewaan->client_id,
+                    "Pembatalan Ditolak",
+                    "Permintaan pembatalan ditolak. Alasan: " . $request->catatan,
+                    route('penyewaan.keranjang', $keranjang->penyewaan->id),
+                    $keranjang->penyewaan->id
+                );
+
                 $message = 'Pembatalan ditolak. Status keranjang kembali aktif.';
             }
 

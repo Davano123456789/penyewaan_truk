@@ -3,11 +3,8 @@
 @section('content_dashboard')
 <div class="container-fluid">
 
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div class="mb-4">
         <h1 class="h3 mb-0 text-gray-800">Tambah Keunggulan</h1>
-        <a href="{{ route('keunggulan.index') }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left"></i> Kembali
-        </a>
     </div>
 
     <div class="card shadow mb-4">
@@ -29,7 +26,7 @@
                 <div class="form-group">
                     <label for="gambar" class="font-weight-bold">Gambar</label>
                     <div class="custom-file">
-                        <input type="file" class="custom-file-input @error('gambar') is-invalid @enderror" id="gambar" name="gambar" accept="image/*" onchange="previewImage(event)">
+                        <input type="file" class="custom-file-input @error('gambar') is-invalid @enderror" id="gambar" name="gambar" accept="image/*, .svg" onchange="previewImage(event)">
                         <label class="custom-file-label" for="gambar">Pilih gambar...</label>
                     </div>
                     @error('gambar')
@@ -50,7 +47,7 @@
                         <i class="fas fa-save"></i> Simpan
                     </button>
                     <a href="{{ route('keunggulan.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Batal
+                        <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                 </div>
             </form>

@@ -2,14 +2,14 @@
         <div class="container mx-auto px-6">
             <div class="grid md:grid-cols-3 gap-8">
                 <div>
-                    <h3 class="text-xl font-bold mb-4">TruckRental</h3>
+                    <h3 class="text-xl font-bold mb-4">PT Sutera Jaya</h3>
                     <p class="text-gray-400">Solusi penyewaan truk terpercaya untuk kebutuhan bisnis Anda</p>
                 </div>
                 <div>
                     <h3 class="text-xl font-bold mb-4">Kontak</h3>
-                    <p class="text-gray-400 mb-2"><i class="fas fa-phone mr-2"></i> +62 812-3456-7890</p>
-                    <p class="text-gray-400 mb-2"><i class="fas fa-envelope mr-2"></i> info@truckrental.com</p>
-                    <p class="text-gray-400"><i class="fas fa-map-marker-alt mr-2"></i> Jakarta, Indonesia</p>
+                    <p class="text-gray-400 mb-2"><i class="fas fa-phone mr-2"></i> 0822-1116-7667 (Adang)</p>
+                    <p class="text-gray-400 mb-2"><i class="fas fa-envelope mr-2"></i> suterajaya.logistik@gmail.com</p>
+                    <p class="text-gray-400"><i class="fas fa-map-marker-alt mr-2"></i> Perum Taman Permata Indah Blok CA 06 Kelurahan Pagak, Kecamatan Beji, Kab. Pasuruan, Jawa Timur</p>
                 </div>
                 <div>
                     <h3 class="text-xl font-bold mb-4">Ikuti Kami</h3>
@@ -20,8 +20,8 @@
                     </div>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2024 TruckRental. All rights reserved.</p>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-right text-gray-400">
+                <p>&copy; 2024 PT Sutera Jaya. All rights reserved.</p>
             </div>
         </div>
     </footer>

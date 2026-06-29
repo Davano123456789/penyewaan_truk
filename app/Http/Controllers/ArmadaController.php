@@ -22,8 +22,8 @@ class ArmadaController extends Controller
 
      public function tambah()
     {
-        // Ambil user dengan peran_id = 3 (Sopir)
-        $sopirs = User::where('peran_id', 3)->get();
+        // Ambil user dengan peran_id = 3 (Sopir) yang belum memiliki armada
+        $sopirs = User::where('peran_id', 3)->whereDoesntHave('armada')->get();
         $parkirs = Parkir::all();
         return view('dashboard.armada.tambah', compact('sopirs', 'parkirs'));
     }
@@ -33,7 +33,7 @@ class ArmadaController extends Controller
         // Validasi
         $validated = $request->validate([
             'no_polisi' => 'required|string|max:255|unique:armadas,no_polisi',
-            'sopir_id' => 'nullable|exists:users,id',
+            'sopir_id' => 'nullable|exists:users,id|unique:armadas,sopir_id',
             'parkir_id' => 'nullable|exists:parkirs,id',
             'merek' => 'nullable|string|max:255',
             'jenis' => 'nullable|string|max:255',
@@ -45,6 +45,7 @@ class ArmadaController extends Controller
             'no_polisi.required' => 'No Polisi wajib diisi',
             'no_polisi.unique' => 'No Polisi sudah terdaftar',
             'sopir_id.exists' => 'Sopir tidak ditemukan',
+            'sopir_id.unique' => 'Sopir sudah ditugaskan ke armada lain',
             'parkir_id.exists' => 'Lokasi parkir tidak ditemukan',
             'gambar.image' => 'File harus berupa gambar',
             'gambar.mimes' => 'Format gambar harus JPG, JPEG, atau PNG',
@@ -92,7 +93,13 @@ class ArmadaController extends Controller
  public function edit($id)
 {
     $armada = Armada::findOrFail($id);
-    $sopirs = User::where('peran_id', 3)->get();
+    // Ambil sopir yang belum memiliki armada ATAU sopir yang sedang ditugaskan di armada ini
+    $sopirs = User::where('peran_id', 3)
+        ->where(function ($query) use ($armada) {
+            $query->whereDoesntHave('armada')
+                  ->orWhere('id', $armada->sopir_id);
+        })
+        ->get();
     $parkirs = Parkir::all();
     return view('dashboard.armada.edit', compact('armada', 'sopirs', 'parkirs'));
 }
@@ -108,9 +115,11 @@ public function update(Request $request, $id)
         'kapasitas' => 'nullable|numeric',
         'status' => 'required|string',
         'deskripsi' => 'nullable|string',
-        'sopir_id' => 'nullable|exists:users,id',
+        'sopir_id' => 'nullable|exists:users,id|unique:armadas,sopir_id,' . $id,
         'parkir_id' => 'nullable|exists:parkirs,id',
         'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ], [
+        'sopir_id.unique' => 'Sopir sudah ditugaskan ke armada lain',
     ]);
 
     // Upload gambar baru jika ada

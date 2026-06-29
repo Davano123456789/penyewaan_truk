@@ -3,24 +3,42 @@
 @section('content_dashboard')
 <div class="container-fluid">
 
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div class="mb-4">
         <h1 class="h3 mb-0 text-gray-800">Detail Keunggulan</h1>
-        <a href="{{ route('keunggulan.index') }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left"></i> Kembali
-        </a>
     </div>
 
     <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Informasi Keunggulan</h6>
+        
+        </div>
         <div class="card-body">
-            <h4>{{ $keunggulan->judul }}</h4>
+            <div class="form-group">
+                <label class="font-weight-bold grey-800">Judul</label>
+                <input type="text" class="form-control bg-light" value="{{ $keunggulan->judul }}" readonly disabled>
+            </div>
 
-            @if($keunggulan->gambar)
+            <div class="form-group">
+                <label class="font-weight-bold grey-800">Gambar</label>
                 <div class="mb-3">
-                    <img src="{{ $keunggulan->gambar }}" alt="{{ $keunggulan->judul }}" class="img-fluid rounded" style="max-width: 400px;">
+                    @if($keunggulan->gambar)
+                        <img src="{{ $keunggulan->gambar }}" alt="{{ $keunggulan->judul }}" class="img-thumbnail d-block" style="max-width: 300px;">
+                    @else
+                        <div class="alert alert-light border">Tidak ada gambar</div>
+                    @endif
                 </div>
-            @endif
+            </div>
 
-            <p>{!! nl2br(e($keunggulan->deskripsi)) !!}</p>
+            <div class="form-group">
+                <label class="font-weight-bold grey-800">Deskripsi</label>
+                <textarea rows="5" class="form-control bg-light" readonly disabled>{{ $keunggulan->deskripsi }}</textarea>
+            </div>
+
+            <div class="form-group mb-0">
+                <a href="{{ route('keunggulan.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+            </div>
         </div>
     </div>
 

@@ -40,7 +40,7 @@ class ProfilController extends Controller
             'umur.max' => 'Umur tidak valid',
             'gambar.image' => 'File harus berupa gambar',
             'gambar.mimes' => 'Format gambar harus JPG, JPEG, atau PNG',
-            'gambar.max' => 'Ukuran gambar maksimal 2MB',
+            'gambar.max' => 'Ukuran file terlalu besar',
         ]);
 
         // Upload gambar ke Cloudinary jika ada
