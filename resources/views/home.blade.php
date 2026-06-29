@@ -15,7 +15,7 @@
         <div class="container mx-auto px-6 relative z-10">
             <div class="max-w-3xl" data-aos="fade-up">
                 <span class="inline-block px-4 py-1 rounded-full bg-blue-600/20 text-blue-400 font-semibold text-sm mb-6 border border-blue-600/30">
-                    Logistik Terpercaya di Indonesia
+                    Logistik Terpercaya di Indonesia tes vps
                 </span>
                 <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
                     PT Sutera Jaya <br>
