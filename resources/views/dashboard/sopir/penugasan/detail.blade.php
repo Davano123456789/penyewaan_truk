@@ -91,6 +91,8 @@
                                 <span class="badge badge-secondary p-2">Pending (Menunggu Pembayaran)</span>
                             @elseif($penugasan->status == 'aktif')
                                 <span class="badge badge-success p-2">Aktif / Berjalan</span>
+                            @elseif($penugasan->status == 'truk_sampai')
+                                <span class="badge badge-info p-2">Truk Sampai (Siap Upload Bukti)</span>
                             @elseif($penugasan->status == 'revisi_bukti')
                                 <span class="badge badge-danger p-2">Revisi Bukti Selesai</span>
                             @elseif($penugasan->status == 'selesai')

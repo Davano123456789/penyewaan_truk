@@ -305,4 +305,38 @@ class KeranjangController extends Controller
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    public function konfirmasiSampai($id)
+    {
+        try {
+            $keranjang = Keranjang::with(['penugasan', 'armada'])->findOrFail($id);
+            
+            // Pastikan status keranjang aktif
+            if ($keranjang->status !== 'aktif') {
+                return back()->with('error', 'Hanya item dengan status aktif yang dapat dikonfirmasi sampai tujuan.');
+            }
+
+            // Update status menjadi 'truk_sampai'
+            $keranjang->update([
+                'status' => 'truk_sampai'
+            ]);
+
+            // Kirim notifikasi ke sopir
+            $sopirId = $keranjang->penugasan->sopir_id ?? $keranjang->sopir_id;
+            if ($sopirId) {
+                \App\Services\NotifikasiService::kirim(
+                    $sopirId,
+                    "Truk Telah Sampai Tujuan",
+                    "Klien telah mengonfirmasi bahwa armada dengan no polisi " . ($keranjang->armada->no_polisi ?? '-') . " telah sampai tujuan. Silakan unggah bukti selesai penugasan.",
+                    route('penugasan.index'),
+                    $keranjang->penyewaan_id
+                );
+            }
+
+            return back()->with('success', 'Berhasil mengonfirmasi truk sampai tujuan! Sopir sekarang dapat mengunggah bukti selesai.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
 }

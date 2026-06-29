@@ -171,6 +171,7 @@ Route::delete('/dashboard/keranjang/{id}', [KeranjangController::class , 'destro
 Route::get('/pemesanan/{id}/edit', [FrontController::class , 'pemesanan'])->name('keranjang.edit')->middleware('auth');
 Route::put('/dashboard/keranjang/{id}', [KeranjangController::class , 'update'])->name('keranjang.update');
 Route::post('/dashboard/keranjang/{id}/ajukan-batal', [KeranjangController::class , 'ajukanBatal'])->name('keranjang.ajukan-batal');
+Route::post('/dashboard/keranjang/{id}/konfirmasi-sampai', [KeranjangController::class , 'konfirmasiSampai'])->name('keranjang.konfirmasi-sampai');
 
 // Pembatalan Admin
 Route::get('/dashboard/pembatalan-admin', [PenyewaanAdminController::class , 'indexPembatalan'])->name('penyewaanAdmin.pembatalan');

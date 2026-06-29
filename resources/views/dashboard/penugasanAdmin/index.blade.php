@@ -63,6 +63,8 @@
                                 <td class="text-center">
                                     @if($p->status == 'aktif')
                                         <span class="badge badge-success"><i class="fas fa-play-circle"></i> Sedang Berjalan</span>
+                                    @elseif($p->status == 'truk_sampai')
+                                        <span class="badge badge-info"><i class="fas fa-map-marker-alt"></i> Truk Sampai</span>
                                     @elseif($p->status == 'revisi_bukti')
                                         <span class="badge badge-danger"><i class="fas fa-exclamation-circle"></i> Revisi Bukti</span>
                                     @elseif($p->status == 'selesai')

@@ -73,6 +73,17 @@ class PenugasanController extends Controller
                     ->with('error', 'Penugasan tidak ditemukan!');
             }
 
+            if (!in_array($penugasan->status, ['truk_sampai', 'revisi_bukti'])) {
+                return redirect()->route('penugasan.index')
+                    ->with('error', 'Anda tidak dapat mengunggah bukti penyelesaian sebelum pelanggan mengonfirmasi truk telah sampai di tujuan.');
+            }
+
+            // Cegah jika status pembayaran masih menunggu pelunasan
+            if ($penugasan->penyewaan && $penugasan->penyewaan->pembayaran && $penugasan->penyewaan->pembayaran->status == 'menunggu_pelunasan') {
+                return redirect()->route('penugasan.index')
+                    ->with('error', 'Anda tidak dapat mengunggah bukti selesai. Pelanggan belum melunasi sisa tagihan penyewaan.');
+            }
+
             // Upload bukti selesai ke Cloudinary
             if ($request->hasFile('bukti_selesai')) {
                 try {

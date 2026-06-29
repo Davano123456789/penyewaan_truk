@@ -88,14 +88,14 @@
                                             <span class="badge badge-warning"><i class="fas fa-clock"></i> Pending</span>
                                         @elseif($penugasan->status == 'aktif')
                                             <span class="badge badge-success"><i class="fas fa-play-circle"></i> Aktif</span>
+                                        @elseif($penugasan->status == 'truk_sampai')
+                                            <span class="badge badge-info"><i class="fas fa-map-marker-alt"></i> Truk Sampai</span>
                                         @elseif($penugasan->status == 'revisi_bukti')
-                                            <span class="badge badge-danger"><i class="fas fa-exclamation-circle"></i> Revisi
-                                                Bukti</span>
+                                            <span class="badge badge-danger"><i class="fas fa-exclamation-circle"></i> Revisi Bukti</span>
                                         @elseif($penugasan->status == 'selesai')
                                             <span class="badge badge-success"><i class="fas fa-check-circle"></i> Selesai</span>
                                         @elseif($penugasan->status == 'menunggu_konfirmasi_selesai')
-                                            <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Menunggu
-                                                Validasi</span>
+                                            <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Menunggu Validasi</span>
                                         @else
                                             <span class="badge badge-info">{{ ucfirst($penugasan->status) }}</span>
                                         @endif
@@ -116,15 +116,25 @@
                                             @endif
 
                                             {{-- Tombol Upload (hanya jika bisa diupload) --}}
-                                            @if(in_array($penugasan->status, ['aktif', 'revisi_bukti']))
-                                                <button type="button"
-                                                    class="btn btn-{{ $penugasan->status == 'revisi_bukti' ? 'danger' : 'success' }} btn-sm btn-upload"
-                                                    data-id="{{ $penugasan->id }}" 
-                                                    data-status="{{ $penugasan->status }}"
-                                                    data-alasan="{{ $penugasan->penugasan->catatan_penugasan ?? $penugasan->catatan_penugasan ?? '' }}"
-                                                    title="Upload Bukti Selesai">
-                                                    {{ $penugasan->status == 'revisi_bukti' ? 'Upload Ulang' : 'Upload' }}
-                                                </button>
+                                            @if(in_array($penugasan->status, ['truk_sampai', 'revisi_bukti']))
+                                                @if($penugasan->penyewaan && $penugasan->penyewaan->pembayaran && $penugasan->penyewaan->pembayaran->status == 'menunggu_pelunasan')
+                                                    <span class="badge badge-danger text-wrap" style="max-width: 150px;">
+                                                        <i class="fas fa-money-bill-wave"></i> Selesaikan Pelunasan Dahulu
+                                                    </span>
+                                                @else
+                                                    <button type="button"
+                                                        class="btn btn-{{ $penugasan->status == 'revisi_bukti' ? 'danger' : 'success' }} btn-sm btn-upload"
+                                                        data-id="{{ $penugasan->id }}" 
+                                                        data-status="{{ $penugasan->status }}"
+                                                        data-alasan="{{ $penugasan->penugasan->catatan_penugasan ?? $penugasan->catatan_penugasan ?? '' }}"
+                                                        title="Upload Bukti Selesai">
+                                                        {{ $penugasan->status == 'revisi_bukti' ? 'Upload Ulang' : 'Upload' }}
+                                                    </button>
+                                                @endif
+                                            @elseif($penugasan->status == 'aktif')
+                                                <span class="badge badge-secondary text-wrap" style="max-width: 150px;">
+                                                    <i class="fas fa-hourglass-half"></i> Menunggu Klien Konfirmasi
+                                                </span>
                                             @endif
 
                                         </div>

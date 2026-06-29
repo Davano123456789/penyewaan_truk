@@ -142,7 +142,7 @@
                         $borderClass = 'border-left-secondary';
                         if ($item->status == 'pending' || in_array($item->status, ['menunggu_pembayaran', 'menunggu_konfirmasi_pembayaran'])) {
                             $borderClass = 'border-left-warning';
-                        } elseif (in_array($item->status, ['aktif', 'revisi_bukti', 'menunggu_konfirmasi_selesai'])) {
+                        } elseif (in_array($item->status, ['aktif', 'truk_sampai', 'revisi_bukti', 'menunggu_konfirmasi_selesai'])) {
                             $borderClass = 'border-left-info';
                         } elseif ($item->status == 'selesai') {
                             $borderClass = 'border-left-success';
@@ -160,8 +160,14 @@
                                             <span class="badge badge-secondary mr-2"><i class="fas fa-clock"></i> Pending</span>
                                         @elseif(in_array($item->status, ['menunggu_pembayaran', 'menunggu_konfirmasi_pembayaran']))
                                             <span class="badge badge-secondary mr-2"><i class="fas fa-hourglass-half"></i> Persiapan</span>
-                                        @elseif(in_array($item->status, ['aktif', 'revisi_bukti', 'menunggu_konfirmasi_selesai']))
+                                        @elseif($item->status == 'aktif')
                                             <span class="badge badge-info mr-2"><i class="fas fa-truck-moving"></i> Sedang Berjalan</span>
+                                        @elseif($item->status == 'truk_sampai')
+                                            <span class="badge badge-primary mr-2"><i class="fas fa-map-marker-alt"></i> Truk Sampai (Menunggu Bukti Sopir)</span>
+                                        @elseif($item->status == 'revisi_bukti')
+                                            <span class="badge badge-danger mr-2"><i class="fas fa-exclamation-circle"></i> Revisi Bukti</span>
+                                        @elseif($item->status == 'menunggu_konfirmasi_selesai')
+                                            <span class="badge badge-warning mr-2"><i class="fas fa-hourglass-half"></i> Menunggu Validasi</span>
                                         @elseif($item->status == 'selesai')
                                             <span class="badge badge-success mr-2"><i class="fas fa-check-circle"></i> Selesai</span>
                                         @elseif($item->status == 'menunggu_konfirmasi_batal')
@@ -242,10 +248,17 @@
                                                 </button>
                                             </form>
                                         @elseif($item->status == 'aktif')
-                                            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                                            <button type="button" class="btn btn-warning btn-sm mr-1" data-toggle="modal"
                                                 data-target="#modalBatal{{ $item->id }}">
                                                 <i class="fas fa-times-circle"></i> Batalkan
                                             </button>
+                                            <form action="{{ route('keranjang.konfirmasi-sampai', $item->id) }}" method="POST"
+                                                class="confirm-arrived-form d-inline">
+                                                @csrf
+                                                <button type="button" class="btn btn-success btn-sm btn-confirm-arrived">
+                                                    <i class="fas fa-check"></i> Truk Sudah Sampai
+                                                </button>
+                                            </form>
                                             <!-- Modal Batal -->
                                             <div class="modal fade" id="modalBatal{{ $item->id }}" tabindex="-1" role="dialog"
                                                 aria-labelledby="modalBatalLabel{{ $item->id }}" aria-hidden="true">
@@ -352,6 +365,29 @@
                         confirmButtonColor: '#d33',
                         cancelButtonColor: '#3085d6',
                         confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // SweetAlert Konfirmasi Truk Sampai
+            document.querySelectorAll('.btn-confirm-arrived').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const form = this.closest('.confirm-arrived-form');
+
+                    Swal.fire({
+                        title: 'Konfirmasi Kedatangan Truk',
+                        text: "Apakah armada truk penjemput/pengantar memang sudah sampai di lokasi tujuan?",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#28a745',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Truk Sudah Sampai!',
                         cancelButtonText: 'Batal'
                     }).then((result) => {
                         if (result.isConfirmed) {
