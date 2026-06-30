@@ -15,7 +15,7 @@ class PemesananCleanupService
     {
         try {
             // Batas waktu kadaluwarsa (10 menit yang lalu)
-            $expiredTime = now()->subMinutes(60);
+            $expiredTime = now()->subMinutes(5);
 
             // Ambil pemesanan yang kadaluwarsa beserta keranjang dan armadanya
             $expiredPenyewaans = Penyewaan::where('status', 'menunggu_pembayaran')
