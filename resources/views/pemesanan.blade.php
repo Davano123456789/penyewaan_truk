@@ -183,6 +183,23 @@
                         <h2 class="text-2xl font-bold text-gray-800 mb-4">
                             <i class="fas fa-map-marked-alt text-slate-700"></i> Pilih Lokasi
                         </h2>
+
+                        <!-- Panduan Pengisian Lokasi (Lebih Bersahabat bagi Pengguna) -->
+                        <div class="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-blue-900 p-4 rounded-xl text-sm shadow-sm">
+                            <div class="flex gap-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-info text-xs"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <strong class="block text-blue-950 font-bold mb-1 text-sm">💡 Cara Menentukan Alamat & Koordinat:</strong>
+                                    <ul class="list-disc list-inside space-y-1 text-xs text-blue-800">
+                                        <li>Cari lokasi umum Anda (misal: <strong>Mojosulur</strong> atau <strong>Kenanten</strong>) di kotak pencarian bawah, lalu klik cari / enter.</li>
+                                        <li>Geser atau klik peta untuk meletakkan pin koordinat secara pas.</li>
+                                        <li><strong>Lengkapi detail alamat</strong> (seperti Dusun, RT/RW, nomor rumah, atau patokan jalan) pada kolom alamat di bawah peta.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="mb-4">
                             <div class="flex gap-2 mb-3">
@@ -197,8 +214,8 @@
                             <div class="relative">
                                 <input type="text" 
                                        id="searchLocation" 
-                                       placeholder="Ketik alamat dan tekan Enter atau klik tombol cari..." 
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg pr-12"
+                                       placeholder="Ketik lokasi umum, jalan, desa, atau kota (contoh: Mojosulur)..." 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg pr-12 text-sm"
                                        autocomplete="off">
                                 <button type="button" onclick="searchLocation()" id="btnSearchLoc" class="absolute right-2 top-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                                     <i class="fas fa-search"></i>
@@ -210,13 +227,23 @@
                         <div id="map" class="rounded-lg border-2 border-gray-300"></div>
                         
                         <div class="mt-4 grid md:grid-cols-2 gap-4">
-                            <div class="info-box">
-                                <p class="font-semibold text-blue-600 mb-1"><i class="fas fa-map-marker-alt text-slate-700"></i> Titik Jemput:</p>
-                                <p id="jemputAddress" class="text-sm text-gray-700">Belum dipilih</p>
+                            <div class="info-box bg-slate-50 p-4 rounded-xl border-l-4 border-blue-500">
+                                <label for="tempat_jemput" class="block font-bold text-blue-700 mb-1 text-sm">
+                                    <i class="fas fa-map-marker-alt text-slate-700"></i> Alamat Lengkap Penjemputan:
+                                </label>
+                                <textarea name="tempat_jemput" id="tempat_jemput" rows="3" 
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" 
+                                          placeholder="Tentukan lokasi di peta dahulu, kemudian tambahkan detail RT/RW/Dusun di sini..." required>{{ old('tempat_jemput', $editItem->rute->tempat_jemput ?? $editItem->tempat_jemput ?? '') }}</textarea>
+                                <span class="text-[10px] text-gray-500 block mt-1"><i class="fas fa-pencil-alt text-slate-700"></i> *Silakan edit/lengkapi alamat di atas secara manual agar sopir mudah menemukan titik jemput.</span>
                             </div>
-                            <div class="info-box">
-                                <p class="font-semibold text-green-600 mb-1"><i class="fas fa-flag-checkered text-slate-700"></i> Titik Antar:</p>
-                                <p id="antarAddress" class="text-sm text-gray-700">Belum dipilih</p>
+                            <div class="info-box bg-slate-50 p-4 rounded-xl border-l-4 border-green-500">
+                                <label for="tempat_antar" class="block font-bold text-green-700 mb-1 text-sm">
+                                    <i class="fas fa-flag-checkered text-slate-700"></i> Alamat Lengkap Pengantaran:
+                                </label>
+                                <textarea name="tempat_antar" id="tempat_antar" rows="3" 
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white" 
+                                          placeholder="Tentukan lokasi di peta dahulu, kemudian tambahkan detail RT/RW/Dusun di sini..." required>{{ old('tempat_antar', $editItem->rute->tempat_antar ?? $editItem->tempat_antar ?? '') }}</textarea>
+                                <span class="text-[10px] text-gray-500 block mt-1"><i class="fas fa-pencil-alt text-slate-700"></i> *Silakan edit/lengkapi alamat di atas secara manual agar sopir mudah menemukan titik antar.</span>
                             </div>
                         </div>
                     </div>
@@ -345,8 +372,6 @@
             <!-- Hidden Inputs -->
             <input type="hidden" name="client_id" value="2">
             <input type="hidden" name="armada_id" id="armada_id">
-            <input type="hidden" name="tempat_jemput" id="tempat_jemput">
-            <input type="hidden" name="tempat_antar" id="tempat_antar">
             <input type="hidden" name="latitude_penjemputan" id="latitude_penjemputan">
             <input type="hidden" name="longitude_penjemputan" id="longitude_penjemputan">
             <input type="hidden" name="latitude_antar" id="latitude_antar">
@@ -675,11 +700,11 @@ function setMapMode(mode) {
     // Sinkronkan input pencarian dengan alamat yang sudah dipilih di mode tersebut
     const searchInput = document.getElementById('searchLocation');
     if (mode === 'jemput') {
-        const addr = document.getElementById('jemputAddress').textContent;
-        searchInput.value = (addr !== 'Belum dipilih') ? addr : '';
+        const addr = document.getElementById('tempat_jemput').value;
+        searchInput.value = addr || '';
     } else {
-        const addr = document.getElementById('antarAddress').textContent;
-        searchInput.value = (addr !== 'Belum dipilih') ? addr : '';
+        const addr = document.getElementById('tempat_antar').value;
+        searchInput.value = addr || '';
     }
     hideSearchResults();
 }
@@ -710,7 +735,6 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
                 })
             }).addTo(map).bindPopup('Titik Jemput').openPopup();
 
-            document.getElementById('jemputAddress').textContent = address;
             document.getElementById('tempat_jemput').value = address;
             document.getElementById('latitude_penjemputan').value = lat;
             document.getElementById('longitude_penjemputan').value = lng;
@@ -740,7 +764,6 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
                 })
             }).addTo(map).bindPopup('Titik Antar').openPopup();
 
-            document.getElementById('antarAddress').textContent = address;
             document.getElementById('tempat_antar').value = address;
             document.getElementById('latitude_antar').value = lat;
             document.getElementById('longitude_antar').value = lng;
