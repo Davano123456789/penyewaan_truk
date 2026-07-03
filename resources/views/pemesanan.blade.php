@@ -191,7 +191,7 @@
                                     <i class="fas fa-info text-xs"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <strong class="block text-blue-950 font-bold mb-1 text-sm">💡 Cara Menentukan Alamat & Koordinat:</strong>
+                                    <strong class="block text-blue-950 font-bold mb-1 text-sm">Cara Menentukan Alamat & Koordinat:</strong>
                                     <ul class="list-disc list-inside space-y-1 text-xs text-blue-800">
                                         <li>Cari lokasi umum Anda (misal: <strong>Mojosulur</strong> atau <strong>Kenanten</strong>) di kotak pencarian bawah, lalu klik cari / enter.</li>
                                         <li>Geser atau klik peta untuk meletakkan pin koordinat secara pas.</li>
@@ -233,7 +233,7 @@
                                 </label>
                                 <textarea name="tempat_jemput" id="tempat_jemput" rows="3" 
                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" 
-                                          placeholder="Tentukan lokasi di peta dahulu, kemudian tambahkan detail RT/RW/Dusun di sini..." required>{{ old('tempat_jemput', $editItem->rute->tempat_jemput ?? $editItem->tempat_jemput ?? '') }}</textarea>
+                                          placeholder="Tentukan lokasi di peta dahulu, kemudian tambahkan detail RT/RW/Dusun di sini..." required disabled>{{ old('tempat_jemput', $editItem->rute->tempat_jemput ?? $editItem->tempat_jemput ?? '') }}</textarea>
                                 <span class="text-[10px] text-gray-500 block mt-1"><i class="fas fa-pencil-alt text-slate-700"></i> *Silakan edit/lengkapi alamat di atas secara manual agar sopir mudah menemukan titik jemput.</span>
                             </div>
                             <div class="info-box bg-slate-50 p-4 rounded-xl border-l-4 border-green-500">
@@ -242,7 +242,7 @@
                                 </label>
                                 <textarea name="tempat_antar" id="tempat_antar" rows="3" 
                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white" 
-                                          placeholder="Tentukan lokasi di peta dahulu, kemudian tambahkan detail RT/RW/Dusun di sini..." required>{{ old('tempat_antar', $editItem->rute->tempat_antar ?? $editItem->tempat_antar ?? '') }}</textarea>
+                                          placeholder="Tentukan lokasi di peta dahulu, kemudian tambahkan detail RT/RW/Dusun di sini..." required disabled>{{ old('tempat_antar', $editItem->rute->tempat_antar ?? $editItem->tempat_antar ?? '') }}</textarea>
                                 <span class="text-[10px] text-gray-500 block mt-1"><i class="fas fa-pencil-alt text-slate-700"></i> *Silakan edit/lengkapi alamat di atas secara manual agar sopir mudah menemukan titik antar.</span>
                             </div>
                         </div>
@@ -414,6 +414,7 @@ let editMode = @json(isset($editItem));
 let editData = @json($editItem ?? null);
 let currentArmadaId = editData ? editData.armada_id : null;
 let selectedArmadaKapasitas = null;
+let isInitialLoad = true;
 
 function updateFlowState() {
     const lokasiSection = document.getElementById('lokasiSection');
@@ -427,6 +428,8 @@ function updateFlowState() {
     if (!lokasiSection || !btnJemput || !btnAntar || !armadaSection) return;
 
     // Reset styles/state (Fully Solid & Active)
+    document.getElementById('tempat_jemput').removeAttribute('disabled');
+    document.getElementById('tempat_antar').removeAttribute('disabled');
     lokasiSection.classList.remove('section-disabled', 'pointer-events-none');
     btnJemput.removeAttribute('disabled');
     btnJemput.classList.remove('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
@@ -448,6 +451,8 @@ function updateFlowState() {
 
     // 1. Jika Jenis Truk belum dipilih
     if (!selectedJenisTruk) {
+        document.getElementById('tempat_jemput').setAttribute('disabled', 'true');
+        document.getElementById('tempat_antar').setAttribute('disabled', 'true');
         lokasiSection.classList.add('section-disabled', 'pointer-events-none');
         armadaSection.classList.add('section-disabled', 'pointer-events-none');
         if (detailPemesananSection) {
@@ -472,6 +477,8 @@ function updateFlowState() {
 
     // 2. Jika Jenis Truk sudah dipilih, aktifkan Lokasi tetapi HANYA Titik Jemput
     if (selectedJenisTruk && !jemputCoords) {
+        document.getElementById('tempat_jemput').removeAttribute('disabled');
+        document.getElementById('tempat_antar').setAttribute('disabled', 'true');
         btnJemput.classList.remove('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
         btnAntar.setAttribute('disabled', 'true');
         btnAntar.classList.add('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
@@ -487,9 +494,36 @@ function updateFlowState() {
         return;
     }
 
-    // 3. Jika Titik Jemput sudah dipilih, aktifkan Armada Section
+    // 3. Jika Titik Jemput sudah dipilih, aktifkan Armada Section HANYA jika alamat lengkap sudah diisi minimal 10 karakter
     const selectedArmadaId = document.getElementById('armada_id').value;
-    if (jemputCoords && !selectedArmadaId) {
+    const alamatJemputText = document.getElementById('tempat_jemput').value.trim();
+    if (jemputCoords && alamatJemputText.length < 10) {
+        document.getElementById('tempat_jemput').removeAttribute('disabled');
+        document.getElementById('tempat_antar').setAttribute('disabled', 'true');
+        btnAntar.setAttribute('disabled', 'true');
+        btnAntar.classList.add('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
+        
+        if (currentMode !== 'jemput') {
+            setMapMode('jemput');
+        }
+        
+        armadaSection.classList.add('section-disabled', 'pointer-events-none');
+        if (detailPemesananSection) {
+            detailPemesananSection.classList.add('section-disabled', 'pointer-events-none');
+        }
+        
+        document.getElementById('armadaList').innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-keyboard text-slate-700 text-4xl mb-3"></i>
+                <p class="text-sm font-semibold">Silakan isi detail alamat untuk melihat armada yang tersedia.</p>
+            </div>
+        `;
+        return;
+    }
+
+    if (jemputCoords && alamatJemputText.length >= 10 && !selectedArmadaId) {
+        document.getElementById('tempat_jemput').removeAttribute('disabled');
+        document.getElementById('tempat_antar').setAttribute('disabled', 'true');
         btnAntar.setAttribute('disabled', 'true');
         btnAntar.classList.add('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
         
@@ -506,6 +540,8 @@ function updateFlowState() {
 
     // 4. Jika Armada sudah dipilih, baru aktifkan Titik Antar
     if (selectedArmadaId && !antarCoords) {
+        document.getElementById('tempat_jemput').removeAttribute('disabled');
+        document.getElementById('tempat_antar').removeAttribute('disabled');
         btnAntar.removeAttribute('disabled');
         btnAntar.classList.remove('pointer-events-none', 'cursor-not-allowed', 'bg-gray-300', 'text-gray-500');
         armadaSection.classList.remove('section-disabled', 'pointer-events-none');
@@ -649,6 +685,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (editLatJemput && editLngJemput) {
             setLocation(editLatJemput, editLngJemput, 'jemput', editTempatJemput);
+            if (editTempatJemput && editTempatJemput.length >= 10) {
+                loadArmada(editLatJemput, editLngJemput);
+            }
         }
         if (editLatAntar && editLngAntar) {
             setLocation(editLatAntar, editLngAntar, 'antar', editTempatAntar);
@@ -663,8 +702,30 @@ document.addEventListener('DOMContentLoaded', function() {
         // This part depends on how you want to handle existing pricing
     }
     
+    // Event listener untuk memuat armada setelah user mengetik alamat minimal 10 karakter
+    document.getElementById('tempat_jemput').addEventListener('input', function() {
+        const val = this.value.trim();
+        if (val.length < 10) {
+            document.getElementById('armadaList').innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-keyboard text-slate-700 text-4xl mb-3"></i>
+                    <p class="text-sm font-semibold">Silakan isi detail alamat untuk melihat armada yang tersedia.</p>
+                </div>
+            `;
+            document.getElementById('armada_id').value = '';
+            updateFlowState();
+            return;
+        }
+        
+        if (jemputCoords && selectedJenisTruk) {
+            loadArmada(jemputCoords.lat, jemputCoords.lng);
+            updateFlowState();
+        }
+    });
+
     // Inisialisasi status alur pemesanan
     updateFlowState();
+    isInitialLoad = false;
 });
 
 function selectJenisTruk(jenis) {
@@ -735,12 +796,17 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
                 })
             }).addTo(map).bindPopup('Titik Jemput').openPopup();
 
-            document.getElementById('tempat_jemput').value = address;
+            if (editMode && isInitialLoad && address) {
+                document.getElementById('tempat_jemput').value = address;
+            }
             document.getElementById('latitude_penjemputan').value = lat;
             document.getElementById('longitude_penjemputan').value = lng;
 
             if (selectedJenisTruk) {
-                loadArmada(lat, lng);
+                const val = document.getElementById('tempat_jemput').value.trim();
+                if (val.length >= 10) {
+                    loadArmada(lat, lng);
+                }
             } else {
                 Swal.fire({
                     icon: 'warning',
@@ -764,7 +830,9 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
                 })
             }).addTo(map).bindPopup('Titik Antar').openPopup();
 
-            document.getElementById('tempat_antar').value = address;
+            if (editMode && isInitialLoad && address) {
+                document.getElementById('tempat_antar').value = address;
+            }
             document.getElementById('latitude_antar').value = lat;
             document.getElementById('longitude_antar').value = lng;
         }
