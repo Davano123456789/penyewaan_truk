@@ -758,15 +758,6 @@ function setMapMode(mode) {
         ? 'flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold'
         : 'flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg font-semibold';
 
-    // Sinkronkan input pencarian dengan alamat yang sudah dipilih di mode tersebut
-    const searchInput = document.getElementById('searchLocation');
-    if (mode === 'jemput') {
-        const addr = document.getElementById('tempat_jemput').value;
-        searchInput.value = addr || '';
-    } else {
-        const addr = document.getElementById('tempat_antar').value;
-        searchInput.value = addr || '';
-    }
     hideSearchResults();
 }
 
