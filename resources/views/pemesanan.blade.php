@@ -758,6 +758,9 @@ function setMapMode(mode) {
         ? 'flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold'
         : 'flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg font-semibold';
 
+    // Kosongkan kotak pencarian setiap kali berpindah mode jemput/antar
+    document.getElementById('searchLocation').value = '';
+
     hideSearchResults();
 }
 
