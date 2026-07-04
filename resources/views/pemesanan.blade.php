@@ -415,6 +415,8 @@ let editData = @json($editItem ?? null);
 let currentArmadaId = editData ? editData.armada_id : null;
 let selectedArmadaKapasitas = null;
 let isInitialLoad = true;
+let jemputSearchText = editData ? (editData.rute?.tempat_jemput || editData.tempat_jemput || '').split(',').slice(0, 3).join(',') : '';
+let antarSearchText = editData ? (editData.rute?.tempat_antar || editData.tempat_antar || '').split(',').slice(0, 3).join(',') : '';
 
 function updateFlowState() {
     const lokasiSection = document.getElementById('lokasiSection');
@@ -758,8 +760,13 @@ function setMapMode(mode) {
         ? 'flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold'
         : 'flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg font-semibold';
 
-    // Kosongkan kotak pencarian setiap kali berpindah mode jemput/antar
-    document.getElementById('searchLocation').value = '';
+    // Tampilkan kembali kata kunci/alamat pencarian yang tersimpan di mode ini
+    const searchInput = document.getElementById('searchLocation');
+    if (mode === 'jemput') {
+        searchInput.value = jemputSearchText || '';
+    } else {
+        searchInput.value = antarSearchText || '';
+    }
 
     hideSearchResults();
 }
@@ -775,8 +782,14 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
             address = data.display_name;
         }
 
+        let shortAddress = address ? address.split(',').slice(0, 3).join(',') : '';
+
         if (mode === 'jemput') {
             jemputCoords = { lat, lng };
+            jemputSearchText = shortAddress;
+            if (currentMode === 'jemput') {
+                document.getElementById('searchLocation').value = shortAddress;
+            }
             
             if (markerJemput) map.removeLayer(markerJemput);
             markerJemput = L.marker([lat, lng], {
@@ -811,6 +824,10 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
             }
         } else {
             antarCoords = { lat, lng };
+            antarSearchText = shortAddress;
+            if (currentMode === 'antar') {
+                document.getElementById('searchLocation').value = shortAddress;
+            }
             
             if (markerAntar) map.removeLayer(markerAntar);
             markerAntar = L.marker([lat, lng], {
