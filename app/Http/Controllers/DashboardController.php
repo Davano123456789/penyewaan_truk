@@ -16,7 +16,7 @@ class DashboardController extends Controller
         $totalMenungguPembayaran = Penyewaan::where('status', 'menunggu_pembayaran')->count();
         $totalMenungguKonfirmasi = Penyewaan::where('status', 'menunggu_konfirmasi_pembayaran')->count();
 
-        $totalArmadaTersedia = Armada::where('status', 'aktif')->count();
+        $totalArmadaTersedia = Armada::where('status', 'tersedia')->count();
         $totalArmadaDisewa = Armada::where('status', 'tidak_tersedia')->count();
         $totalArmada = Armada::count();
 
@@ -36,6 +36,7 @@ class DashboardController extends Controller
         $laporanPenyewaans = collect();
         $filteredOmset = 0;
         $jenisTrukList = collect();
+        $monthlyIncomeData = [];
 
         if (auth()->check() && auth()->user()->peran_id == 4) {
             $jenisTrukList = Armada::distinct()->pluck('jenis');
@@ -79,6 +80,27 @@ class DashboardController extends Controller
                 }
                 return 0.0;
             });
+
+            // Grafik Pemasukan Bulanan (Owner saja) untuk tahun berjalan
+            $monthlyIncome = array_fill(1, 12, 0);
+            $allPenyewaanCurrentYear = Penyewaan::whereYear('created_at', $now->year)
+                ->with(['pembayaran', 'keranjangs.pembatalan'])
+                ->get();
+                
+            foreach ($allPenyewaanCurrentYear as $penyewaan) {
+                if ($penyewaan->pembayaran && $penyewaan->pembayaran->status === 'lunas') {
+                    $month = $penyewaan->created_at->month;
+                    $totalRefund = 0;
+                    foreach ($penyewaan->keranjangs as $item) {
+                        if ($item->status === 'dibatalkan' && $item->pembatalan) {
+                            $totalRefund += (float)$item->pembatalan->nominal_refund;
+                        }
+                    }
+                    $netIncome = max(0.0, (float)$penyewaan->pembayaran->jumlah_bayar - $totalRefund);
+                    $monthlyIncome[$month] += $netIncome;
+                }
+            }
+            $monthlyIncomeData = array_values($monthlyIncome);
         }
 
         return view('dashboard.dashboard', compact(
@@ -92,7 +114,8 @@ class DashboardController extends Controller
             'totalArmada',
             'laporanPenyewaans',
             'filteredOmset',
-            'jenisTrukList'
+            'jenisTrukList',
+            'monthlyIncomeData'
         ));
     }
 }

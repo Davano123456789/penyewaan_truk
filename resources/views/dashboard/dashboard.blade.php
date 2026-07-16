@@ -294,6 +294,24 @@
             </div>
         </div>
     </div>
+
+    <!-- Grafik Pemasukan Bulanan -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-line mr-1"></i> Grafik Pemasukan Bulanan (Tahun {{ date('Y') }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div style="height: 320px; position: relative;">
+                        <canvas id="myAreaChartOwner"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     @else
     <!-- Layout Asli Admin (3 Kolom per Baris tanpa Statistik Baru) -->
     <!-- Statistics Cards Row 1 -->
@@ -572,6 +590,94 @@
             currentPageOwner++;
             filterTableOwner();
         });
+
+        // Area Chart - Monthly Income
+        var ctx = document.getElementById("myAreaChartOwner");
+        if (ctx) {
+            var myLineChart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"],
+                datasets: [{
+                  label: "Pemasukan Bersih",
+                  lineTension: 0.3,
+                  backgroundColor: "rgba(78, 115, 223, 0.05)",
+                  borderColor: "rgba(78, 115, 223, 1)",
+                  pointRadius: 3,
+                  pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                  pointBorderColor: "rgba(78, 115, 223, 1)",
+                  pointHoverRadius: 3,
+                  pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                  pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                  pointHitRadius: 10,
+                  pointBorderWidth: 2,
+                  data: @json($monthlyIncomeData),
+                }],
+              },
+              options: {
+                maintainAspectRatio: false,
+                layout: {
+                  padding: {
+                    left: 10,
+                    right: 25,
+                    top: 25,
+                    bottom: 0
+                  }
+                },
+                scales: {
+                  xAxes: [{
+                    gridLines: {
+                      display: false,
+                      drawBorder: false
+                    },
+                    ticks: {
+                      maxTicksLimit: 12
+                    }
+                  }],
+                  yAxes: [{
+                    ticks: {
+                      maxTicksLimit: 5,
+                      padding: 10,
+                      callback: function(value, index, values) {
+                        return 'Rp ' + number_format(value);
+                      }
+                    },
+                    gridLines: {
+                      color: "rgb(234, 236, 244)",
+                      zeroLineColor: "rgb(234, 236, 244)",
+                      drawBorder: false,
+                      borderDash: [2],
+                      zeroLineBorderDash: [2]
+                    }
+                  }],
+                },
+                legend: {
+                  display: false
+                },
+                tooltips: {
+                  backgroundColor: "rgb(255,255,255)",
+                  bodyFontColor: "#858796",
+                  titleMarginBottom: 10,
+                  titleFontColor: '#6e707e',
+                  titleFontSize: 14,
+                  borderColor: '#dddfeb',
+                  borderWidth: 1,
+                  xPadding: 15,
+                  yPadding: 15,
+                  displayColors: false,
+                  intersect: false,
+                  mode: 'index',
+                  caretPadding: 10,
+                  callbacks: {
+                    label: function(tooltipItem, chart) {
+                      var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                      return datasetLabel + ': Rp ' + number_format(tooltipItem.yLabel);
+                    }
+                  }
+                }
+              }
+            });
+        }
     });
     @endif
 </script>
