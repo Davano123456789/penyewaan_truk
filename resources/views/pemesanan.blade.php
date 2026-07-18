@@ -534,7 +534,12 @@ function checkCapacity() {
 
 // Initialize map
 document.addEventListener('DOMContentLoaded', function() {
-    map = L.map('map').setView([-7.250445, 112.768845], 13);
+    const boundsIndonesia = L.latLngBounds([-11.0, 95.0], [6.0, 141.0]);
+    map = L.map('map', {
+        maxBounds: boundsIndonesia,
+        maxBoundsViscosity: 1.0,
+        minZoom: 5
+    }).setView([-7.250445, 112.768845], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
@@ -698,13 +703,46 @@ function setMapMode(mode) {
 }
 
 async function setLocation(lat, lng, modeOverride = null, addressOverride = null) {
+    // Validasi batas koordinat wilayah Indonesia (Sabang-Merauke, Miangas-Rote)
+    if (lat < -11.1 || lat > 6.1 || lng < 94.5 || lng > 141.1) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Lokasi Diluar Batas',
+            text: 'Layanan pemesanan truk hanya tersedia di wilayah Indonesia.',
+            confirmButtonColor: '#ef4444'
+        });
+        return;
+    }
+
     try {
         let mode = modeOverride || currentMode;
         let address = addressOverride;
+
+        // Pengecekan ekstra untuk memastikan string alamat mengandung "Indonesia"
+        if (address && !address.toLowerCase().includes('indonesia')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lokasi Diluar Batas',
+                text: 'Layanan pemesanan truk hanya tersedia di wilayah Indonesia.',
+                confirmButtonColor: '#ef4444'
+            });
+            return;
+        }
         
         if (!address) {
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
             const data = await response.json();
+            
+            if (data.address && data.address.country_code !== 'id') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lokasi Diluar Batas',
+                    text: 'Layanan pemesanan truk hanya tersedia di wilayah Indonesia.',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+            
             address = data.display_name;
         }
 
@@ -823,14 +861,21 @@ function updateParkirSelection(parkir, hasSkipped = false) {
 
 async function showSearchSuggestions(query) {
     try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&countrycodes=id`);
         const data = await response.json();
 
         const resultsDiv = document.getElementById('searchResults');
         currentSearchResults = data;
         
-        if (data.length > 0) {
-            resultsDiv.innerHTML = data.map((item, index) => `
+        // Hanya tampilkan saran yang alamatnya mengandung Indonesia atau country_code 'id'
+        const indonesianSuggestions = data.filter(item => 
+            (item.address && item.address.country_code === 'id') || 
+            (item.display_name && item.display_name.toLowerCase().includes('indonesia'))
+        );
+        currentSearchResults = indonesianSuggestions;
+
+        if (indonesianSuggestions.length > 0) {
+            resultsDiv.innerHTML = indonesianSuggestions.map((item, index) => `
                 <div class="search-result-item" data-index="${index}">
                     <div class="font-semibold text-sm">${item.display_name.split(',')[0]}</div>
                     <div class="text-xs text-gray-500">${item.display_name}</div>
@@ -847,6 +892,15 @@ async function showSearchSuggestions(query) {
 }
 
 function selectSearchResult(lat, lng, address) {
+    if (lat < -11.1 || lat > 6.1 || lng < 94.5 || lng > 141.1) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Lokasi Diluar Batas',
+            text: 'Layanan pemesanan truk hanya tersedia di wilayah Indonesia.',
+            confirmButtonColor: '#ef4444'
+        });
+        return;
+    }
     map.setView([lat, lng], 16);
     setLocation(lat, lng, null, address); // Pass address directly to avoid duplicate reverse search
     document.getElementById('searchLocation').value = address.split(',').slice(0, 3).join(',');
@@ -870,12 +924,39 @@ async function searchLocation() {
     }
 
     try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`);
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&countrycodes=id`);
         const data = await response.json();
 
         if (data.length > 0) {
-            const lat = parseFloat(data[0].lat);
-            const lng = parseFloat(data[0].lon);
+            const firstResult = data[0];
+            
+            // Validasi apakah hasil pencarian adalah wilayah Indonesia berdasarkan country_code atau teks alamat
+            const isIndonesia = (firstResult.address && firstResult.address.country_code === 'id') ||
+                                (firstResult.display_name && firstResult.display_name.toLowerCase().includes('indonesia'));
+                                
+            if (!isIndonesia) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lokasi Diluar Batas',
+                    text: 'Layanan pemesanan truk hanya tersedia di wilayah Indonesia.',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+
+            const lat = parseFloat(firstResult.lat);
+            const lng = parseFloat(firstResult.lon);
+            
+            if (lat < -11.1 || lat > 6.1 || lng < 94.5 || lng > 141.1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lokasi Diluar Batas',
+                    text: 'Layanan pemesanan truk hanya tersedia di wilayah Indonesia.',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+            
             map.setView([lat, lng], 16);
             setLocation(lat, lng, null, data[0].display_name); // Pass address directly to avoid duplicate reverse search
             hideSearchResults();
