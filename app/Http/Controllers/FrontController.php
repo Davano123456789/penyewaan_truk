@@ -392,6 +392,7 @@ public function storePemesanan(Request $request)
     ]);
 
     // Trigger event untuk kirim email verifikasi
+    // menjalnkan even listener SendEmailVerificationNotification 
     event(new Registered($user));
 
     // Login otomatis setelah register
