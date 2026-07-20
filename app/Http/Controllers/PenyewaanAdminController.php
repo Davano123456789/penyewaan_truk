@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PenugasanNotification;
+use App\Mail\PembatalanPenugasanNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenyewaanAdminController extends Controller
@@ -423,7 +424,7 @@ class PenyewaanAdminController extends Controller
         try {
             DB::beginTransaction();
             
-            $keranjang = \App\Models\Keranjang::with('armada.sopir', 'penyewaan')->findOrFail($id);
+            $keranjang = \App\Models\Keranjang::with('armada.sopir', 'penyewaan', 'rute')->findOrFail($id);
 
             if ($request->action === 'approve') {
                 $updateData = ['status' => 'dibatalkan'];
@@ -463,12 +464,12 @@ class PenyewaanAdminController extends Controller
 
                              $pesanWA = "⚠️ *PEMBATALAN PENUGASAN*\n\n";
                              $pesanWA .= "Halo Bapak/Ibu " . $sopir->nama . ",\n";
-                             $pesanWA .= "Kami menginformasikan bahwa penugasan pengiriman untuk transaksi *" . ($penyewaan->kode_transaksi ?? '-') . "* telah *DIBATALKAN* oleh admin.\n\n";
+                             $pesanWA .= "Kami menginformasikan bahwa penugasan pengiriman untuk item sewa *" . ($keranjang->kode_keranjang ?? '-') . "* telah *DIBATALKAN* oleh admin.\n\n";
                              $pesanWA .= "Detail Pesanan yang Dibatalkan:\n";
                              $pesanWA .= "• Truk    : " . $keranjang->armada->no_polisi . " (" . $keranjang->armada->merek . ")\n";
                              $pesanWA .= "• Muatan  : " . $keranjang->barang_muatan . "\n";
-                             $pesanWA .= "• Jemput  : " . $keranjang->tempat_jemput . "\n";
-                             $pesanWA .= "• Antar   : " . $keranjang->tempat_antar . "\n\n";
+                             $pesanWA .= "• Jemput  : " . ($keranjang->rute?->tempat_jemput ?? '-') . "\n";
+                             $pesanWA .= "• Antar   : " . ($keranjang->rute?->tempat_antar ?? '-') . "\n\n";
                              $pesanWA .= "Status armada Anda telah dikembalikan menjadi *Tersedia* di sistem. Silakan abaikan tugas ini.\n\n";
                              $pesanWA .= "Terima kasih,\nAdmin Penyewaan Truk";
 
@@ -478,6 +479,16 @@ class PenyewaanAdminController extends Controller
                              \Log::error('✗ Gagal mengirim WA pembatalan ke sopir id ' . $sopir->id . ': ' . $e->getMessage());
                          }
                      }
+                     
+                     // Kirim Notifikasi Email ke Sopir
+                      if ($sopir && $sopir->email) {
+                          try {
+                              Mail::to($sopir->email)->send(new PembatalanPenugasanNotification($sopir, $keranjang));
+                              \Log::info('✓ Email pembatalan penugasan berhasil terkirim ke: ' . $sopir->email);
+                          } catch (\Throwable $e) {
+                              \Log::error('✗ Gagal mengirim email pembatalan ke ' . $sopir->email . ': ' . $e->getMessage());
+                          }
+                      }
                  }
 
                 // Recalculate Total Price for Penyewaan
