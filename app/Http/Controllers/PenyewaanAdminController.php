@@ -423,7 +423,7 @@ class PenyewaanAdminController extends Controller
         try {
             DB::beginTransaction();
             
-            $keranjang = \App\Models\Keranjang::with('armada', 'penyewaan')->findOrFail($id);
+            $keranjang = \App\Models\Keranjang::with('armada.sopir', 'penyewaan')->findOrFail($id);
 
             if ($request->action === 'approve') {
                 $updateData = ['status' => 'dibatalkan'];
@@ -451,9 +451,34 @@ class PenyewaanAdminController extends Controller
                 $keranjang->pembatalan()->updateOrCreate([], $pembatalanData);
                 
                 // Kembalikan armada menjadi tersedia (aktif)
-                if ($keranjang->armada) {
-                    $keranjang->armada->update(['status' => 'tersedia']);
-                }
+                 if ($keranjang->armada) {
+                     $keranjang->armada->update(['status' => 'tersedia']);
+
+                     // Kirim Notifikasi WA ke Sopir
+                     $sopir = $keranjang->armada->sopir;
+                     if ($sopir && $sopir->telepon) {
+                         try {
+                             $telepon = $sopir->telepon;
+                             $penyewaan = $keranjang->penyewaan;
+
+                             $pesanWA = "⚠️ *PEMBATALAN PENUGASAN*\n\n";
+                             $pesanWA .= "Halo Bapak/Ibu " . $sopir->nama . ",\n";
+                             $pesanWA .= "Kami menginformasikan bahwa penugasan pengiriman untuk transaksi *" . ($penyewaan->kode_transaksi ?? '-') . "* telah *DIBATALKAN* oleh admin.\n\n";
+                             $pesanWA .= "Detail Pesanan yang Dibatalkan:\n";
+                             $pesanWA .= "• Truk    : " . $keranjang->armada->no_polisi . " (" . $keranjang->armada->merek . ")\n";
+                             $pesanWA .= "• Muatan  : " . $keranjang->barang_muatan . "\n";
+                             $pesanWA .= "• Jemput  : " . $keranjang->tempat_jemput . "\n";
+                             $pesanWA .= "• Antar   : " . $keranjang->tempat_antar . "\n\n";
+                             $pesanWA .= "Status armada Anda telah dikembalikan menjadi *Tersedia* di sistem. Silakan abaikan tugas ini.\n\n";
+                             $pesanWA .= "Terima kasih,\nAdmin Penyewaan Truk";
+
+                             $waService = app(\App\Services\WhatsappService::class);
+                             $waService->sendMessage($telepon, $pesanWA);
+                         } catch (\Throwable $e) {
+                             \Log::error('✗ Gagal mengirim WA pembatalan ke sopir id ' . $sopir->id . ': ' . $e->getMessage());
+                         }
+                     }
+                 }
 
                 // Recalculate Total Price for Penyewaan
                 $penyewaan = $keranjang->penyewaan;
