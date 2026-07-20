@@ -380,27 +380,29 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-let map, markerJemput, markerAntar, markerParkir, routeLayer;
-let markerSkippedParkirs = [];
-let currentMode = 'jemput';
-let jemputCoords = null;
-let antarCoords = null;
-let selectedJenisTruk = null;
-let nearestParkir = null;
-let parkirs = @json($parkirs);
-let searchTimeout;
-let hargaAsli = 0;
-let currentSearchResults = []; // To safely store Nominatim results and avoid quote escaping bugs
+// Deklarasi Variabel Global untuk Peta & Rute
+let map, markerJemput, markerAntar, markerParkir, routeLayer; // Objek peta, marker pin, dan layer rute jalan
+let markerSkippedParkirs = []; // Menyimpan penanda pool parkir kosong yang dilewati
+let currentMode = 'jemput'; // Mode aktif klik peta ('jemput' atau 'antar')
+let jemputCoords = null; // Koordinat latitude & longitude lokasi jemput
+let antarCoords = null; // Koordinat latitude & longitude lokasi antar
+let selectedJenisTruk = null; // Jenis truk yang dipilih (CDD, BOX, WINGBOX)
+let nearestParkir = null; // Pool parkir terdekat terpilih
+let parkirs = @json($parkirs); // Mengambil semua data pool parkir dari database
+let searchTimeout; // Timer delay pencarian alamat (anti-spam API)
+let hargaAsli = 0; // Harga sewa asli dasar (untuk pembanding harga tawar)
+let currentSearchResults = []; // Menyimpan hasil saran pencarian alamat Nominatim
 
-// Initialize variables for edit mode
-let editMode = @json(isset($editItem));
-let editData = @json($editItem ?? null);
-let currentArmadaId = editData ? editData.armada_id : null;
-let selectedArmadaKapasitas = null;
-let isInitialLoad = true;
-let jemputSearchText = editData ? (editData.rute?.tempat_jemput || editData.tempat_jemput || '').split(',').slice(0, 3).join(',') : '';
-let antarSearchText = editData ? (editData.rute?.tempat_antar || editData.tempat_antar || '').split(',').slice(0, 3).join(',') : '';
+// Inisialisasi Variabel Khusus untuk Mode Edit Pesanan
+let editMode = @json(isset($editItem)); // Menandakan apakah halaman berjalan dalam mode edit (true/false)
+let editData = @json($editItem ?? null); // Menyimpan objek data transaksi lama yang sedang diedit
+let currentArmadaId = editData ? editData.armada_id : null; // ID armada lama (agar tetap muncul di pilihan saat edit)
+let selectedArmadaKapasitas = null; // Kapasitas berat armada terpilih
+let isInitialLoad = true; // Penanda load pertama kali (untuk auto-render peta saat masuk mode edit)
+let jemputSearchText = editData ? (editData.rute?.tempat_jemput || editData.tempat_jemput || '').split(',').slice(0, 3).join(',') : ''; // Teks alamat jemput lama
+let antarSearchText = editData ? (editData.rute?.tempat_antar || editData.tempat_antar || '').split(',').slice(0, 3).join(',') : ''; // Teks alamat antar lama
 
+// Fungsi untuk mengaktifkan/menonaktifkan seksi sesuai alur transaksi (Fungsi utama flow control)
 function updateFlowState() {
     const lokasiSection = document.getElementById('lokasiSection');
     const btnJemput = document.getElementById('btnJemput');
@@ -515,7 +517,7 @@ function updateFlowState() {
         }
     }
 }
-
+// Fungsi Pengecekan Kapasitas Berat (Weight Capacity)
 function checkCapacity() {
     const bobotInput = document.getElementById('bobot');
     const warningElement = document.getElementById('bobot-warning');
@@ -532,7 +534,7 @@ function checkCapacity() {
     }
 }
 
-// Initialize map
+// Inisialisasi Peta (Map Initialization)
 document.addEventListener('DOMContentLoaded', function() {
     const boundsIndonesia = L.latLngBounds([-11.0, 95.0], [6.0, 141.0]);
     map = L.map('map', {
@@ -661,6 +663,7 @@ document.addEventListener('DOMContentLoaded', function() {
     isInitialLoad = false;
 });
 
+// Fungsi Pemilihan Jenis Truk (CDD/BOX/WINGBOX)
 function selectJenisTruk(jenis) {
     selectedJenisTruk = jenis;
     document.getElementById('jenis_truk').value = jenis;
@@ -680,6 +683,7 @@ function selectJenisTruk(jenis) {
     updateFlowState();
 }
 
+// Fungsi Pengaturan Mode Peta (Klik Titik atau Input Alamat)
 function setMapMode(mode) {
     currentMode = mode;
     
@@ -702,6 +706,7 @@ function setMapMode(mode) {
     hideSearchResults();
 }
 
+// Fungsi Mengatur Lokasi (Pin & Alamat)
 async function setLocation(lat, lng, modeOverride = null, addressOverride = null) {
     // Validasi batas koordinat wilayah Indonesia (Sabang-Merauke, Miangas-Rote)
     if (lat < -11.1 || lat > 6.1 || lng < 94.5 || lng > 141.1) {
@@ -827,6 +832,7 @@ async function setLocation(lat, lng, modeOverride = null, addressOverride = null
     }
 }
 
+// Fungsi Pembaharuan Pilihan Pool Parkir
 function updateParkirSelection(parkir, hasSkipped = false) {
     nearestParkir = parkir;
     
@@ -859,6 +865,7 @@ function updateParkirSelection(parkir, hasSkipped = false) {
     document.getElementById('parkir_longitude').value = parkir.longitude;
 }
 
+// Fungsi Pencarian Saran Alamat (Nominatim API)
 async function showSearchSuggestions(query) {
     try {
         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&countrycodes=id`);
@@ -890,7 +897,7 @@ async function showSearchSuggestions(query) {
         console.error('Error searching:', error);
     }
 }
-
+// memproses tindakan ketika pengguna mengeklik salah satu baris rekomendasi alamat (Select Search Result)
 function selectSearchResult(lat, lng, address) {
     if (lat < -11.1 || lat > 6.1 || lng < 94.5 || lng > 141.1) {
         Swal.fire({
@@ -906,11 +913,11 @@ function selectSearchResult(lat, lng, address) {
     document.getElementById('searchLocation').value = address.split(',').slice(0, 3).join(',');
     hideSearchResults();
 }
-
+// Fungsi untuk menyembunyikan hasil pencarian alamat (Hide Search Results)
 function hideSearchResults() {
     document.getElementById('searchResults').style.display = 'none';
 }
-
+// Fungsi pencarian lokasi menggunakan API Nominatim (Search Location)
 async function searchLocation() {
     const query = document.getElementById('searchLocation').value;
     if (!query) {
@@ -978,7 +985,7 @@ async function searchLocation() {
         });
     }
 }
-
+// Fungsi Memuat Pilihan Armada Terdekat (Load Available Armada)
 async function loadArmada(lat, lng) {
     if (!selectedJenisTruk) {
         document.getElementById('armadaList').innerHTML = `
@@ -1065,7 +1072,7 @@ async function loadArmada(lat, lng) {
         console.error('Error loading armada:', error);
     }
 }
-
+// Fungsi Memilih Armada (Select Armada)
 function selectArmada(id, kapasitas) {
     document.getElementById('armada_id').value = id;
     selectedArmadaKapasitas = kapasitas;
@@ -1089,7 +1096,7 @@ function selectArmada(id, kapasitas) {
 
     updateFlowState();
 }
-
+// Fungsi Menghitung Rute Via Parkir (OSRM Routing Engine)
 async function calculateRouteWithParkir(parkirLat, parkirLng) {
     if (!jemputCoords || !antarCoords) return;
 
@@ -1135,7 +1142,7 @@ async function calculateRouteWithParkir(parkirLat, parkirLng) {
         console.error('Error calculating route:', error);
     }
 }
-
+// Fungsi Validasi Harga Tawar (Validate Offer Price)
 function validateHargaTawar() {
     const hargaTawarInput = document.getElementById('harga_tawar');
     const hargaTawar = parseFloat(hargaTawarInput.value) || 0;
