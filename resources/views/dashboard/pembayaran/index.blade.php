@@ -21,15 +21,15 @@
                         <div class="col-md-6 mb-3">
                             <div class="border rounded p-3 text-center">
                                 <h6 class="font-weight-bold text-primary">Bank BCA</h6>
-                                <p class="h5 mb-1">1234567890</p>
-                                <small class="text-muted">PT Truck Rental Indonesia</small>
+                                <p class="h5 mb-1">8620917382</p>
+                                <small class="text-muted">a.n. Sasa</small>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="border rounded p-3 text-center">
                                 <h6 class="font-weight-bold text-info">Bank BRI</h6>
-                                <p class="h5 mb-1">5555666677</p>
-                                <small class="text-muted">PT Truck Rental Indonesia</small>
+                                <p class="h5 mb-1">119201030927503</p>
+                                <small class="text-muted">a.n. Rizaldy Zulfikar</small>
                             </div>
                         </div>
                     </div>
@@ -152,10 +152,10 @@
                             <select name="metode" class="form-control @error('metode') is-invalid @enderror" required>
                                 <option value="">-- Pilih Bank Transfer --</option>
                                 <option value="transfer_bca" {{ old('metode') == 'transfer_bca' ? 'selected' : '' }}>
-                                    Transfer Bank BCA (1234567890)
+                                    Transfer Bank BCA (8620917382 - a.n. Sasa)
                                 </option>
                                 <option value="transfer_bri" {{ old('metode') == 'transfer_bri' ? 'selected' : '' }}>
-                                    Transfer Bank BRI (5555666677)
+                                    Transfer Bank BRI (119201030927503 - a.n. Rizaldy Zulfikar)
                                 </option>
                             </select>
                             @error('metode')
