@@ -56,6 +56,9 @@
                                         <small class="text-primary mt-1 d-block" style="cursor: pointer;" data-toggle="modal" data-target="#modalBukti{{ $p->id }}">
                                             <i class="fas fa-search-plus"></i> Perbesar
                                         </small>
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="fas fa-calendar-alt"></i> Upload: {{ $p->penugasan && $p->penugasan->updated_at ? $p->penugasan->updated_at->format('d-m-Y H:i') : '-' }}
+                                        </small>
                                     @else
                                         <span class="badge badge-secondary">Tidak ada bukti</span>
                                     @endif
