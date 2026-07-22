@@ -117,7 +117,11 @@
 
                                             {{-- Tombol Upload (hanya jika bisa diupload) --}}
                                             @if(in_array($penugasan->status, ['truk_sampai', 'revisi_bukti']))
-                                                @if($penugasan->penyewaan && $penugasan->penyewaan->pembayaran && $penugasan->penyewaan->pembayaran->status == 'menunggu_pelunasan')
+                                                @if($penugasan->tanggal_mulai && \Carbon\Carbon::today()->lt(\Carbon\Carbon::parse($penugasan->tanggal_mulai)->startOfDay()))
+                                                    <span class="badge badge-warning text-wrap" style="max-width: 150px;">
+                                                        <i class="fas fa-calendar-alt"></i> Belum Tanggal Mulai
+                                                    </span>
+                                                @elseif($penugasan->penyewaan && $penugasan->penyewaan->pembayaran && $penugasan->penyewaan->pembayaran->status == 'menunggu_pelunasan')
                                                     <span class="badge badge-danger text-wrap" style="max-width: 150px;">
                                                         <i class="fas fa-money-bill-wave"></i> Selesaikan Pelunasan Dahulu
                                                     </span>
@@ -174,6 +178,8 @@
             <div class="modal-content">
                 <form id="uploadForm" method="POST" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" name="sopir_lat" id="sopir_lat">
+                    <input type="hidden" name="sopir_lng" id="sopir_lng">
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">
                             <i class="fas fa-upload"></i> Upload Bukti Selesai Penugasan
@@ -327,6 +333,58 @@
             filterTable();
         }
 
+        function getLocation() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mendeteksi Lokasi GPS...';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        document.getElementById('sopir_lat').value = position.coords.latitude;
+                        document.getElementById('sopir_lng').value = position.coords.longitude;
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+                    },
+                    function(error) {
+                        submitBtn.disabled = true;
+                        let errorMsg = "Gagal mendeteksi lokasi GPS Anda.";
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg = "Izin akses lokasi (GPS) ditolak. Anda harus mengizinkan akses lokasi di browser untuk mengunggah bukti selesai sesuai SOP.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg = "Informasi lokasi tidak tersedia pada perangkat Anda.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg = "Waktu deteksi lokasi habis. Silakan coba lagi.";
+                                break;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'GPS Wajib Aktif',
+                            text: errorMsg,
+                            confirmButtonColor: '#3b82f6'
+                        });
+                        submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> GPS Tidak Aktif';
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Browser Tidak Mendukung',
+                    text: 'Browser Anda tidak mendukung deteksi lokasi (Geolokasi).',
+                    confirmButtonColor: '#3b82f6'
+                });
+                submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Browser Tidak Kompatibel';
+            }
+        }
+
         $(document).ready(function () {
             // Run initial filter
             filterTable();
@@ -350,6 +408,11 @@
                 } else {
                     $('#rejectionReasonContainer').hide();
                 }
+
+                // Reset koordinat & dapatkan lokasi baru
+                $('#sopir_lat').val('');
+                $('#sopir_lng').val('');
+                getLocation();
 
                 $('#uploadModal').modal('show');
             });

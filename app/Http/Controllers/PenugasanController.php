@@ -78,6 +78,47 @@ class PenugasanController extends Controller
                     ->with('error', 'Anda tidak dapat mengunggah bukti penyelesaian sebelum pelanggan mengonfirmasi truk telah sampai di tujuan.');
             }
 
+            // Validasi koordinat GPS Sopir
+            $sopirLat = $request->input('sopir_lat');
+            $sopirLng = $request->input('sopir_lng');
+            if (empty($sopirLat) || empty($sopirLng)) {
+                return back()->with('error', 'Gagal memverifikasi lokasi. Anda wajib menyalakan GPS dan mengizinkan browser mengakses lokasi Anda untuk mengunggah bukti.');
+            }
+
+            // Hitung jarak ke Pool Parkir armada terkait
+            $parkir = $penugasan->armada->parkir ?? null;
+            if ($parkir && $parkir->latitude && $parkir->longitude) {
+                $lat1 = floatval($sopirLat);
+                $lng1 = floatval($sopirLng);
+                $lat2 = floatval($parkir->latitude);
+                $lng2 = floatval($parkir->longitude);
+
+                // Haversine formula (jarak lurus bola bumi dalam meter)
+                $earthRadius = 6371000;
+                $dLat = deg2rad($lat2 - $lat1);
+                $dLng = deg2rad($lng2 - $lng1);
+                $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng/2) * sin($dLng/2);
+                $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+                $distance = $earthRadius * $c;
+
+                // Batas toleransi jarak (misal 300 meter untuk GPS mobile yang kurang akurat)
+                $maxDistance = 300;
+
+                if ($distance > $maxDistance) {
+                    return back()->with('error', 'Unggah bukti ditolak. Anda terdeteksi berada ' . round($distance) . ' meter di luar area pool parkir (' . $parkir->nama . '). Sesuai SOP, Anda harus berada di area pool parkir terlebih dahulu untuk mengembalikan armada.');
+                }
+            }
+
+            // Validasi tanggal mulai sewa
+            if ($penugasan->tanggal_mulai) {
+                $today = \Carbon\Carbon::today();
+                $startDate = \Carbon\Carbon::parse($penugasan->tanggal_mulai)->startOfDay();
+                if ($today->lt($startDate)) {
+                    return redirect()->route('penugasan.index')
+                        ->with('error', 'Anda tidak dapat mengunggah bukti selesai sebelum tanggal mulai sewa (' . \Carbon\Carbon::parse($penugasan->tanggal_mulai)->format('d-m-Y') . ').');
+                }
+            }
+
             // Cegah jika status pembayaran masih menunggu pelunasan
             if ($penugasan->penyewaan && $penugasan->penyewaan->pembayaran && $penugasan->penyewaan->pembayaran->status == 'menunggu_pelunasan') {
                 return redirect()->route('penugasan.index')
