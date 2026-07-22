@@ -18,7 +18,7 @@
                     Logistik Terpercaya di Indonesia
                 </span>
                 <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
-                    PT Sutera Jaya <br>
+                    CV Sutera Jaya <br>
                     <span class="text-blue-500">Logistik & Distribusi</span>
                 </h1>
                 <p class="text-gray-300 text-xl mb-10 max-w-xl leading-relaxed font-light">
@@ -409,7 +409,7 @@
                             <div class="bg-blue-50 w-14 h-14 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-all duration-300">
                                 <i class="fab fa-facebook-f text-blue-600 text-2xl group-hover:text-white transition-all duration-300"></i>
                             </div>
-                            <a href="https://facebook.com/suterajaya" class="text-gray-700 text-lg hover:text-blue-600 transition-all duration-300">PT Sutera Jaya</a>
+                            <a href="https://facebook.com/suterajaya" class="text-gray-700 text-lg hover:text-blue-600 transition-all duration-300">CV Sutera Jaya</a>
                         </div>
                     </div>
                 </div>

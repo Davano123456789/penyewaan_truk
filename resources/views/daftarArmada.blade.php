@@ -14,7 +14,7 @@
         <div class="container mx-auto px-6 relative z-10">
             <div class="text-center" data-aos="fade-up">
                 <span class="inline-block px-4 py-1 rounded-full bg-blue-600/20 text-blue-400 font-semibold text-sm mb-4 border border-blue-600/30">
-                    Armada PT Sutera Jaya
+                    Armada CV Sutera Jaya
                 </span>
                 <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6">
                     Daftar <span class="text-blue-500">Armada Kami</span>
@@ -138,7 +138,7 @@
                         <!-- Description (Limited) -->
                         <div class="mb-8 flex-1">
                             <p class="text-gray-500 text-xs leading-relaxed line-clamp-2 italic">
-                                {{ $armada->deskripsi ?? 'Armada andalan PT Sutera Jaya untuk pengiriman logistik yang aman dan terpercaya ke seluruh wilayah.' }}
+                                {{ $armada->deskripsi ?? 'Armada andalan CV Sutera Jaya untuk pengiriman logistik yang aman dan terpercaya ke seluruh wilayah.' }}
                             </p>
                         </div>
 

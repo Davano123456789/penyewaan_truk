@@ -2,7 +2,7 @@
         <div class="container mx-auto px-6">
             <div class="grid md:grid-cols-3 gap-8">
                 <div>
-                    <h3 class="text-xl font-bold mb-4">PT Sutera Jaya</h3>
+                    <h3 class="text-xl font-bold mb-4">CV Sutera Jaya</h3>
                     <p class="text-gray-400">Solusi penyewaan truk terpercaya untuk kebutuhan bisnis Anda</p>
                 </div>
                 <div>
@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="border-t border-gray-800 mt-8 pt-8 text-right text-gray-400">
-                <p>&copy; 2024 PT Sutera Jaya. All rights reserved.</p>
+                <p>&copy; 2024 CV Sutera Jaya. All rights reserved.</p>
             </div>
         </div>
     </footer>

@@ -79,7 +79,7 @@
         {{-- Footer --}}
         <div style="background:#f4f6f8; padding:18px 32px; text-align:center; border-top:1px solid #e8ecf0;">
             <p style="margin:0; font-size:12px; color:#888;">
-                Terima kasih &mdash; <strong>Admin PT Sutra Jaya</strong>
+                Terima kasih &mdash; <strong>Admin CV Sutera Jaya</strong>
             </p>
         </div>
 
