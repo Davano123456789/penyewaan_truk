@@ -35,6 +35,7 @@
                             <th>Sopir</th>
                             <th>Armada</th>
                             <th>Bukti Selesai</th>
+                            <th>Tanggal Upload</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
@@ -56,11 +57,17 @@
                                         <small class="text-primary mt-1 d-block" style="cursor: pointer;" data-toggle="modal" data-target="#modalBukti{{ $p->id }}">
                                             <i class="fas fa-search-plus"></i> Perbesar
                                         </small>
-                                        <small class="text-muted d-block mt-1">
-                                            <i class="fas fa-calendar-alt"></i> Upload: {{ $p->penugasan && $p->penugasan->updated_at ? $p->penugasan->updated_at->format('d-m-Y H:i') : '-' }}
-                                        </small>
                                     @else
                                         <span class="badge badge-secondary">Tidak ada bukti</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if($p->penugasan && $p->penugasan->bukti_selesai && $p->penugasan->updated_at)
+                                        <span class="font-weight-bold text-dark">{{ $p->penugasan->updated_at->format('d-m-Y') }}</span>
+                                        <br>
+                                        <small class="text-muted">{{ $p->penugasan->updated_at->format('H:i') }} WIB</small>
+                                    @else
+                                        <span class="text-muted">-</span>
                                     @endif
                                 </td>
                                 <td class="text-center">
